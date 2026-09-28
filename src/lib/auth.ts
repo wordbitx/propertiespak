@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import { users, type User } from "@/db/schema";
+import { sessionCookieOptions } from "@/lib/session-cookie";
 
 const COOKIE_NAME = "estatewx_session";
 const SECRET = process.env.SESSION_SECRET ?? "estatewx-dev-session-secret";
@@ -30,13 +31,7 @@ function sign(value: string): string {
 export async function createSession(userId: number) {
   const token = `${userId}.${sign(String(userId))}`;
   const store = await cookies();
-  store.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  store.set(COOKIE_NAME, token, await sessionCookieOptions(60 * 60 * 24 * 30));
 }
 
 export async function destroySession() {

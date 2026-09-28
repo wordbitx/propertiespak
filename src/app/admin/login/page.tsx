@@ -1,16 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
 import { IconShield } from "@/components/icons";
 import { BrandLockup } from "@/components/brand-lockup";
 import { SITE } from "@/lib/constants";
 
+const SESSION_HINT = "The password was accepted but this browser did not store the admin session cookie. "
+  + "Open the preview in its own browser tab (not embedded), or allow cookies for this site, then try again.";
+
+const noopSubscribe = () => () => {};
+
 export default function AdminLoginPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // `/admin` bounces back here when the session cookie is missing. If that
+  // happens within two minutes of a successful sign-in, the browser blocked the
+  // cookie (embedded preview + third-party cookie restrictions). Read via
+  // useSyncExternalStore so SSR is unaffected and hydration stays consistent.
+  const cookieBlocked = useSyncExternalStore(
+    noopSubscribe,
+    () => {
+      if (searchParams.get("session") !== "missing") return false;
+      try {
+        const signedInAt = Number(window.sessionStorage.getItem("pp_admin_login_at") ?? 0);
+        return Boolean(signedInAt) && Date.now() - signedInAt < 120_000;
+      } catch {
+        return false;
+      }
+    },
+    () => false,
+  );
+  const shownError = error || (cookieBlocked ? SESSION_HINT : "");
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -28,8 +52,14 @@ export default function AdminLoginPage() {
         setLoading(false);
         return;
       }
-      router.push("/admin");
-      router.refresh();
+      try {
+        window.sessionStorage.setItem("pp_admin_login_at", String(Date.now()));
+      } catch {
+        // Storage is optional; only used to explain a blocked session cookie.
+      }
+      // Full navigation (rather than a client-side push) so the freshly issued
+      // session cookie is sent with the /admin request.
+      window.location.assign("/admin");
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
@@ -63,9 +93,9 @@ export default function AdminLoginPage() {
             autoComplete="current-password"
             autoFocus
           />
-          {error && (
+          {shownError && (
             <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3.5 py-2.5 text-[0.8125rem] text-red-700">
-              {error}
+              {shownError}
             </p>
           )}
           <button type="submit" disabled={loading || !password} className="btn btn-primary mt-5 w-full disabled:opacity-60">

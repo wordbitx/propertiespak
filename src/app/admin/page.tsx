@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  if (!(await isAdminAuthenticated())) redirect("/admin/login");
+  if (!(await isAdminAuthenticated())) redirect("/admin/login?session=missing");
   const { tab } = await searchParams;
   const initialSection: AdminSection = tab === "inquiries" || tab === "properties" ? tab : "approvals";
   return (
