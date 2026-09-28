@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       const needsCity = cityName && !query.toLowerCase().includes(cityName.toLowerCase());
       url.searchParams.set("q", needsCity ? `${query}, ${cityName}, Pakistan` : `${query}, Pakistan`);
       const response = await fetch(url, {
-        headers: { "User-Agent": "EstateWX-Demo/1.0 (info@wordbitxtech.com)", Accept: "application/json" },
+        headers: { "User-Agent": "PropertiesPak/1.0 (+https://propertiespak.com; info@propertiespak.com)", Accept: "application/json" },
         signal: controller.signal,
       });
       clearTimeout(timeout);

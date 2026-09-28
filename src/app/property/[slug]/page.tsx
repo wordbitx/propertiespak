@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!property) {
     return buildMetadata({
       title: "Property not found",
-      description: "This listing is no longer available on Pak Property.",
+      description: "This listing is no longer available on Properties Pak.",
       path: "/properties",
     });
   }
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const heading = intentHeading(property);
   return buildMetadata({
     title: `${heading} | ${price}`,
-    description: `${heading}. ${formatArea(property.areaValue, property.areaUnit)}${property.bedrooms ? `, ${property.bedrooms} bedrooms, ${property.bathrooms} bathrooms` : ""} — ${price}. Compare price, size and location with map search and investment tools on Pak Property.`,
+    description: `${heading}. ${formatArea(property.areaValue, property.areaUnit)}${property.bedrooms ? `, ${property.bedrooms} bedrooms, ${property.bathrooms} bathrooms` : ""} — ${price}. Compare price, size and location with map search and investment tools on Properties Pak.`,
     path: `/property/${property.slug}`,
     image: property.coverImage,
     keywords: [
@@ -96,7 +96,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   const badge = purposeBadge(property);
   const isOwnerListing = Boolean(property.listedByName && property.listedByPhone);
-  const contactName = isOwnerListing ? property.listedByName : (agent?.name ?? "Pak Property Advisory");
+  const contactName = isOwnerListing ? property.listedByName : (agent?.name ?? "Properties Pak Advisory");
   const contactTitle = isOwnerListing ? "Property Listing Person" : (agent?.title ?? "Property Consultant");
   const contactPhone = isOwnerListing ? property.listedByPhone : (agent?.phone ?? SITE.companyPhone);
   const contactWhatsapp = (isOwnerListing
@@ -105,7 +105,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   ).replace(/\D/g, "");
   const contactEmail = isOwnerListing ? property.listedByEmail : (agent?.email ?? SITE.companyEmail);
   const whatsappMessage = encodeURIComponent(
-    `Hi ${contactName}, I'm interested in this property on Pak Property: ${property.title}, ${property.locationArea}, ${property.cityName}. Please share more details. Reference EWX-${String(property.id).padStart(5, "0")}.`,
+    `Hi ${contactName}, I'm interested in this property on Properties Pak: ${property.title}, ${property.locationArea}, ${property.cityName}. Please share more details. Reference EWX-${String(property.id).padStart(5, "0")}.`,
   );
   const facts: { label: string; value: string; icon?: React.ComponentType<{ className?: string }> }[] = [
     { label: "Property type", value: property.propertyType, icon: IconBuilding },
@@ -202,7 +202,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               Demo listing
             </span>
             <p className="text-[0.8125rem] leading-relaxed text-ink-muted">
-              This listing is illustrative sample inventory created for the Pak Property product demonstration by WordbitX
+              This listing is illustrative sample inventory created for the Properties Pak product demonstration by WordbitX
               Software Company. Price, availability and documentation status are examples only and are not verified market
               transactions. Always verify details independently before paying a token.
             </p>

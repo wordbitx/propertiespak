@@ -202,7 +202,7 @@ export function ListingForm() {
 
       {/* 1 — Contact */}
       <div className="rounded-xl border border-soft bg-white p-5 shadow-soft sm:p-6">
-        <SectionTitle step="1" title="Your contact details" copy="Buyers reach you through Pak Property after approval." />
+        <SectionTitle step="1" title="Your contact details" copy="Buyers reach you through Properties Pak after approval." />
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div>
             <label className={label} htmlFor="listing-name">Full name *</label>

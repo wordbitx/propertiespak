@@ -7,7 +7,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 export const metadata: Metadata = {
   title: "Admin — Properties & Client Enquiries",
-  description: "Pak Property admin workspace for property approvals, listings and client enquiries.",
+  description: "Properties Pak admin workspace for property approvals, listings and client enquiries.",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";

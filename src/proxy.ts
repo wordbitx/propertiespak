@@ -53,7 +53,7 @@ const LANDING_SLUGS = new Set([...getAllLandingSlugs(), ...getAllKeywordLandingS
 const NOT_FOUND_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="robots" content="noindex, follow"/>
-<title>Page not found | Pak Property</title>
+<title>Page not found | Properties Pak</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#061C33;color:#102A43;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -70,14 +70,14 @@ a.ghost{border:1px solid #E8EEF3;color:#061C33}
 .credit a{color:#0d8a4c}
 </style></head><body><div class="wrap"><main class="card">
 <p class="eyebrow">Error 404</p>
-<h1>We couldn&rsquo;t find that page on Pak Property.</h1>
+<h1>We couldn&rsquo;t find that page on Properties Pak.</h1>
 <p>The link may be broken or the listing may have been removed. Search the sample inventory, or start from one of the market pages below.</p>
 <div class="row">
 <a class="btn primary" href="/properties">Browse properties</a>
 <a class="btn ghost" href="/property-for-sale-in-lahore">Property in Lahore</a>
 <a class="btn ghost" href="/">Back to home</a>
 </div>
-<p class="credit">Pak Property &mdash; Pakistan Real Estate. A real-estate demo product developed by
+<p class="credit">Properties Pak &mdash; Pakistan Real Estate. A real-estate demo product developed by
 <a href="https://wordbitxtech.com/" rel="noopener">WordbitX Software Company</a>.</p>
 </main></div></body></html>`;
 
@@ -110,5 +110,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|images|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|images|leaflet|favicon.ico|icon.svg|icon.png|apple-icon.png|manifest.webmanifest|robots.txt|sitemap.xml|sitemap-index.xml|sitemaps).*)",
+  ],
 };

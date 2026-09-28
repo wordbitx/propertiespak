@@ -529,7 +529,7 @@
   background: rgba(255, 255, 255, 0.85);
 }
 
-/* ---------- Pak Property: seamless hero & responsive navigation ---------- */
+/* ---------- Properties Pak: seamless hero & responsive navigation ---------- */
 :root { --site-header-height: calc(72px + env(safe-area-inset-top, 0px)); }
 html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .reveal { min-width: 0; }

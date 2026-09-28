@@ -125,7 +125,10 @@ export async function getPropertyBySlug(slug: string): Promise<Property | undefi
 
 export async function getAllPropertySlugs() {
   await ensureSeeded();
-  return db.select({ slug: properties.slug }).from(properties);
+  return db
+    .select({ slug: properties.slug, updatedAt: properties.createdAt })
+    .from(properties)
+    .orderBy(desc(properties.createdAt));
 }
 
 export async function getSimilarProperties(property: Property, limit = 3) {
@@ -252,7 +255,10 @@ export async function getPostBySlug(slug: string) {
 
 export async function getAllPostSlugs() {
   await ensureSeeded();
-  return db.select({ slug: posts.slug }).from(posts);
+  return db
+    .select({ slug: posts.slug, updatedAt: posts.publishedAt })
+    .from(posts)
+    .orderBy(desc(posts.publishedAt));
 }
 
 export async function getTestimonials() {

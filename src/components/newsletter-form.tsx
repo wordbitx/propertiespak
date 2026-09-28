@@ -20,7 +20,7 @@ export function NewsletterForm() {
           name: "Newsletter subscriber",
           email,
           phone: "",
-          message: "Subscribed to Pak Property market updates",
+          message: "Subscribed to Properties Pak market updates",
           source: "footer",
         }),
       });

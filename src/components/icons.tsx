@@ -256,13 +256,28 @@ export function IconLayers(props: IconProps) {
   );
 }
 
+/**
+ * Properties Pak brand mark — a green canopy roof over a solid body with a
+ * navy doorway on a deep-navy tile. Vector-only so it stays crisp from 16px
+ * favicons up to the 512px app icon.
+ */
 export function IconLogo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" aria-hidden="true" className={className}>
-      <rect width="40" height="40" rx="11" fill="#082B4C" />
-      <path d="M11.5 25.8V17l8.4-5.6L28.3 17v8.8" stroke="#22C55E" strokeWidth="2.1" fill="none" strokeLinecap="round" />
-      <path d="M16.6 25.8v-5.2h6.7v5.2" stroke="#FFFFFF" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M11.5 27.6h17" stroke="#22C55E" strokeWidth="2.1" strokeLinecap="round" />
+    <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
+      <defs>
+        <linearGradient id="ppMarkBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#0B355C" />
+          <stop offset="1" stopColor="#04182C" />
+        </linearGradient>
+        <linearGradient id="ppMarkRoof" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#16B364" />
+          <stop offset="1" stopColor="#4ADE80" />
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="13" fill="url(#ppMarkBg)" />
+      <path d="M24 12.4 9.9 24.9a1.95 1.95 0 0 0 1.29 3.38h25.62a1.95 1.95 0 0 0 1.29-3.38Z" fill="url(#ppMarkRoof)" />
+      <path d="M15.3 27.3h17.4v8.1a1.95 1.95 0 0 1-1.95 1.95H17.25A1.95 1.95 0 0 1 15.3 35.4Z" fill="#FFFFFF" />
+      <path d="M21.2 37.35v-5.5a1.55 1.55 0 0 1 1.55-1.55h2.5a1.55 1.55 0 0 1 1.55 1.55v5.5Z" fill="#0B355C" />
     </svg>
   );
 }

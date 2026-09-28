@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/json-ld";
 import { IconArrowRight, IconPin } from "@/components/icons";
 import { ListingView, type RawSearchParams } from "@/components/listing-view";
 import { LeadForm } from "@/components/lead-form";
@@ -10,7 +11,7 @@ import { Section, SectionHeading } from "@/components/section";
 import { PROPERTY_TYPES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { getCities, getCityBySlug, getMapProperties, searchProperties } from "@/lib/queries";
-import { buildMetadata, listingRobots } from "@/lib/seo";
+import { buildMetadata, itemListJsonLd, listingRobots, webPageJsonLd } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -25,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   if (!city) {
     return buildMetadata({
       title: "City not found",
-      description: "This property market is not covered yet on Pak Property.",
+      description: "This property market is not covered yet on Properties Pak.",
       path: "/properties",
     });
   }
@@ -46,6 +47,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         `property for rent ${city.name}`,
         `plots ${city.name}`,
       ],
+      ogKicker: city.name.toUpperCase(),
+      ogSubtitle: `${city.province} · For sale & for rent · Properties Pak`,
     }),
     robots: listingRobots(hasFilters),
   };
@@ -89,6 +92,19 @@ export default async function CityPage({ params, searchParams }: PageProps) {
 
   return (
     <>
+      <JsonLd data={webPageJsonLd({
+        name: `Property in ${city.name}`,
+        description: `${city.tagline}. Property for sale and rent in ${city.name}, ${city.province}.`,
+        path: `/city/${city.slug}`,
+        about: [`Property in ${city.name}`, `Real estate ${city.name}`, `${city.province} property`],
+      })} />
+      {cityListings.items.length > 0 && (
+        <JsonLd data={itemListJsonLd({
+          name: `Popular properties in ${city.name}`,
+          path: `/city/${city.slug}`,
+          items: cityListings.items.map((item) => ({ name: item.title, path: `/property/${item.slug}` })),
+        })} />
+      )}
       <section className="relative isolate overflow-hidden bg-navy-950 pb-16 pt-28 lg:pb-20 lg:pt-36">
         <div className="absolute inset-0">
           <img

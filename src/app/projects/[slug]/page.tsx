@@ -20,13 +20,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!project) {
     return buildMetadata({
       title: "Project not found",
-      description: "This development is no longer tracked on Pak Property.",
+      description: "This development is no longer tracked on Properties Pak.",
       path: "/projects",
     });
   }
   return buildMetadata({
     title: `${project.name} — ${project.projectType} in ${project.location}`,
-    description: `${project.name} by ${project.developer} in ${project.location}. ${project.projectType}, starting from ${formatPrice(project.startingPrice)}. ${project.completion}. Unite sizes, payment plans and status on Pak Property.`,
+    description: `${project.name} by ${project.developer} in ${project.location}. ${project.projectType}, starting from ${formatPrice(project.startingPrice)}. ${project.completion}. Unite sizes, payment plans and status on Properties Pak.`,
     path: `/projects/${project.slug}`,
     image: project.coverImage,
     keywords: [`${project.name}`, `${project.cityName} new project`, `${project.projectType} ${project.cityName}`],

@@ -11,9 +11,9 @@ import { getAllPropertySlugs, getAllProjectSlugs, getAllPostSlugs } from "@/lib/
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "HTML Sitemap — Pak Property Pakistan Real Estate Directory",
+  title: "HTML Sitemap — Properties Pak Pakistan Real Estate Directory",
   description:
-    "Complete index of all property listings, city markets, society guides, commercial real estate, new housing projects and property investment tools on Pak Property.",
+    "Complete index of all property listings, city markets, society guides, commercial real estate, new housing projects and property investment tools on Properties Pak.",
   path: "/sitemap",
 });
 
@@ -33,7 +33,7 @@ export default async function HtmlSitemapPage() {
     <>
       <PageHero
         eyebrow="Directory Index"
-        title="Pak Property Sitemap & Property Directory"
+        title="Properties Pak Sitemap & Property Directory"
         description="Browse all canonical, indexable pages across Pakistan's property markets: cities, societies, property types, projects, guides and tools."
         crumbs={[
           { name: "Home", href: "/" },
@@ -126,7 +126,7 @@ export default async function HtmlSitemapPage() {
                 <li><Link href="/projects" className="hover:text-forest-700">New Housing Projects</Link></li>
                 <li><Link href="/compare" className="hover:text-forest-700">Property Comparison Tool</Link></li>
                 <li><Link href="/list-property" className="hover:text-forest-700">List Your Property</Link></li>
-                <li><Link href="/about" className="hover:text-forest-700">About Pak Property</Link></li>
+                <li><Link href="/about" className="hover:text-forest-700">About Properties Pak</Link></li>
                 <li><Link href="/contact" className="hover:text-forest-700">Contact Us</Link></li>
               </ul>
             </div>

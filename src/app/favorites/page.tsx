@@ -7,7 +7,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Saved Properties",
   description:
-    "Your saved Pak Property shortlist — compare favourite properties across Pakistan and share them with your consultant before viewings.",
+    "Your saved Properties Pak shortlist — compare favourite properties across Pakistan and share them with your consultant before viewings.",
   path: "/favorites",
   robots: { index: false, follow: true },
 });

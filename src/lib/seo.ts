@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/constants";
-import { heroImage, ogImage } from "@/lib/images";
+import { ogCard, ogImage } from "@/lib/images";
 import type { Post, Project, Property } from "@/db/schema";
 import { formatArea, formatPrice } from "@/lib/format";
 
@@ -13,6 +13,9 @@ type MetaInput = {
   type?: "website" | "article";
   publishedTime?: string;
   robots?: Metadata["robots"];
+  /** Short context label rendered on the generated social card. */
+  ogKicker?: string;
+  ogSubtitle?: string;
 };
 
 /**
@@ -34,15 +37,23 @@ export function buildMetadata({
   type = "website",
   publishedTime,
   robots,
+  ogKicker,
+  ogSubtitle,
 }: MetaInput): Metadata {
   const url = `${SITE.url}${path === "/" ? "" : path}`;
-  const og = image ?? ogImage;
+  // Pages without their own photography get a branded, title-aware card from
+  // the OG route; the homepage uses the hero photograph social card.
+  const og =
+    image ??
+    (path === "/"
+      ? ogImage
+      : ogCard({ title, subtitle: ogSubtitle ?? description, kicker: ogKicker }));
   return {
     // `absolute` keeps authored titles exactly as written (no double brand suffix).
     title: { absolute: title },
     description,
     keywords,
-    robots: robots ?? { index: true, follow: true },
+    robots: robots ?? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
     alternates: { canonical: url },
     openGraph: {
       title,
@@ -69,11 +80,20 @@ export function organizationJsonLd() {
     "@type": "RealEstateAgent",
     "@id": `${SITE.url}/#organization`,
     name: SITE.name,
-    alternateName: "Pak Property Pakistan",
+    legalName: SITE.company,
+    alternateName: ["Properties Pak", "PropertiesPak.com", "Properties Pak Pakistan"],
     description: SITE.description,
     url: SITE.url,
     email: SITE.companyEmail,
     telephone: SITE.companyPhone,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE.url}/icon.png`,
+      width: 512,
+      height: 512,
+    },
+    image: `${SITE.url}/images/residence-social.jpg`,
+    sameAs: Object.values(SITE.social),
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -88,21 +108,23 @@ export function organizationJsonLd() {
         contactType: "international enquiries",
         telephone: SITE.companyPhoneUs,
         email: SITE.companyEmail,
-        areaServed: ["US", "GB", "AE"],
+        areaServed: ["US", "GB", "AE", "SA"],
         availableLanguage: ["en"],
       },
     ],
-    image: `${SITE.url}${heroImage.og}`,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Property discovery and investment tools",
       itemListElement: [
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Property search across Pakistan" } },
-        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Property comparison and demo property scores" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Property comparison and listing scores" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Mortgage, yield and investment calculators" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Free property listing for owners and agencies" } },
       ],
     },
+    knowsLanguage: ["en-PK", "ur-PK"],
     areaServed: [
+      { "@type": "Country", name: "Pakistan" },
       { "@type": "City", name: "Lahore" },
       { "@type": "City", name: "Islamabad" },
       { "@type": "City", name: "Karachi" },
@@ -126,7 +148,7 @@ export function organizationJsonLd() {
       description:
         "WordbitX Software Company is a full-service technology company engineering web platforms, PropTech solutions, custom software & mobile apps in Pakistan and globally.",
       url: SITE.companyUrl,
-      email: SITE.companyEmail,
+      email: "info@wordbitxtech.com",
       telephone: SITE.companyPhone,
       sameAs: [
         "https://www.linkedin.com/",
@@ -140,25 +162,11 @@ export function organizationJsonLd() {
         addressRegion: "Punjab",
         addressLocality: SITE.companyAddress.city,
       },
-      contactPoint: [
-        {
-          "@type": "ContactPoint",
-          contactType: "sales",
-          telephone: SITE.companyPhone,
-          areaServed: "PK",
-        },
-        {
-          "@type": "ContactPoint",
-          contactType: "international enquiries",
-          telephone: SITE.companyPhoneUs,
-          areaServed: ["US", "GB", "AE", "SA"],
-        },
-      ],
     },
     slogan: SITE.tagline,
     isAccessibleForFree: true,
     disambiguatingDescription:
-      "Pak Property is the official real estate platform demonstration product developed and powered by WordbitX Software Company (https://wordbitxtech.com/).",
+      "Properties Pak (propertiespak.com) is Pakistan's property marketplace, engineered by WordbitX Software Company (https://wordbitxtech.com/).",
   };
 }
 
@@ -168,14 +176,21 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     "@id": `${SITE.url}/#website`,
     name: SITE.name,
+    alternateName: SITE.fullName,
     url: SITE.url,
     description: SITE.description,
+    inLanguage: SITE.language,
     publisher: { "@id": `${SITE.url}/#organization` },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE.url}/properties?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
+    potentialAction: [
+      {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE.url}/properties?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    ],
   };
 }
 
@@ -195,7 +210,7 @@ export function webPageJsonLd(input: {
     isPartOf: { "@id": `${SITE.url}/#website` },
     publisher: { "@id": `${SITE.url}/#organization` },
     about: (input.about ?? []).map((name) => ({ "@type": "Thing", name })),
-    inLanguage: "en-PK",
+    inLanguage: SITE.language,
   };
 }
 
@@ -212,12 +227,51 @@ export function breadcrumbJsonLd(items: { name: string; href: string }[]) {
   };
 }
 
+/** CollectionPage markup for hub pages that list many properties. */
+export function collectionPageJsonLd(input: { name: string; description: string; path: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${SITE.url}${input.path}#collection`,
+    name: input.name,
+    description: input.description,
+    url: `${SITE.url}${input.path}`,
+    isPartOf: { "@id": `${SITE.url}/#website` },
+    publisher: { "@id": `${SITE.url}/#organization` },
+    inLanguage: SITE.language,
+  };
+}
+
+/** ItemList markup for curated listing pages (category, city, society hubs). */
+export function itemListJsonLd(input: {
+  name: string;
+  path: string;
+  items: { name: string; path: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: input.name,
+    url: `${SITE.url}${input.path}`,
+    numberOfItems: input.items.length,
+    itemListElement: input.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: `${SITE.url}${item.path}`,
+    })),
+  };
+}
+
 export function propertyJsonLd(property: Property) {
+  const url = `${SITE.url}/property/${property.slug}`;
+  const isRent = property.purpose === "rent";
   return {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
+    "@id": `${url}#listing`,
     name: property.title,
-    url: `${SITE.url}/property/${property.slug}`,
+    url,
     description: property.description,
     image: property.images.slice(0, 4),
     datePosted: property.createdAt instanceof Date ? property.createdAt.toISOString() : undefined,
@@ -232,6 +286,7 @@ export function propertyJsonLd(property: Property) {
       "@type": "PostalAddress",
       streetAddress: property.address || property.locationArea,
       addressLocality: property.cityName,
+      addressRegion: "Pakistan",
       addressCountry: "PK",
     },
     geo: {
@@ -239,18 +294,52 @@ export function propertyJsonLd(property: Property) {
       latitude: property.lat,
       longitude: property.lng,
     },
-    offers: {
-      "@type": "Offer",
-      price: property.price,
-      priceCurrency: "PKR",
-      availability: "https://schema.org/InStock",
-      url: `${SITE.url}/property/${property.slug}`,
-      description: `${formatPrice(property.price, property.priceUnit)} · ${formatArea(
-        property.areaValue,
-        property.areaUnit,
-        property.areaSqft,
-      )}`,
-    },
+    /** Rental listings expose prices as recurring monthly Rent, sales as Offer. */
+    ...(isRent
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: property.price,
+            priceCurrency: "PKR",
+            availability: "https://schema.org/InStock",
+            url,
+            businessFunction: "http://purl.org/goodrelations/v1#LeaseOut",
+          },
+        }
+      : {
+          offers: {
+            "@type": "Offer",
+            price: property.price,
+            priceCurrency: "PKR",
+            availability: "https://schema.org/InStock",
+            url,
+            businessFunction: "http://purl.org/goodrelations/v1#Sell",
+            priceSpecification: {
+              "@type": "UnitPriceSpecification",
+              price: property.price,
+              priceCurrency: "PKR",
+              referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "C62" },
+            },
+          },
+        }),
+    countryOfOrigin: { "@type": "Country", name: "Pakistan" },
+    additionalProperty: [
+      { "@type": "PropertyValue", name: "Purpose", value: isRent ? "For Rent" : "For Sale" },
+      { "@type": "PropertyValue", name: "Property type", value: property.propertyType },
+      { "@type": "PropertyValue", name: "City", value: property.cityName },
+      { "@type": "PropertyValue", name: "Area", value: property.locationArea },
+      {
+        "@type": "PropertyValue",
+        name: "Price",
+        value: `${formatPrice(property.price, property.priceUnit)} · ${formatArea(
+          property.areaValue,
+          property.areaUnit,
+          property.areaSqft,
+        )}`,
+      },
+      { "@type": "PropertyValue", name: "Furnishing", value: property.furnishing },
+      { "@type": "PropertyValue", name: "Possession", value: property.possession },
+    ],
   };
 }
 
@@ -258,6 +347,7 @@ export function projectJsonLd(project: Project) {
   return {
     "@context": "https://schema.org",
     "@type": "ApartmentComplex",
+    "@id": `${SITE.url}/projects/${project.slug}#project`,
     name: project.name,
     url: `${SITE.url}/projects/${project.slug}`,
     description: project.description,
@@ -266,6 +356,7 @@ export function projectJsonLd(project: Project) {
       "@type": "PostalAddress",
       streetAddress: project.location,
       addressLocality: project.cityName,
+      addressRegion: "Pakistan",
       addressCountry: "PK",
     },
     geo: { "@type": "GeoCoordinates", latitude: project.lat, longitude: project.lng },
@@ -277,12 +368,16 @@ export function articleJsonLd(post: Post) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
+    "@id": `${SITE.url}/blog/${post.slug}#article`,
     headline: post.title,
     description: post.excerpt,
     image: [post.coverImage],
-    author: { "@type": "Organization", name: post.author },
+    author: { "@type": "Organization", name: post.author, url: `${SITE.url}/about` },
     publisher: { "@id": `${SITE.url}/#organization` },
     datePublished: post.publishedAt instanceof Date ? post.publishedAt.toISOString() : undefined,
+    dateModified: post.publishedAt instanceof Date ? post.publishedAt.toISOString() : undefined,
+    inLanguage: SITE.language,
+    isPartOf: { "@id": `${SITE.url}/#website` },
     mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
   };
 }

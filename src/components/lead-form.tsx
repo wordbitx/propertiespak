@@ -85,7 +85,7 @@ export function LeadForm({
       </div>
       {state === "error" && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-[0.8125rem] text-red-700">{error}</p>}
       <button type="submit" disabled={state === "loading"} className="btn btn-green mt-5 w-full disabled:opacity-70">{state === "loading" ? "Sending…" : variant === "visit" ? "Request visit" : "Send enquiry"}<IconArrowRight className="h-4 w-4" /></button>
-      <p className="mt-3 text-[0.6875rem] leading-5 text-ink-muted">Your request goes to the Pak Property admin team. By submitting, you agree to be contacted about it. We never sell your data.</p>
+      <p className="mt-3 text-[0.6875rem] leading-5 text-ink-muted">Your request goes to the Properties Pak admin team. By submitting, you agree to be contacted about it. We never sell your data.</p>
     </form>
   );
 }

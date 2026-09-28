@@ -74,7 +74,7 @@ export async function registerUser(input: {
   const inserted = await db
     .insert(users)
     .values({
-      name: input.name.trim() || "Pak Property Member",
+      name: input.name.trim() || "Properties Pak Member",
       email,
       phone: input.phone.trim(),
       passwordHash: hashPassword(input.password),

@@ -27,7 +27,7 @@ export default async function BlogPage() {
       <PageHero
         eyebrow="Property insights"
         title="Editorial Research for Better Property Decisions"
-        description="Area comparisons, investment notes and documentation checklists written by the Pak Property research and advisory desks — no hype, no guaranteed-return claims."
+        description="Area comparisons, investment notes and documentation checklists written by the Properties Pak research and advisory desks — no hype, no guaranteed-return claims."
         crumbs={[
           { name: "Home", href: "/" },
           { name: "Insights", href: "/blog" },

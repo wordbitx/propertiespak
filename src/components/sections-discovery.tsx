@@ -237,7 +237,7 @@ export function MarketHub({
               Pakistan property investment guide <IconArrowRight className="h-4 w-4" />
             </Link>
             <div className="mt-4 rounded-xl border border-soft bg-white p-3 text-[0.8125rem] text-ink-muted">
-              <span>Looking to build a custom real estate portal like Pak Property? </span>
+              <span>Looking to build a custom real estate portal like Properties Pak? </span>
               <a
                 href={SITE.companyUrl}
                 target="_blank"

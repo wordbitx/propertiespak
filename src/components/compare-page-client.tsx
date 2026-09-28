@@ -118,7 +118,7 @@ export function ComparePageClient() {
         <h2 className="mt-5 font-sans text-[1.15rem] font-semibold text-navy-900">Nothing to compare yet</h2>
         <p className="mx-auto mt-2 max-w-xl text-[0.9rem] leading-relaxed text-ink-muted">
           Add two or three properties to the comparison view using the compare button on any listing card. You will then
-          see price, price per square foot, area, amenities and the illustrative Pak Property Property Score side by side.
+          see price, price per square foot, area, amenities and the illustrative Properties Pak Score side by side.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/properties" className="btn btn-primary">
@@ -257,7 +257,7 @@ export function ComparePageClient() {
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <p className="rounded-panel border border-soft bg-mist p-5 text-[0.8125rem] leading-relaxed text-ink-muted">
           <strong className="font-semibold text-navy-900">How to read this.</strong> Price per square foot, area and the
-          Pak Property Property Score make two apparently similar listings genuinely comparable. Green ticks mark the
+          Properties Pak Score make two apparently similar listings genuinely comparable. Green ticks mark the
           strongest figure in each row. The property score is an {scores[0].label.toLowerCase()} built from each listing&rsquo;s
           own attributes and sample market benchmarks — it is not a valuation or investment advice.
         </p>

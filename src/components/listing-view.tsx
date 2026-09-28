@@ -6,7 +6,9 @@ import { PageHero } from "@/components/page-hero";
 import { PropertyCard } from "@/components/property-card";
 import { Reveal } from "@/components/reveal";
 import type { Crumb } from "@/components/breadcrumbs";
+import { JsonLd } from "@/components/json-ld";
 import { getCities, getMapProperties, searchProperties, type PropertyFilters } from "@/lib/queries";
+import { collectionPageJsonLd, itemListJsonLd } from "@/lib/seo";
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -93,6 +95,16 @@ export async function ListingView({
     citySlug: property.citySlug,
   }));
 
+  // Structured data only on the canonical, unfiltered view of the page, so
+  // Google reads one ItemList per URL instead of per filter combination.
+  const hasActiveFilters =
+    filters.page !== 1 ||
+    Boolean(first(raw.sort)) ||
+    Boolean(filters.q || filters.beds || filters.minPrice || filters.maxPrice || filters.minArea || filters.type || filters.category) ||
+    (Boolean(filters.city) && filters.city !== fixed?.city) ||
+    Boolean(filters.featured) !== Boolean(fixed?.featured) ||
+    Boolean(filters.isNewProject) !== Boolean(fixed?.isNewProject);
+
   const paramRecord: Record<string, string | undefined> = {
     city: first(raw.city),
     type: first(raw.type),
@@ -109,6 +121,23 @@ export async function ListingView({
 
   return (
     <>
+      {!hasActiveFilters && (
+        <>
+          <JsonLd data={collectionPageJsonLd({ name: title, description, path: basePath })} />
+          {result.items.length > 0 && (
+            <JsonLd
+              data={itemListJsonLd({
+                name: title,
+                path: basePath,
+                items: result.items.slice(0, 20).map((property) => ({
+                  name: property.title,
+                  path: `/property/${property.slug}`,
+                })),
+              })}
+            />
+          )}
+        </>
+      )}
       {showHero ? (
         <PageHero eyebrow={eyebrow} title={title} description={description} crumbs={crumbs} />
       ) : (

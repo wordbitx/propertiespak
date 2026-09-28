@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next
+/out
+next-env.d.ts
+
+# local env files
+.env
+.env.local
+.env*.local
+
+# sandbox-only source artwork for scripts/build-assets.mjs
+/.preview-assets
+
+# test + tooling output
+/test-results
+/playwright-report
+/.playwright
+
+# misc
+.DS_Store
+*.pem
+*.log
+
+# typescript incremental build info
+*.tsbuildinfo

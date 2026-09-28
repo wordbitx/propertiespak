@@ -51,7 +51,7 @@ function FollowUp({ inquiry, onSaved }: { inquiry: InboxItem; onSaved: () => voi
 function InquiryDetails({ item, onSaved }: { item: InboxItem; onSaved: () => void }) {
   const digits = contactDigits(item.phone);
   const reference = `PP-ENQ-${String(item.id).padStart(6, "0")}`;
-  const whatsappMessage = encodeURIComponent(`Hi ${item.name}, I am following up on your Pak Property ${item.type === "visit" ? "visit request" : "enquiry"}${item.propertyTitle ? ` for ${item.propertyTitle}` : ""}. Reference ${reference}.`);
+  const whatsappMessage = encodeURIComponent(`Hi ${item.name}, I am following up on your Properties Pak ${item.type === "visit" ? "visit request" : "enquiry"}${item.propertyTitle ? ` for ${item.propertyTitle}` : ""}. Reference ${reference}.`);
   return (
     <div className="mt-5 grid min-w-0 gap-6 border-t border-soft pt-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <div className="min-w-0">
@@ -84,7 +84,7 @@ function InquiryDetails({ item, onSaved }: { item: InboxItem; onSaved: () => voi
         <div className="mt-5 flex flex-wrap gap-2.5">
           {digits && <a href={`tel:+${digits}`} className="btn btn-outline text-[0.8125rem]"><IconPhone className="h-4 w-4" />Call client</a>}
           {digits && <a href={`https://wa.me/${digits}?text=${whatsappMessage}`} target="_blank" rel="noopener noreferrer" className="btn btn-green text-[0.8125rem]"><IconWhatsApp className="h-4 w-4" />WhatsApp</a>}
-          <a href={`mailto:${item.email}?subject=${encodeURIComponent(`Pak Property enquiry ${reference}`)}`} className="btn btn-outline text-[0.8125rem]"><IconMail className="h-4 w-4" />Email client</a>
+          <a href={`mailto:${item.email}?subject=${encodeURIComponent(`Properties Pak enquiry ${reference}`)}`} className="btn btn-outline text-[0.8125rem]"><IconMail className="h-4 w-4" />Email client</a>
         </div>
       </div>
       <div className="min-w-0"><FollowUp key={`${item.id}-${item.reviewedAt}`} inquiry={item} onSaved={onSaved} /></div>

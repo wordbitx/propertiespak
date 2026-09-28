@@ -32,9 +32,9 @@ import { buildMetadata } from "@/lib/seo";
 import type { MapProperty } from "@/components/map-view";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Pak Property — Property for Sale & Rent in Pakistan | Pakistan Real Estate",
+  title: "Properties Pak — Property for Sale & Rent in Pakistan | Pakistan Real Estate",
   description:
-    "Explore sample property listings for sale and rent across Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad and Multan. Houses, apartments, plots, commercial space and new projects with map search, filters and investment tools.",
+    "Properties Pak is Pakistan's property marketplace: browse houses, apartments, plots, commercial property and new housing projects for sale and rent in Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar — with map search, price filters and investment calculators.",
   path: "/",
   keywords: [
     "real estate Pakistan",

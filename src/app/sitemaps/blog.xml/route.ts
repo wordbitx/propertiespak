@@ -9,7 +9,7 @@ export async function GET() {
     renderUrlSet([
       { path: "/blog", changeFrequency: "weekly", priority: 0.7 },
       ...posts.map((post) => ({
-        path: `/blog/${post.slug}`,
+        path: `/blog/${post.slug}`, lastModified: post.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.7,
       })),

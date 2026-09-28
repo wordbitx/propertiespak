@@ -45,11 +45,11 @@ export function WhyEstateWx({ listings, cities }: { listings: number; cities: nu
           <Reveal>
             <p className="eyebrow text-forest-700">
               <span className="h-[1px] w-6 bg-current opacity-70" />
-              Why Pak Property
+              Why Properties Pak
             </p>
             <h2 className="display-2 mt-4 text-navy-900">Real Estate, Made Smarter.</h2>
             <p className="lede mt-4">
-              Pak Property brings structure to a market that runs on scattered listings and phone calls. One platform, one
+              Properties Pak brings structure to a market that runs on scattered listings and phone calls. One platform, one
               set of standards, one clear decision path.
             </p>
 
@@ -153,7 +153,7 @@ export function InvestmentSection({
             </p>
             <h2 className="display-2 mt-4 text-white">Invest With More Confidence.</h2>
             <p className="lede mt-4 text-white/70">
-              Property decisions get better when the numbers are visible. Use Pak Property to compare locations, understand
+              Property decisions get better when the numbers are visible. Use Properties Pak to compare locations, understand
               entry and rental economics, and judge a development on evidence rather than optimism.
             </p>
 
@@ -241,7 +241,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
             <span className="h-[1px] w-6 bg-current opacity-70" />
             Illustrative user scenarios
           </p>
-          <h2 className="display-2 mt-4 text-navy-900">How different buyers would use Pak Property</h2>
+          <h2 className="display-2 mt-4 text-navy-900">How different buyers would use Properties Pak</h2>
           <p className="lede mt-4">
             Composite scenarios written for this demo to show how the platform&rsquo;s search, comparison and calculator
             tools support different property decisions in Pakistan.

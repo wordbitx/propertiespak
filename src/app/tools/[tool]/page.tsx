@@ -155,12 +155,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!config) {
     return buildMetadata({
       title: "Tool not found",
-      description: "This calculator is not available on Pak Property.",
+      description: "This calculator is not available on Properties Pak.",
       path: "/tools",
     });
   }
   return buildMetadata({
-    title: `${config.title} | Pak Property`,
+    title: `${config.title} | Properties Pak`,
     description: config.description,
     path: `/tools/${tool}`,
     keywords: config.keywords,
@@ -224,7 +224,7 @@ export default async function ToolPage({ params }: PageProps) {
             </p>
 
             <div className="mt-9">
-              <h2 className="font-sans text-[1.05rem] font-semibold text-navy-900">Other Pak Property tools</h2>
+              <h2 className="font-sans text-[1.05rem] font-semibold text-navy-900">Other Properties Pak tools</h2>
               <div className="mt-4 flex flex-wrap gap-2">
                 {others.map(([slug, item]) => (
                   <Link key={slug} href={`/tools/${slug}`} className="chip">

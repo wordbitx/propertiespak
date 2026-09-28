@@ -10,9 +10,9 @@ import { SITE } from "@/lib/constants";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Login or Register — Pak Property Account",
+  title: "Login or Register — Properties Pak Account",
   description:
-    "Sign in to Pak Property to sync your saved property shortlist across devices, track enquiries and save searches across Pakistan's property markets.",
+    "Sign in to Properties Pak to sync your saved property shortlist across devices, track enquiries and save searches across Pakistan's property markets.",
   path: "/login",
   robots: { index: false, follow: true },
 });
@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
     <>
       <PageHero
         eyebrow="Account"
-        title="Sign In to Your Pak Property Account"
+        title="Sign In to Your Properties Pak Account"
         description="Save the properties you like, keep your shortlist in sync across devices and follow every enquiry you send."
         crumbs={[
           { name: "Home", href: "/" },

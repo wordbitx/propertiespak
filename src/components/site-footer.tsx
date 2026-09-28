@@ -48,14 +48,14 @@ const COLUMNS = [
       { label: "Documentation checklist", href: "/blog/property-documentation-checklist-pakistan" },
       { label: "FBR property tax guide", href: "/blog/fbr-property-tax-guide-pakistan" },
       { label: "DHA vs Bahria Town", href: "/blog/dha-vs-bahria-town-comparison" },
-      { label: "About Pak Property", href: "/about" },
+      { label: "About Properties Pak", href: "/about" },
     ],
   },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/10 bg-navy-950 text-white/65" aria-label="Pak Property footer">
+    <footer className="border-t border-white/10 bg-navy-950 text-white/65" aria-label="Properties Pak footer">
       <div className="ui-container py-12 sm:py-16">
         <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,2fr)] lg:gap-14">
           <div className="min-w-0">

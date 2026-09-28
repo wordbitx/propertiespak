@@ -15,7 +15,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "My Account — Saved Properties & Enquiries",
   description:
-    "Manage your Pak Property account: review your synced property shortlist, track enquiries sent to our consultants and continue your search.",
+    "Manage your Properties Pak account: review your synced property shortlist, track enquiries sent to our consultants and continue your search.",
   path: "/account",
   robots: { index: false, follow: true },
 });
@@ -45,7 +45,7 @@ export default async function AccountPage() {
       <PageHero
         eyebrow="Account"
         title={`Welcome back, ${user.name.split(" ")[0]}`}
-        description="Your synced shortlist and every enquiry you have sent from Pak Property."
+        description="Your synced shortlist and every enquiry you have sent from Properties Pak."
         crumbs={[
           { name: "Home", href: "/" },
           { name: "Account", href: "/account" },

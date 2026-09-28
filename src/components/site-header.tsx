@@ -126,7 +126,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         <NavigationDialog key="menu" label="Main menu" onDismiss={dismiss}>
           <div className="navigation-drawer">
             <div className="navigation-panel-heading">
-              <Link href="/" onClick={dismiss} aria-label="Pak Property home"><BrandLockup compact /></Link>
+              <Link href="/" onClick={dismiss} aria-label="Properties Pak home"><BrandLockup compact /></Link>
               <button type="button" data-dialog-initial onClick={dismiss} aria-label="Close menu" className="dialog-close"><IconClose className="h-5 w-5" /></button>
             </div>
             <div className="navigation-drawer-scroll">
@@ -156,7 +156,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         <NavigationDialog key="search" label="Search properties" onDismiss={dismiss}>
           <div className="navigation-search-panel">
             <div className="navigation-panel-heading">
-              <div><p className="eyebrow text-forest-700">Pak Property</p><h2 className="mt-1.5 font-sans text-xl font-bold text-navy-900">Find your next property</h2></div>
+              <div><p className="eyebrow text-forest-700">Properties Pak</p><h2 className="mt-1.5 font-sans text-xl font-bold text-navy-900">Find your next property</h2></div>
               <button type="button" onClick={dismiss} aria-label="Close search" className="dialog-close"><IconClose className="h-5 w-5" /></button>
             </div>
             <div className="navigation-search-scroll">

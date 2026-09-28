@@ -10,7 +10,7 @@ import { SITE } from "@/lib/constants";
 export const metadata: Metadata = buildMetadata({
   title: "List Your Property in Pakistan — Free Listing Review",
   description:
-    "List your house, apartment, plot, office or shop on Pak Property. Free listing review, pricing guidance and photography support for owners and landlords in Pakistan.",
+    "List your house, apartment, plot, office or shop on Properties Pak. Free listing review, pricing guidance and photography support for owners and landlords in Pakistan.",
   path: "/list-property",
   keywords: ["list property Pakistan", "sell house Lahore", "rent out property Pakistan", "property listing Pakistan"],
 });
@@ -47,7 +47,7 @@ export default function ListPropertyPage() {
     <>
       <PageHero
         eyebrow="For owners & landlords"
-        title="List Your Property With Pak Property"
+        title="List Your Property With Properties Pak"
         description="Reach thousands of active buyers and corporate tenants with accurate pricing, exact satellite map pinning, and direct WhatsApp enquiries."
         crumbs={[
           { name: "Home", href: "/" },
@@ -73,7 +73,7 @@ export default function ListPropertyPage() {
               <span className="h-[1px] w-6 bg-current opacity-70" />
               Listing Process
             </p>
-            <h2 className="display-3 mt-2 text-navy-900">How listing on Pak Property works</h2>
+            <h2 className="display-3 mt-2 text-navy-900">How listing on Properties Pak works</h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step) => {
                 const Icon = step.icon;

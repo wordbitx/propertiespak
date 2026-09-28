@@ -84,7 +84,7 @@ export function pricePerSqft(property: Pick<Property, "price" | "areaSqft">): nu
 }
 
 /**
- * Pak Property Property Score — a transparent, illustrative demo rating built only
+ * Properties Pak Score — a transparent, illustrative demo rating built only
  * from the listing's own attributes plus published demo market benchmarks.
  * It is not an official market valuation and is always labelled as a demo score.
  */
@@ -140,7 +140,7 @@ export function computePropertyScore(property: Property): PropertyScore {
     overall: round(overall),
     label: "Illustrative Demo Score",
     disclaimer:
-      "The Pak Property Property Score is an illustrative demo rating generated from the listing's own attributes and sample market benchmarks. It is not a valuation, a market rating or investment advice.",
+      "The Properties Pak Score is an illustrative demo rating generated from the listing's own attributes and sample market benchmarks. It is not a valuation, a market rating or investment advice.",
     dimensions,
   };
 }

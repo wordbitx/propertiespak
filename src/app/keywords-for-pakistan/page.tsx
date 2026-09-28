@@ -16,7 +16,7 @@ import { Section, SectionHeading } from "@/components/section";
 import { SITE } from "@/lib/constants";
 import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 
-const TITLE = "Pakistan Real Estate Keywords | Property Search & Investment Topics | Pak Property";
+const TITLE = "Pakistan Real Estate Keywords | Property Search & Investment Topics | Properties Pak";
 const DESCRIPTION =
   "Explore popular Pakistan real estate searches including property for sale, property for rent, houses, apartments, plots, commercial property and property investment opportunities.";
 
@@ -202,7 +202,7 @@ const GROUPS: KeywordGroup[] = [
   },
   {
     title: "Society / Area Intent",
-    description: "Go directly to Pak Property society and micro-location guides.",
+    description: "Go directly to Properties Pak society and micro-location guides.",
     icon: IconCompass,
     links: SOCIETY_INTENT,
   },
@@ -278,7 +278,7 @@ export default function PakistanKeywordHubPage() {
             Pakistan Real Estate Keywords &amp; Property Search Guide
           </h1>
           <p className="lede mt-5 max-w-3xl text-white/75">
-            Explore popular property searches across Pakistan and discover the Pak Property pages, guides and market
+            Explore popular property searches across Pakistan and discover the Properties Pak pages, guides and market
             resources that match each search intent.
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
@@ -376,7 +376,7 @@ export default function PakistanKeywordHubPage() {
         <div className="ui-container">
           <SectionHeading
             eyebrow="Search intent"
-            title="Find the right Pak Property resource for your question"
+            title="Find the right Properties Pak resource for your question"
             description="Search intent describes what a visitor is trying to accomplish. Use transaction, investment, property-type, city or society paths rather than opening an unrelated page."
           />
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -409,7 +409,7 @@ export default function PakistanKeywordHubPage() {
         <div className="ui-container grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:items-start">
           <div>
             <p className="eyebrow text-forest-700">
-              <span className="h-px w-6 bg-current" /> How to use Pak Property search pages
+              <span className="h-px w-6 bg-current" /> How to use Properties Pak search pages
             </p>
             <h2 className="display-3 mt-3 text-navy-900">Move from broad research to a useful shortlist</h2>
             <div className="mt-5 space-y-4 text-[0.9375rem] leading-relaxed text-ink-muted">
@@ -420,7 +420,7 @@ export default function PakistanKeywordHubPage() {
               </p>
               <p>
                 Next, filter by property type, price range, bedrooms and area. Add two or three sample listings to the
-                comparison tool to line up price per square foot, amenities and illustrative Pak Property property signals.
+                comparison tool to line up price per square foot, amenities and illustrative Properties Pak property signals.
               </p>
               <p>
                 For investment research, use the rental-yield, ROI, mortgage, tax and affordability calculators alongside
@@ -451,7 +451,7 @@ export default function PakistanKeywordHubPage() {
               ))}
             </ul>
             <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
-              Pak Property is an official real-estate platform demonstration by{" "}
+              Properties Pak is an official real-estate platform demonstration by{" "}
               <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-forest-700 hover:underline">
                 WordbitX Software Company
               </a>

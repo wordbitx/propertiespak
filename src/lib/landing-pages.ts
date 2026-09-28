@@ -495,7 +495,7 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Bahria Town Islamabad and the adjoining Rawalpindi phases form a major planned residential corridor for households working across the twin cities. Gated streets, commercial areas and motorway access drive end-user demand.",
     inventoryNote:
-      "Pak Property presents comparable sample Islamabad and Rawalpindi inventory while dedicated Bahria Town Islamabad listings are added to the demonstration catalogue.",
+      "Properties Pak presents comparable sample Islamabad and Rawalpindi inventory while dedicated Bahria Town Islamabad listings are added to the demonstration catalogue.",
     priceNote:
       "Indicative demo pricing varies materially by phase, block, possession, road width and development status; compare only like-for-like plots or constructed units.",
     investmentNote:
@@ -870,7 +870,7 @@ const TYPE_LANDINGS: TypeCityLanding[] = [
     slug: "houses-for-sale-in-lahore",
     typeKey: "houses",
     citySlug: "lahore",
-    metaTitle: "Houses for Sale in Lahore | DHA, Bahria Town & Family Homes | Pak Property",
+    metaTitle: "Houses for Sale in Lahore | DHA, Bahria Town & Family Homes | Properties Pak",
     h1: "Houses for Sale in Lahore",
     filters: { purpose: "buy", city: "lahore", category: "house" },
   },
@@ -886,7 +886,7 @@ const TYPE_LANDINGS: TypeCityLanding[] = [
     slug: "plots-for-sale-in-lahore",
     typeKey: "plots",
     citySlug: "lahore",
-    metaTitle: "Plots for Sale in Lahore | Bahria Town & New Societies | Pak Property",
+    metaTitle: "Plots for Sale in Lahore | Bahria Town & New Societies | Properties Pak",
     h1: "Residential Plots for Sale in Lahore",
     filters: { purpose: "buy", city: "lahore", category: "plot" },
     introExtra:
@@ -906,7 +906,7 @@ const TYPE_LANDINGS: TypeCityLanding[] = [
     slug: "commercial-property-in-islamabad",
     typeKey: "commercial",
     citySlug: "islamabad",
-    metaTitle: "Commercial Property in Islamabad | Offices & Retail | Pak Property",
+    metaTitle: "Commercial Property in Islamabad | Offices & Retail | Properties Pak",
     h1: "Commercial Property in Islamabad",
     filters: { city: "islamabad", commercialOnly: true },
     introExtra:
@@ -926,7 +926,7 @@ const TYPE_LANDINGS: TypeCityLanding[] = [
     slug: "houses-for-sale-in-islamabad",
     typeKey: "houses",
     citySlug: "islamabad",
-    metaTitle: "Houses for Sale in Islamabad | DHA & Sector Homes | Pak Property",
+    metaTitle: "Houses for Sale in Islamabad | DHA & Sector Homes | Properties Pak",
     h1: "Houses for Sale in Islamabad",
     filters: { purpose: "buy", city: "islamabad", category: "house" },
   },
@@ -991,11 +991,11 @@ export function buildCityLanding(citySlug: string, purpose: "sale" | "rent"): La
     eyebrow: `${city.name} · ${city.province}`,
     h1: `Property ${intent} in ${city.name}`,
     metaTitle: isSale
-      ? `Property for Sale in ${city.name} | Houses, Apartments & Plots | Pak Property`
-      : `Property for Rent in ${city.name} | Houses, Apartments & Portions | Pak Property`,
+      ? `Property for Sale in ${city.name} | Houses, Apartments & Plots | Properties Pak`
+      : `Property for Rent in ${city.name} | Houses, Apartments & Portions | Properties Pak`,
     metaDescription: isSale
-      ? `Browse property for sale in ${city.name}: houses, apartments, plots and commercial space across ${city.keyAreas.slice(0, 4).join(", ")}. Filter by area, budget and size on Pak Property.`
-      : `Looking for property for rent in ${city.name}? Compare houses, apartments, portions and commercial units by area, rent and furnishing on Pak Property.`,
+      ? `Browse property for sale in ${city.name}: houses, apartments, plots and commercial space across ${city.keyAreas.slice(0, 4).join(", ")}. Filter by area, budget and size on Properties Pak.`
+      : `Looking for property for rent in ${city.name}? Compare houses, apartments, portions and commercial units by area, rent and furnishing on Properties Pak.`,
     keywords: [
       `property for sale in ${city.name}`,
       `property for rent in ${city.name}`,
@@ -1070,7 +1070,7 @@ export function buildTypeLanding(slug: string): LandingContent | null {
     eyebrow: `${copy.plural} · ${city.name}`,
     h1: config.h1,
     metaTitle: config.metaTitle,
-    metaDescription: `Explore ${copy.plural} for sale in ${city.name} across ${city.keyAreas.slice(0, 4).join(", ")}. Compare price, size, bedrooms and price per square foot with Pak Property filters and comparison tools.`,
+    metaDescription: `Explore ${copy.plural} for sale in ${city.name} across ${city.keyAreas.slice(0, 4).join(", ")}. Compare price, size, bedrooms and price per square foot with Properties Pak filters and comparison tools.`,
     keywords: [
       `${copy.plural} for sale ${city.name}`,
       `${copy.plural} in ${city.name}`,
@@ -1107,7 +1107,7 @@ export function buildTypeLanding(slug: string): LandingContent | null {
       {
         question: `How do I compare ${copy.plural} in ${city.name} quickly?`,
         answer:
-          "Use the price per square foot shown on each listing, then add up to three shortlisted properties to the Pak Property comparison view to line up price, area, amenities and the illustrative property score side by side.",
+          "Use the price per square foot shown on each listing, then add up to three shortlisted properties to the Properties Pak comparison view to line up price, area, amenities and the illustrative property score side by side.",
       },
       {
         question: `What is an indicative price range for ${copy.plural} in ${city.name}?`,
@@ -1142,7 +1142,7 @@ export function buildSocietyLanding(slug: string): LandingContent | null {
     kind: "type-city",
     eyebrow: `${society.cityName} · Location guide`,
     h1: `Property for Sale in ${society.name}`,
-    metaTitle: `Property for Sale in ${society.name} | Prices, Listings & Guide | Pak Property`,
+    metaTitle: `Property for Sale in ${society.name} | Prices, Listings & Guide | Properties Pak`,
     metaDescription: `${society.name} property guide: live demo listings, indicative price bands, what to verify before buying and how the area compares with neighbouring ${society.cityName} locations.`,
     keywords: [
       `${society.name} property`,
@@ -1153,7 +1153,7 @@ export function buildSocietyLanding(slug: string): LandingContent | null {
     intro: [
       society.heroNote,
       society.inventoryNote,
-      `${society.priceNote} These are illustrative demo figures created for the Pak Property product demonstration and are not verified market transactions.`,
+      `${society.priceNote} These are illustrative demo figures created for the Properties Pak product demonstration and are not verified market transactions.`,
     ],
     filters,
     alternatives: { city: society.citySlug },
@@ -1198,7 +1198,7 @@ const INVESTMENT_GUIDE: LandingContent = {
   kind: "guide",
   eyebrow: "Investment guide",
   h1: "Property Investment in Pakistan",
-  metaTitle: "Property Investment in Pakistan | Real Estate Investment Guide | Pak Property",
+  metaTitle: "Property Investment in Pakistan | Real Estate Investment Guide | Properties Pak",
   metaDescription:
     "A practical guide to property investment in Pakistan: how to compare locations, model rental yield and capital growth, verify documentation and avoid common mistakes. Includes free calculators.",
   keywords: [
@@ -1209,7 +1209,7 @@ const INVESTMENT_GUIDE: LandingContent = {
   ],
   intro: [
     "Property in Pakistan is bought for two very different reasons: somewhere to live, and something to hold as an asset. The second requires a framework, because two properties on the same street can behave completely differently over five years.",
-    "This guide sets out the framework our desk uses when comparing opportunities — location fundamentals, entry economics, income, documentation risk and exit liquidity. Nothing here is investment advice, and every figure on Pak Property is illustrative demo content.",
+    "This guide sets out the framework our desk uses when comparing opportunities — location fundamentals, entry economics, income, documentation risk and exit liquidity. Nothing here is investment advice, and every figure on Properties Pak is illustrative demo content.",
     "Use the calculators alongside the city and society guides, then shortlist two or three options and compare them side by side before you visit.",
   ],
   filters: { featured: true },
@@ -1278,9 +1278,9 @@ const INVESTMENT_GUIDE: LandingContent = {
         "At minimum: allotment and transfer letters, dues statements, the chain of ownership, any authority NOC or approval, and the exact transfer procedure. For constructed property also review approved plans and utility connections.",
     },
     {
-      question: "Does Pak Property provide investment advice?",
+      question: "Does Properties Pak provide investment advice?",
       answer:
-        "No. Pak Property is a demonstration property discovery platform. The tools and guides here are educational and illustrative, and all sample figures are labelled as demo content.",
+        "No. Properties Pak is a demonstration property discovery platform. The tools and guides here are educational and illustrative, and all sample figures are labelled as demo content.",
     },
   ],
   relatedLinks: [

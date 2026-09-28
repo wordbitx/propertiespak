@@ -1,12 +1,16 @@
 export const SITE = {
-  name: "Pak Property",
-  tagline: "WordbitX group of companies",
-  url: "https://property.wordbitxtech.com",
+  name: "Properties Pak",
+  /** Brand name with the country suffix used in titles and structured data. */
+  fullName: "Properties Pak — Pakistan Real Estate Marketplace",
+  tagline: "Buy · Rent · Invest in Pakistan",
+  url: "https://propertiespak.com",
+  /** Apex host is canonical; www and legacy hosts 301 to it (see next.config.ts). */
+  host: "propertiespak.com",
   description:
-    "Pakistan's premier real estate & property marketplace powered by WordbitX. Search houses for sale, apartments, plots, luxury villas, commercial properties & new housing projects across Lahore, Islamabad, Karachi, Rawalpindi & Pakistan.",
+    "Properties Pak is Pakistan's property marketplace for verified listings — search houses, apartments, plots, luxury villas, commercial property and new housing projects for sale and rent in Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar.",
   company: "WordbitX Software Company",
   companyUrl: "https://wordbitxtech.com/",
-  companyEmail: "info@wordbitxtech.com",
+  companyEmail: "info@propertiespak.com",
   companyPhone: "+92 325 1888841",
   companyPhoneUs: "+1 (929) 619-7699",
   companyAddress: {
@@ -14,13 +18,23 @@ export const SITE = {
     city: "Lahore",
     country: "Pakistan",
   },
+  /** Company (not site) address for the vendor credit line. */
+  companyAddressLine: "Office #306, Taj Heights, Johar Town, Lahore, Pakistan",
   locale: "en_PK",
-  demoLabel: "Official Real Estate Platform Demo by WordbitX",
+  language: "en-PK",
+  demoLabel: "Official real estate platform by WordbitX Software Company",
+  social: {
+    facebook: "https://www.facebook.com/propertiespak",
+    instagram: "https://www.instagram.com/propertiespak",
+    linkedin: "https://www.linkedin.com/company/propertiespak",
+    youtube: "https://www.youtube.com/@propertiespak",
+    x: "https://x.com/propertiespak",
+  },
   backlinks: {
     wordbitxHome: "https://wordbitxtech.com/",
     wordbitxServices: "https://wordbitxtech.com/",
     wordbitxContact: "https://wordbitxtech.com/",
-    officialDemo: "https://property.wordbitxtech.com",
+    officialDemo: "https://propertiespak.com",
   },
 };
 

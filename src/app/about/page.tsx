@@ -11,23 +11,23 @@ import { buildMetadata, faqJsonLd } from "@/lib/seo";
 import { photo } from "@/lib/images";
 
 export const metadata: Metadata = buildMetadata({
-  title: "About Pak Property — Pakistan Real Estate in Pakistan",
+  title: "About Properties Pak — Pakistan Real Estate in Pakistan",
   description:
-    "Pak Property is a property marketplace for Pakistan built by WordbitX Software Company. Learn how we verify listings, structure search and support buyers, tenants and investors.",
+    "Properties Pak is a property marketplace for Pakistan built by WordbitX Software Company. Learn how we verify listings, structure search and support buyers, tenants and investors.",
   path: "/about",
-  keywords: ["Pak Property", "real estate platform Pakistan", "WordbitX Software Company", "property marketplace Pakistan"],
+  keywords: ["Properties Pak", "real estate platform Pakistan", "WordbitX Software Company", "property marketplace Pakistan"],
 });
 
 const FAQS = [
   {
-    question: "What is Pak Property?",
+    question: "What is Properties Pak?",
     answer:
-      "Pak Property is a premium property marketplace demo for Pakistan. It brings sample sale and rental listings, new developments, commercial spaces, map search and investment calculators into one platform.",
+      "Properties Pak is a premium property marketplace demo for Pakistan. It brings sample sale and rental listings, new developments, commercial spaces, map search and investment calculators into one platform.",
   },
   {
-    question: "Which cities does Pak Property cover?",
+    question: "Which cities does Properties Pak cover?",
     answer:
-      "Pak Property currently tracks Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar, with new societies added as inventory becomes available.",
+      "Properties Pak currently tracks Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar, with new societies added as inventory becomes available.",
   },
   {
     question: "Are these real, verified listings?",
@@ -35,19 +35,19 @@ const FAQS = [
       "No \u2014 all inventory on this demo website is illustrative sample content created to showcase the platform. In a production deployment for a licensed agency, listings would be reviewed for documentation status, dues clearance and accuracy of size, price and location before publication.",
   },
   {
-    question: "Can I list my property on Pak Property?",
+    question: "Can I list my property on Properties Pak?",
     answer:
       "Yes. Submit your property through the List Your Property form. An advisor will review the details, guide you on pricing and arrange photography before the listing goes live.",
   },
   {
-    question: "Does Pak Property provide mortgages?",
+    question: "Does Properties Pak provide mortgages?",
     answer:
-      "Pak Property does not lend money. Our mortgage and affordability calculators provide estimates for planning, and our advisory desk can share the documentation banks typically require.",
+      "Properties Pak does not lend money. Our mortgage and affordability calculators provide estimates for planning, and our advisory desk can share the documentation banks typically require.",
   },
   {
     question: "Who builds and maintains the platform?",
     answer:
-      "Pak Property is a real-estate product developed by WordbitX Software Company, which also builds marketplaces, property technology and enterprise software.",
+      "Properties Pak is a real-estate product developed by WordbitX Software Company, which also builds marketplaces, property technology and enterprise software.",
   },
 ];
 
@@ -59,7 +59,7 @@ export default async function AboutPage() {
       <PageHero
         eyebrow="About"
         title="A Smarter Way to Move Through Pakistan's Property Market"
-        description="Pak Property is a real-estate platform built around one idea: property decisions get better when information is structured, comparable and visible before you commit."
+        description="Properties Pak is a real-estate platform built around one idea: property decisions get better when information is structured, comparable and visible before you commit."
         crumbs={[
           { name: "Home", href: "/" },
           { name: "About", href: "/about" },
@@ -76,7 +76,7 @@ export default async function AboutPage() {
             <h2 className="display-2 mt-4 text-navy-900">Standard-setting, not listing volume</h2>
             <p className="lede mt-4">
               Pakistan's property market moves on relationships — but the information behind a deal is often scattered
-              across phone calls and screenshots. Pak Property structures that information so a buyer can compare, filter and
+              across phone calls and screenshots. Properties Pak structures that information so a buyer can compare, filter and
               decide without travelling the city first.
             </p>
             <ul className="mt-7 space-y-4">
@@ -112,7 +112,7 @@ export default async function AboutPage() {
             <div className="overflow-hidden rounded-panel bg-soft">
               <img
                 src={photo(8135496, 1200, 1400)}
-                alt="Premium open-plan interior representing Pak Property listing standards"
+                alt="Premium open-plan interior representing Properties Pak listing standards"
                 width={1200}
                 height={1400}
                 loading="lazy"
@@ -135,7 +135,7 @@ export default async function AboutPage() {
           <SectionHeading
             eyebrow="Platform"
             title="What the platform covers today"
-            description="A snapshot of inventory, projects and markets currently tracked on Pak Property."
+            description="A snapshot of inventory, projects and markets currently tracked on Properties Pak."
           />
           <dl className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {[
@@ -171,7 +171,7 @@ export default async function AboutPage() {
               <span className="h-[1px] w-6 bg-current opacity-70" />
               Consultants & teams
             </p>
-            <h2 className="display-2 mt-4 text-navy-900">Work with the Pak Property desk</h2>
+            <h2 className="display-2 mt-4 text-navy-900">Work with the Properties Pak desk</h2>
             <p className="lede mt-4">
               Our consultants work city by city with clients buying, renting, selling and leasing. If you advise property
               in Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad or Multan, we would like to hear from you.
@@ -243,7 +243,7 @@ export default async function AboutPage() {
                     </a>
                     <span className="mt-1 block text-[0.75rem] leading-relaxed text-ink-muted">
                       WordbitX&rsquo;s international contact number (New York, USA) for company and software enquiries — not
-                      an Pak Property property office.
+                      an Properties Pak property office.
                     </span>
                   </dd>
                 </div>
@@ -288,7 +288,7 @@ export default async function AboutPage() {
                   {[
                     "Search, filtering, sorting and pagination over the listings database",
                     "Map-based location browsing with price markers",
-                    "Property comparison and the Pak Property Property Score engine",
+                    "Property comparison and the Properties Pak Score engine",
                     "Eight investment and cost calculators",
                     "Saved shortlists, accounts, enquiries and site-visit requests",
                   ].map((item) => (
@@ -318,7 +318,7 @@ export default async function AboutPage() {
               </div>
             </div>
             <p className="mt-6 text-[0.8125rem] leading-relaxed text-ink-muted">
-              Pak Property is a demonstration product. To run this platform on a licensed agency's own verified inventory,
+              Properties Pak is a demonstration product. To run this platform on a licensed agency's own verified inventory,
               contact {SITE.company} at{" "}
               <a href={`mailto:${SITE.companyEmail}`} className="font-semibold text-navy-900 hover:text-forest-700">
                 {SITE.companyEmail}
@@ -334,7 +334,7 @@ export default async function AboutPage() {
           <SectionHeading
             eyebrow="FAQs"
             title="Questions buyers ask before they start"
-            description="Straight answers about coverage, verification and how Pak Property works with buyers, sellers and landlords."
+            description="Straight answers about coverage, verification and how Properties Pak works with buyers, sellers and landlords."
           />
           <div className="mt-9 grid gap-3.5 lg:grid-cols-2">
             {FAQS.map((faq) => (

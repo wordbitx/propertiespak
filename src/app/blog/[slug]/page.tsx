@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post) {
     return buildMetadata({
       title: "Article not found",
-      description: "This insight is no longer available on Pak Property.",
+      description: "This insight is no longer available on Properties Pak.",
       path: "/blog",
     });
   }

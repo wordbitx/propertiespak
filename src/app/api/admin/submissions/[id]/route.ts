@@ -118,7 +118,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         parking: submission.parking,
         furnishing: submission.furnishing,
         possession: submission.possession,
-        description: submission.description || `${submission.title} in ${submission.locationArea}, ${submission.cityName}. Contact Pak Property for details and a site visit.`,
+        description: submission.description || `${submission.title} in ${submission.locationArea}, ${submission.cityName}. Contact Properties Pak for details and a site visit.`,
         features: submission.features,
         amenities: submission.amenities,
         coverImage: submission.imageUrls[0] ?? photo(fallback[0], 1200, 800),

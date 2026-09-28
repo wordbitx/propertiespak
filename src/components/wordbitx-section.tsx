@@ -8,7 +8,7 @@ const CONTACTS = [
 
 /** Compact contacts reused in the elevated company section and site-wide footer. */
 export function WordbitxContacts({ light = false }: { light?: boolean }) {
-  const message = encodeURIComponent("Hi WordbitX, I would like to know more about the Pak Property platform.");
+  const message = encodeURIComponent("Hi WordbitX, I would like to know more about the Properties Pak platform.");
   return (
     <div className="company-contact-grid">
       {CONTACTS.map((contact) => (
@@ -23,7 +23,7 @@ export function WordbitxContacts({ light = false }: { light?: boolean }) {
   );
 }
 
-/** The company behind Pak Property, deliberately placed BEFORE the closing property CTA. */
+/** The company behind Properties Pak, deliberately placed BEFORE the closing property CTA. */
 export function WordbitxSection() {
   return (
     <section id="wordbitx" className="wordbitx-section" aria-labelledby="wordbitx-heading" data-testid="wordbitx-company">
@@ -32,8 +32,8 @@ export function WordbitxSection() {
           <div className="min-w-0">
             <p className="eyebrow text-forest-700">Designed & engineered by</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" aria-label="WordbitX Software Company" className="wordbitx-wordmark">Wordbit<span className="text-forest-700">X</span></a>
-            <h2 id="wordbitx-heading" className="mt-5 max-w-lg font-sans text-[clamp(1.35rem,2.6vw,2rem)] font-bold leading-tight text-navy-900">The technology behind Pak Property.</h2>
-            <p className="mt-4 max-w-xl text-[0.9375rem] leading-7 text-ink-muted">Pak Property is a real-estate demonstration by WordbitX Software Company. For a property marketplace, custom business software or digital solutions, talk to the team that built it.</p>
+            <h2 id="wordbitx-heading" className="mt-5 max-w-lg font-sans text-[clamp(1.35rem,2.6vw,2rem)] font-bold leading-tight text-navy-900">The technology behind Properties Pak.</h2>
+            <p className="mt-4 max-w-xl text-[0.9375rem] leading-7 text-ink-muted">Properties Pak is a real-estate demonstration by WordbitX Software Company. For a property marketplace, custom business software or digital solutions, talk to the team that built it.</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-navy-800 hover:text-forest-700">Explore WordbitX <IconArrowRight className="h-4 w-4" /></a>
           </div>
           <div className="wordbitx-contact-panel">

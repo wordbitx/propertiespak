@@ -8,7 +8,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Compare Properties Side by Side",
   description:
-    "Compare up to three properties on Pak Property — price, price per square foot, area, bedrooms, amenities, indicative yield and the illustrative Pak Property Property Score.",
+    "Compare up to three properties on Properties Pak — price, price per square foot, area, bedrooms, amenities, indicative yield and the illustrative Properties Pak Score.",
   path: "/compare",
   robots: { index: false, follow: true },
 });

@@ -80,9 +80,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
       ...properties.map((item) => ({
         url: `${SITE.url}/property/${item.slug}`,
-        lastModified: now,
+        lastModified: item.updatedAt instanceof Date ? item.updatedAt : now,
         changeFrequency: "weekly" as const,
-        priority: 0.75,
+        priority: 0.7,
       })),
       ...projects.map((item) => ({
         url: `${SITE.url}/projects/${item.slug}`,
@@ -92,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
       ...posts.map((item) => ({
         url: `${SITE.url}/blog/${item.slug}`,
-        lastModified: now,
+        lastModified: item.updatedAt instanceof Date ? item.updatedAt : now,
         changeFrequency: "monthly" as const,
         priority: 0.6,
       })),

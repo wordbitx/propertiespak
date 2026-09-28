@@ -151,7 +151,7 @@ export function LocationAutocomplete({
                 <IconPin className="h-4 w-4 shrink-0 text-forest-600" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[0.875rem] font-semibold text-navy-900">{s.label}</span>
-                  <span className="block text-[0.6875rem] text-ink-muted">{s.source === "estatewx" ? "Pak Property society index" : "OpenStreetMap"}</span>
+                  <span className="block text-[0.6875rem] text-ink-muted">{s.source === "estatewx" ? "Properties Pak society index" : "OpenStreetMap"}</span>
                 </span>
                 {s.kind && KIND_LABEL[s.kind] && (
                   <span className="shrink-0 rounded-md bg-mist px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-ink-muted">{KIND_LABEL[s.kind]}</span>

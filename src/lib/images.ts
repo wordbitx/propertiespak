@@ -53,3 +53,19 @@ export const investmentImage = {
 };
 
 export const ogImage = heroImage.og;
+
+const OG_CARD_PATH = "/api/og";
+
+/**
+ * Title-aware social card served by the OG image route (`/api/og`). Pages
+ * without their own photography use it so shared links stay branded and
+ * readable in search results, WhatsApp, Facebook and X.
+ */
+export function ogCard(input: { title: string; subtitle?: string; kicker?: string; footer?: string }): string {
+  const params = new URLSearchParams();
+  params.set("title", input.title);
+  if (input.subtitle) params.set("subtitle", input.subtitle);
+  if (input.kicker) params.set("kicker", input.kicker);
+  if (input.footer) params.set("footer", input.footer);
+  return `${OG_CARD_PATH}?${params.toString()}`;
+}

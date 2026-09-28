@@ -9,11 +9,11 @@ import { getAgents } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Contact Pak Property — Property Advisory in Pakistan",
+  title: "Contact Properties Pak — Property Advisory in Pakistan",
   description:
-    "Talk to the Pak Property property desk in Lahore, Islamabad, Karachi and Multan. Call +92 325 1888841 or send your requirement for matched listings and site visits.",
+    "Talk to the Properties Pak property desk in Lahore, Islamabad, Karachi and Multan. Call +92 325 1888841 or send your requirement for matched listings and site visits.",
   path: "/contact",
-  keywords: ["property dealers Lahore", "real estate contact Pakistan", "Pak Property contact"],
+  keywords: ["property dealers Lahore", "real estate contact Pakistan", "Properties Pak contact"],
 });
 
 export default async function ContactPage() {
@@ -147,7 +147,7 @@ export default async function ContactPage() {
           <div className="rounded-panel border border-soft bg-mist p-6 lg:p-8">
             <p className="eyebrow text-forest-700">
               <span className="h-[1px] w-6 bg-current opacity-70" />
-              WordbitX · the company behind Pak Property
+              WordbitX · the company behind Properties Pak
             </p>
             <h2 className="display-3 mt-3 text-navy-900">Platform, software &amp; partnership enquiries</h2>
             <p className="lede mt-4 max-w-3xl">
@@ -191,7 +191,7 @@ export default async function ContactPage() {
               </a>
             </div>
             <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
-              Property enquiries for Pakistan are handled by the Pak Property desk using the Pakistan number above. The USA
+              Property enquiries for Pakistan are handled by the Properties Pak desk using the Pakistan number above. The USA
               number is an international WordbitX business line and is not a property office.
             </p>
           </div>
