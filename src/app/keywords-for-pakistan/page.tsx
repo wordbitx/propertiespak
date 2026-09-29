@@ -76,7 +76,7 @@ export default function PakistanKeywordHubPage() {
           <Breadcrumbs
             items={[
               { name: "Home", href: "/" },
-              { name: "SEO Resources", href: "/sitemap" },
+              { name: "Properties", href: "/properties" },
               { name: "Pakistan Real Estate Keywords", href: "/keywords-for-pakistan" },
             ]}
           />
@@ -202,7 +202,6 @@ export default function PakistanKeywordHubPage() {
                 { label: "Open commercial property hub", href: "/commercial" },
                 { label: "Use all property calculators", href: "/tools" },
                 { label: "Read Pakistan property insights", href: "/blog" },
-                { label: "View complete HTML sitemap", href: "/sitemap" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

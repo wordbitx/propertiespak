@@ -10,10 +10,19 @@ The hero uses representative architectural photography rather than a photograph 
 
 Responsive `picture` sources select mobile crops below 768px and serve AVIF where supported with WebP fallback. The hero is eager-loaded with high fetch priority and explicit dimensions. The previous hero assets remain available for existing references.
 
-## Commercial section photography
+## Section artwork (bundled)
 
-"Spaces Built for Business" on the homepage uses two locally served images:
-`public/images/commercial-tower-{800,1200}.{avif,webp}` (glass office tower at dusk) and
-`public/images/commercial-lobby-{480,960}.{avif,webp}` (marble and walnut reception lobby).
-Both are AI-generated artwork. They are representative, not photographs of a specific
-listing, and are never upscaled past their 1200 px / 1312 px sources.
+Premium section images are stored in `src/assets/images/` and imported through
+`src/lib/site-images.ts`. Next.js then serves them from `/_next/static/media/<hash>`
+with immutable caching, the same pipeline as the app's JS and CSS. `SitePicture`
+renders AVIF first and falls back to WebP.
+
+| Key | Used in | Files |
+| --- | --- | --- |
+| `commercialTower` | Home → Spaces Built for Business (main image) | `commercial-tower-{800,1200}` |
+| `commercialLobby` | Home → Spaces Built for Business (inset card) | `commercial-lobby-{480,960}` |
+| `smarterLiving` | Home → Real Estate, Made Smarter | `smarter-living-768` |
+| `aboutVilla` | About → Our approach | `about-villa-768` |
+
+All four are AI-generated architectural artwork. They are representative, not photographs of a
+specific listing, and are never upscaled past their source resolution.

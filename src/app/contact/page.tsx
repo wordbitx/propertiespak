@@ -16,6 +16,8 @@ export const metadata: Metadata = buildMetadata({
   keywords: ["property dealers Lahore", "real estate contact Pakistan", "Properties Pak contact"],
 });
 
+const DESK_WHATSAPP_TEXT = "Hi WordbitX, I would like to know more about the Properties Pak platform.";
+
 export default async function ContactPage() {
   const agents = await getAgents();
 
@@ -108,12 +110,25 @@ export default async function ContactPage() {
                     <p className="mt-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-forest-700">
                       {agent.cityName}
                     </p>
-                    <a
-                      href={`tel:${agent.phone.replace(/\s/g, "")}`}
-                      className="mt-3 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-navy-900 hover:text-forest-700"
-                    >
-                      <IconPhone className="h-3.5 w-3.5" /> {agent.phone}
-                    </a>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <a
+                        href={`tel:${agent.phone.replace(/[^\d+]/g, "")}`}
+                        className="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-navy-900 hover:text-forest-700"
+                      >
+                        <IconPhone className="h-3.5 w-3.5" /> {agent.phone}
+                      </a>
+                      {agent.whatsapp && (
+                        <a
+                          href={`https://wa.me/${agent.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(DESK_WHATSAPP_TEXT)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`WhatsApp the ${agent.cityName} desk`}
+                          className="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-forest-700 hover:text-forest-600"
+                        >
+                          <IconWhatsApp className="h-3.5 w-3.5" /> WhatsApp
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -191,8 +206,8 @@ export default async function ContactPage() {
               </a>
             </div>
             <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
-              Property enquiries for Pakistan are handled by the Properties Pak desk using the Pakistan number above. The USA
-              number is an international WordbitX business line and is not a property office.
+              Property enquiries are handled by the Properties Pak city desks listed above. The USA number is WordbitX&rsquo;s
+              international business line, and it also takes WhatsApp messages for the Karachi desk.
             </p>
           </div>
         </div>

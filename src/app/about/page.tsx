@@ -8,7 +8,8 @@ import { Section, SectionHeading } from "@/components/section";
 import { SITE } from "@/lib/constants";
 import { getCities, getPlatformStats } from "@/lib/queries";
 import { buildMetadata, faqJsonLd } from "@/lib/seo";
-import { photo } from "@/lib/images";
+import { SitePicture } from "@/components/site-picture";
+import { siteImages } from "@/lib/site-images";
 
 export const metadata: Metadata = buildMetadata({
   title: "About Properties Pak — Pakistan Real Estate in Pakistan",
@@ -17,6 +18,69 @@ export const metadata: Metadata = buildMetadata({
   path: "/about",
   keywords: ["Properties Pak", "real estate platform Pakistan", "WordbitX Software Company", "property marketplace Pakistan"],
 });
+
+/** Live portals in the WordbitX group (listed on wordbitxtech.com). */
+type Portal = { name: string; sector: string; domain: string; url: string; copy: string; current?: boolean };
+
+const WORDBITX_PORTALS: Portal[] = [
+  {
+    name: "Properties Pak",
+    sector: "Real estate",
+    domain: "propertiespak.com",
+    url: "/",
+    copy: "Pakistan's property marketplace for sale, rent, new projects, commercial space and verified dealers.",
+    current: true,
+  },
+  {
+    name: "Pakistan Real Estate",
+    sector: "Property portal",
+    domain: "pakproperty.wordbitxtech.com",
+    url: "https://pakproperty.wordbitxtech.com/",
+    copy: "Society-style listings with search and layouts built for dealers.",
+  },
+  {
+    name: "Motor & Automotive",
+    sector: "Automotive",
+    domain: "motor.wordbitxtech.com",
+    url: "https://motor.wordbitxtech.com/",
+    copy: "Vehicle listings, showroom-style layouts and enquiry-first design.",
+  },
+  {
+    name: "Medicare",
+    sector: "Healthcare",
+    domain: "medicare.wordbitxtech.com",
+    url: "https://medicare.wordbitxtech.com/",
+    copy: "Healthcare services, appointment booking and professional medical presentation.",
+  },
+  {
+    name: "Education",
+    sector: "Education",
+    domain: "education.wordbitxtech.com",
+    url: "https://education.wordbitxtech.com/",
+    copy: "Courses, programmes, admissions and education content.",
+  },
+  {
+    name: "E-commerce",
+    sector: "Retail & commerce",
+    domain: "ecom.wordbitxtech.com",
+    url: "https://ecom.wordbitxtech.com/",
+    copy: "Product catalogues, categories and a checkout built to convert.",
+  },
+  {
+    name: "Luxury Dining",
+    sector: "Hospitality",
+    domain: "luxury.wordbitxtech.com",
+    url: "https://luxury.wordbitxtech.com/",
+    copy: "Premium restaurant presentation with menus and reservations.",
+  },
+  {
+    name: "Salon & Beauty",
+    sector: "Beauty",
+    domain: "saloon.wordbitxtech.com",
+    url: "https://saloon.wordbitxtech.com/",
+    copy: "Services, packages and appointment booking for salons.",
+  },
+];
 
 const FAQS = [
   {
@@ -47,7 +111,7 @@ const FAQS = [
   {
     question: "Who builds and maintains the platform?",
     answer:
-      "Properties Pak is a real-estate product developed by WordbitX Software Company, which also builds marketplaces, property technology and enterprise software.",
+      "Properties Pak is developed and run by WordbitX Software Company. WordbitX runs a group of companies and live digital portals across real estate, automotive, healthcare, education, e-commerce, hospitality and beauty, alongside its software, SEO and marketing services.",
   },
 ];
 
@@ -109,16 +173,13 @@ export default async function AboutPage() {
             </ul>
           </div>
           <div className="relative">
-            <div className="overflow-hidden rounded-panel bg-soft">
-              <img
-                src={photo(8135496, 1200, 1400)}
-                alt="Premium open-plan interior representing Properties Pak listing standards"
-                width={1200}
-                height={1400}
-                loading="lazy"
-                decoding="async"
-                className="h-[340px] w-full object-cover lg:h-[520px]"
+            <div className="relative overflow-hidden rounded-panel bg-navy-950 shadow-card ring-1 ring-navy-900/10">
+              <SitePicture
+                image={siteImages.aboutVilla}
+                sizes="(min-width: 1024px) 560px, 100vw"
+                className="h-[340px] w-full object-cover object-[50%_48%] lg:h-[520px]"
               />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-transparent" />
             </div>
             <div className="absolute -bottom-6 right-6 rounded-panel border border-soft bg-white p-5 shadow-card">
               <p className="font-sans text-[1.6rem] font-bold leading-none text-navy-900">{stats.listings}+</p>
@@ -242,8 +303,8 @@ export default async function AboutPage() {
                       {SITE.companyPhoneUs}
                     </a>
                     <span className="mt-1 block text-[0.75rem] leading-relaxed text-ink-muted">
-                      WordbitX&rsquo;s international contact number (New York, USA) for company and software enquiries — not
-                      an Properties Pak property office.
+                      WordbitX&rsquo;s international line (New York, USA) for company and software enquiries. It also
+                      takes WhatsApp messages for the Karachi desk.
                     </span>
                   </dd>
                 </div>
@@ -270,6 +331,46 @@ export default async function AboutPage() {
               </div>
             </dl>
           </div>
+        </div>
+      </Section>
+
+      <Section tone="mist" id="wordbitx-group">
+        <div className="ui-container">
+          <SectionHeading
+            eyebrow="The WordbitX group"
+            title="Properties Pak is run by WordbitX"
+            description="WordbitX Software Company builds and runs Properties Pak. It also runs a group of companies and live digital portals across real estate, automotive, healthcare, education, commerce and hospitality — the same team, standards and engineering behind every one of them."
+            action={{ label: "Visit wordbitxtech.com", href: SITE.companyUrl }}
+          />
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {WORDBITX_PORTALS.map((portal) => (
+              <li key={portal.domain}>
+                <a
+                  href={portal.url}
+                  target={portal.current ? undefined : "_blank"}
+                  rel={portal.current ? undefined : "noopener"}
+                  className="group flex h-full flex-col rounded-panel border border-soft bg-white p-5 transition-shadow duration-300 hover:shadow-card"
+                >
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-forest-700">{portal.sector}</span>
+                    {portal.current ? (
+                      <span className="rounded-full bg-forest-50 px-2.5 py-0.5 text-[0.6875rem] font-semibold text-forest-700">You are here</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-ink-muted">
+                        <span className="h-1.5 w-1.5 rounded-full bg-forest-500" /> Live
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-3 block font-sans text-[1.0625rem] font-semibold text-navy-900">{portal.name}</span>
+                  <span className="mt-1.5 block flex-1 text-[0.8125rem] leading-relaxed text-ink-muted">{portal.copy}</span>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-navy-800 group-hover:text-forest-700">
+                    {portal.domain}
+                    <IconArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </Section>
 

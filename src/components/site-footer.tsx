@@ -157,9 +157,6 @@ export function SiteFooter() {
           <p className="text-[0.75rem] text-white/50">© {new Date().getFullYear()} {SITE.name}. A WordbitX Product.</p>
           <div className="flex min-w-0 flex-wrap gap-x-5 gap-y-3 text-[0.75rem]">
             <Link href="/contact" className="hover:text-white">Contact</Link>
-            <Link href="/sitemap" className="hover:text-white">Directory</Link>
-            <Link href="/sitemap-index.xml" className="hover:text-white">Sitemap index</Link>
-            <Link href="/sitemap.xml" className="hover:text-white">XML sitemap</Link>
             <a href={SITE.url} className="hover:text-white">Official platform</a>
             <Link href="/admin" className="hover:text-white">Admin</Link>
           </div>

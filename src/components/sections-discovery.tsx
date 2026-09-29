@@ -19,6 +19,8 @@ import type { City, Post, Project, Property } from "@/db/schema";
 import { formatPrice } from "@/lib/format";
 import { photo } from "@/lib/images";
 import { SITE } from "@/lib/constants";
+import { siteImages } from "@/lib/site-images";
+import { SitePicture } from "@/components/site-picture";
 
 const CATEGORY_TILES = [
   { label: "Buy", sub: "Houses, plots & villas", href: "/properties/for-sale", image: 36676879, icon: IconKey },
@@ -403,43 +405,19 @@ export function CommercialSection({ properties }: { properties: Property[] }) {
           <Reveal delay={120} className="relative">
             {/* Locally served, premium dusk photography (AVIF with WebP fallback). */}
             <div className="relative overflow-hidden rounded-panel bg-navy-950 shadow-card ring-1 ring-navy-900/10">
-              <picture>
-                <source
-                  type="image/avif"
-                  srcSet="/images/commercial-tower-800.avif 800w, /images/commercial-tower-1200.avif 1200w"
-                  sizes="(min-width: 1024px) 620px, 100vw"
-                />
-                <source
-                  type="image/webp"
-                  srcSet="/images/commercial-tower-800.webp 800w, /images/commercial-tower-1200.webp 1200w"
-                  sizes="(min-width: 1024px) 620px, 100vw"
-                />
-                <img
-                  src="/images/commercial-tower-1200.webp"
-                  alt="Premium glass office tower glowing at dusk above a landscaped business plaza"
-                  width={1200}
-                  height={896}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-[320px] w-full object-cover object-[50%_40%] lg:h-[420px]"
-                />
-              </picture>
+              <SitePicture
+                image={siteImages.commercialTower}
+                sizes="(min-width: 1024px) 620px, 100vw"
+                className="h-[320px] w-full object-cover object-[50%_40%] lg:h-[420px]"
+              />
               <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/35 via-transparent to-transparent" />
             </div>
             <div className="absolute -bottom-8 left-6 hidden w-[240px] overflow-hidden rounded-panel border border-soft bg-white p-3 shadow-card sm:block">
-              <picture>
-                <source type="image/avif" srcSet="/images/commercial-lobby-480.avif 480w, /images/commercial-lobby-960.avif 960w" sizes="216px" />
-                <source type="image/webp" srcSet="/images/commercial-lobby-480.webp 480w, /images/commercial-lobby-960.webp 960w" sizes="216px" />
-                <img
-                  src="/images/commercial-lobby-480.webp"
-                  alt="Marble and walnut reception lobby of a premium office building"
-                  width={480}
-                  height={298}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-[130px] w-full rounded-lg object-cover"
-                />
-              </picture>
+              <SitePicture
+                image={siteImages.commercialLobby}
+                sizes="216px"
+                className="h-[130px] w-full rounded-lg object-cover"
+              />
               <p className="mt-3 font-sans text-[0.8125rem] font-semibold text-navy-900">Prime corridor assets</p>
               <p className="mt-1 text-[0.75rem] text-ink-muted">Gulberg · Blue Area · Shahrah-e-Faisal</p>
             </div>

@@ -12,7 +12,9 @@ import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/section";
 import { WordbitxSection } from "@/components/wordbitx-section";
 import type { Testimonial } from "@/db/schema";
-import { investmentImage, photo } from "@/lib/images";
+import { investmentImage } from "@/lib/images";
+import { siteImages } from "@/lib/site-images";
+import { SitePicture } from "@/components/site-picture";
 
 const BENEFITS = [
   {
@@ -93,16 +95,13 @@ export function WhyEstateWx({ listings, cities }: { listings: number; cities: nu
           </Reveal>
 
           <Reveal delay={120} className="relative">
-            <div className="overflow-hidden rounded-panel">
-              <img
-                src={photo(7546230, 1100, 1300)}
-                alt="Modern open-plan living space with designer lighting"
-                width={1100}
-                height={1300}
-                loading="lazy"
-                decoding="async"
-                className="h-[380px] w-full object-cover lg:h-[540px]"
+            <div className="relative overflow-hidden rounded-panel bg-navy-950 shadow-card ring-1 ring-navy-900/10">
+              <SitePicture
+                image={siteImages.smarterLiving}
+                sizes="(min-width: 1024px) 600px, 100vw"
+                className="h-[380px] w-full object-cover object-[50%_62%] lg:h-[540px]"
               />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/45 via-transparent to-transparent" />
             </div>
             <div className="absolute bottom-6 left-6 right-6 rounded-panel border border-white/15 bg-navy-950/88 p-5 text-white backdrop-blur-sm">
               <p className="eyebrow text-forest-400">Property Information Standards</p>
