@@ -68,15 +68,15 @@ const NOT_FOUND_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-
 body{margin:0;background:#061C33;color:#102A43;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{min-height:100vh;display:grid;place-items:center;padding:32px}
 .card{width:100%;max-width:640px;background:#fff;border-radius:18px;padding:40px;box-shadow:0 30px 70px -28px rgba(6,28,51,.55)}
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#0d8a4c}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#10a456}
 h1{margin:14px 0 0;font-size:30px;line-height:1.12;letter-spacing:-.025em;color:#061C33}
 p{margin:16px 0 0;color:#4a6079;line-height:1.65;font-size:15px}
 .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
 a.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px}
-a.primary{background:#16B364;color:#fff}
+a.primary{background:#10a456;color:#fff}
 a.ghost{border:1px solid #E8EEF3;color:#061C33}
 .credit{margin-top:26px;padding-top:18px;border-top:1px solid #E8EEF3;font-size:12px;color:#75899d}
-.credit a{color:#0d8a4c}
+.credit a{color:#10a456}
 </style></head><body><div class="wrap"><main class="card">
 <p class="eyebrow">Error 404</p>
 <h1>We couldn&rsquo;t find that page on Properties Pak.</h1>

@@ -375,7 +375,8 @@ export function IconX(props: IconProps) {
 /**
  * Properties Pak brand mark — the official logo: a white "P" whose bowl frames
  * a four-pane window, a green roof chevron sweeping under it and three rising
- * bars (two white, one green) for growth. Drawn as a vector on the brand's
+ * bars (two white, one green) for growth. The green is the single brand green
+ * (--color-brand, #10A456) used across the whole site. Drawn as a vector on the brand's
  * deep-navy tile so it stays crisp from 16px favicons up to the 512px app icon.
  */
 export function IconLogo({ className }: { className?: string }) {
@@ -385,15 +386,6 @@ export function IconLogo({ className }: { className?: string }) {
         <linearGradient id="ppMarkTile" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#0A1A3A" />
           <stop offset="1" stopColor="#050E26" />
-        </linearGradient>
-        <linearGradient id="ppMarkBar" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2BD673" />
-          <stop offset="1" stopColor="#0A8A45" />
-        </linearGradient>
-        <linearGradient id="ppMarkRoof" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stopColor="#11A852" />
-          <stop offset="0.6" stopColor="#22C860" />
-          <stop offset="1" stopColor="#16B25A" />
         </linearGradient>
         <linearGradient id="ppMarkWhite" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#FFFFFF" />
@@ -405,14 +397,14 @@ export function IconLogo({ className }: { className?: string }) {
       <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
         <path d="M560 246 L596 219 L596 376 L560 405 Z" fill="url(#ppMarkWhite)" />
         <path d="M609 197 L637 175 L637 340 L609 363 Z" fill="url(#ppMarkWhite)" />
-        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="url(#ppMarkBar)" />
+        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="#10A456" />
         <path
           d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
           fill="url(#ppMarkWhite)"
         />
         <path
           d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
-          fill="url(#ppMarkRoof)"
+          fill="#10A456"
         />
         <g fill="#FFFFFF">
           <rect x="759" y="354" width="28" height="29" />

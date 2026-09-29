@@ -498,7 +498,7 @@ export function ProfileSetupDialog({
                 <label className="mt-3 flex items-start gap-2.5 text-[0.8125rem] text-navy-900">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 accent-[#0d8a4c]"
+                    className="mt-0.5 h-4 w-4 accent-[#10a456]"
                     checked={requestVerification}
                     onChange={(event) => setRequestVerification(event.target.checked)}
                   />

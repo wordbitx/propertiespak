@@ -10,7 +10,7 @@ export default function NotFound() {
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           backgroundImage:
-            "radial-gradient(700px 400px at 12% 0%, rgba(22,179,100,0.22), transparent 62%), radial-gradient(600px 380px at 88% 20%, rgba(19,80,127,0.5), transparent 60%)",
+            "radial-gradient(700px 400px at 12% 0%, rgba(16,164,86,0.22), transparent 62%), radial-gradient(600px 380px at 88% 20%, rgba(19,80,127,0.5), transparent 60%)",
         }}
       />
       <div className="ui-container relative z-10">

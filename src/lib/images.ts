@@ -30,18 +30,20 @@ export const photos = {
   },
 } as const;
 
-const HERO_PHOTO_ID = 28054849;
+const HERO_PHOTO_ID = 31817157;
 const heroSrc = (width: number, height?: number) =>
   `https://images.pexels.com/photos/${HERO_PHOTO_ID}/pexels-photo-${HERO_PHOTO_ID}.jpeg?auto=compress&cs=tinysrgb` +
   (height ? `&fit=crop&w=${width}&h=${height}` : `&w=${width}`);
 
 /**
- * Hero: twilight stone villa with infinity pool by Ahmet Çötür (Pexels photo
- * 28054849), shot at 8192 × 5464. It is served straight from the Pexels image
- * CDN, which resizes from that full-resolution original, so every width in the
- * srcset is a true downscale — including 3840px for 4K and retina desktops.
- * Portrait mobile crops are cut at 3:4 by the CDN. The hero component
- * preconnects to images.pexels.com so the first byte is not delayed.
+ * Hero: contemporary luxury villa with an infinity pool at sunset by Ahmet
+ * Çötür (Pexels photo 31817157), shot at 7688 × 5128. It is served straight
+ * from the Pexels image CDN, which resizes from that full-resolution original,
+ * so every width in the srcset is a true downscale — including 3840px for 4K
+ * and retina desktops. Portrait mobile crops are cut at 3:4 by the CDN. The
+ * hero component preconnects to images.pexels.com so the first byte is not
+ * delayed. The villa sits on the right of the frame, leaving the sunset sky and
+ * the pool behind the headline.
  */
 export const heroImage = {
   origin: "https://images.pexels.com",
@@ -56,7 +58,7 @@ export const heroImage = {
     .join(", "),
   /** Local, real-JPEG social card (WhatsApp / Facebook / X previews). */
   og: "/images/residence-social.jpg",
-  alt: "Stone villa with floor-to-ceiling glass and an illuminated infinity pool at twilight",
+  alt: "Contemporary luxury villa with floor-to-ceiling glass and an infinity pool at sunset",
 };
 
 export const investmentImage = {

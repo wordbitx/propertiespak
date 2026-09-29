@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 
 const NAVY = "#061C33";
 const NAVY_SOFT = "#0B355C";
-const GREEN = "#16B364";
-const GREEN_DEEP = "#0D8A4C";
+/** The single brand green (--color-brand in globals.css). */
+const GREEN = "#10A456";
 
 function clamp(value: string, max: number) {
   return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
@@ -29,28 +29,18 @@ export async function GET(request: Request) {
 
   const logo = (
     <svg width="86" height="86" viewBox="0 0 48 48">
-      <defs>
-        <linearGradient id="ogBar" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2BD673" />
-          <stop offset="1" stopColor={GREEN_DEEP} />
-        </linearGradient>
-        <linearGradient id="ogRoof" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stopColor="#11A852" />
-          <stop offset="1" stopColor={GREEN} />
-        </linearGradient>
-      </defs>
       <rect width="48" height="48" rx="13.5" fill="#FFFFFF" fillOpacity="0.1" />
       <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
         <path d="M560 246 L596 219 L596 376 L560 405 Z" fill="#FFFFFF" />
         <path d="M609 197 L637 175 L637 340 L609 363 Z" fill="#FFFFFF" />
-        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="url(#ogBar)" />
+        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill={GREEN} />
         <path
           d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
           fill="#FFFFFF"
         />
         <path
           d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
-          fill="url(#ogRoof)"
+          fill={GREEN}
         />
         <path d="M759 354h28v29h-28Zm37 0h28v29h-28Zm-37 38h28v29h-28Zm37 0h28v29h-28Z" fill="#FFFFFF" />
       </g>
@@ -67,7 +57,7 @@ export async function GET(request: Request) {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "58px 64px",
-          backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, ${NAVY_SOFT} 62%, #0F5C46 100%)`,
+          backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, ${NAVY_SOFT} 62%, #0C3A63 100%)`,
           color: "#FFFFFF",
           fontFamily: "sans-serif",
         }}

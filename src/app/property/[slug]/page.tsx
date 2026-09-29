@@ -157,7 +157,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{
             backgroundImage:
-              "radial-gradient(800px 400px at 10% -10%, rgba(22,179,100,0.22), transparent 60%), radial-gradient(700px 400px at 92% 10%, rgba(19,80,127,0.5), transparent 62%)",
+              "radial-gradient(800px 400px at 10% -10%, rgba(16,164,86,0.22), transparent 60%), radial-gradient(700px 400px at 92% 10%, rgba(19,80,127,0.5), transparent 62%)",
           }}
         />
         <div className="ui-container relative z-10">

@@ -28,7 +28,7 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{
             backgroundImage:
-              "radial-gradient(820px 420px at 10% -12%, rgba(22,179,100,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
+              "radial-gradient(820px 420px at 10% -12%, rgba(16,164,86,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
           }}
         />
         <div className="ui-container relative z-10">
