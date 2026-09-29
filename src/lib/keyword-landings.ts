@@ -1,4 +1,5 @@
 import type { LandingContent } from "@/lib/landing-pages";
+import { getAllMatrixKeywordSlugs, resolveMatrixKeyword } from "@/lib/keyword-matrix";
 import type { PropertyFilters } from "@/lib/queries";
 
 type LandingSpec = {
@@ -527,12 +528,17 @@ const LANDINGS = new Map<string, LandingContent>(
   ]),
 );
 
+/**
+ * Curated national specs first, then the generated city × property-type matrix
+ * from `keyword-matrix.ts` (long-tail terms such as "flats for rent in Karachi").
+ */
 export function resolveKeywordLanding(slug: string): LandingContent | null {
-  return LANDINGS.get(slug) ?? null;
+  return LANDINGS.get(slug) ?? resolveMatrixKeyword(slug);
 }
 
 export function getAllKeywordLandingSlugs(): string[] {
-  return [...LANDINGS.keys()];
+  // Deduped: a few curated investment specs also exist in the matrix.
+  return [...new Set([...LANDINGS.keys(), ...getAllMatrixKeywordSlugs()])];
 }
 
 export { PAKISTAN_CITIES, PAKISTAN_RENT_CITIES };

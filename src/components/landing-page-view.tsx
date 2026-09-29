@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { IconArrowRight, IconShield } from "@/components/icons";
 import { Reveal } from "@/components/reveal";
+import { KeywordLinks } from "@/components/keyword-links";
 import { PropertyCard } from "@/components/property-card";
 import { getLandingProperties } from "@/lib/queries";
 import type { LandingContent } from "@/lib/landing-pages";
@@ -241,6 +242,12 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
           </div>
         </section>
       )}
+      <KeywordLinks
+        path={`/${content.slug}`}
+        title={`Related searches for ${content.h1}`}
+        description="The property searches buyers use around this page — each one opens live inventory on Properties Pak."
+      />
+
     </>
   );
 }

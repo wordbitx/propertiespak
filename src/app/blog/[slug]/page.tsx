@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { IconArrowRight } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
+import { KeywordLinks } from "@/components/keyword-links";
 import { LeadForm } from "@/components/lead-form";
 import { Section, SectionHeading } from "@/components/section";
 import { formatDate } from "@/lib/format";
 import { getPostBySlug, getPosts } from "@/lib/queries";
+import { keywordsForTags } from "@/lib/keyword-catalog";
 import { articleJsonLd, buildMetadata } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -142,6 +144,13 @@ export default async function BlogPostPage({ params }: PageProps) {
           </aside>
         </div>
       </Section>
+
+      <KeywordLinks
+        links={keywordsForTags(post.tags, 12)}
+        tone="light"
+        title="Properties and searches mentioned in this guide"
+        description="Follow a term straight into live Pakistan property inventory, area guides and calculators."
+      />
 
       {related.length > 0 && (
         <Section tone="mist">

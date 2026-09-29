@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { LandingPageView } from "@/components/landing-page-view";
 import { getAllLandingSlugs, resolveLanding } from "@/lib/landing-pages";
+import { keywordsForPath } from "@/lib/keyword-catalog";
 import { getAllKeywordLandingSlugs, resolveKeywordLanding } from "@/lib/keyword-landings";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, itemListJsonLd, webPageJsonLd } from "@/lib/seo";
 
@@ -29,7 +30,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: content.metaTitle,
       description: content.metaDescription,
       path: `/${content.slug}`,
-      keywords: content.keywords,
+      // Page keywords plus every catalog phrase that targets this slug, so the
+      // metadata matches the terms the page is actually built to answer.
+      keywords: [...new Set([...content.keywords, ...keywordsForPath(`/${content.slug}`)])],
       ogKicker: "PROPERTIES PAK",
       ogSubtitle: content.metaDescription,
     }),
