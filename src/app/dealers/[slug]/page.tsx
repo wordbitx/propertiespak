@@ -134,13 +134,8 @@ export default async function DealerProfilePage({ params }: PageProps) {
                 />
               </div>
               <div className="flex flex-wrap items-start gap-5 rounded-panel border border-soft bg-white p-6 shadow-soft">
-                <span className="relative grid h-20 w-20 shrink-0 place-items-center rounded-full bg-navy-900 font-sans text-[1.5rem] font-bold text-white">
+                <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-navy-900 font-sans text-[1.5rem] font-bold text-white">
                   {initialsFor(dealer.name)}
-                  {dealer.isVerified && (
-                    <span className="absolute -bottom-0.5 -right-0.5 grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-white">
-                      <BlueTick className="h-6 w-6" />
-                    </span>
-                  )}
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="flex flex-wrap items-center gap-2.5 font-sans text-[1.375rem] font-bold text-navy-900">

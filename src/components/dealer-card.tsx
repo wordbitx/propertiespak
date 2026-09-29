@@ -15,19 +15,15 @@ export function DealerCard({ dealer, compact = false }: { dealer: DealerProfile;
   return (
     <article className="flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-5 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-navy-100 hover:shadow-card">
       <div className="flex items-start gap-4">
-        <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-full bg-navy-900 font-sans text-[1.0625rem] font-bold text-white">
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-navy-900 font-sans text-[1.0625rem] font-bold text-white">
           {initialsFor(dealer.name)}
-          {dealer.isVerified && (
-            <span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-white bg-white">
-              <BlueTick className="h-5 w-5" />
-            </span>
-          )}
         </span>
         <div className="min-w-0">
           <h3 className="flex min-w-0 flex-wrap items-center gap-2 font-sans text-[1.0625rem] font-semibold text-navy-900">
             <Link href={href} className="truncate transition-colors hover:text-forest-700">
               {dealer.name}
             </Link>
+            {/* Blue tick lives beside the name — the same mark the dealer slider uses. */}
             {dealer.isVerified && <BlueTick className="h-4 w-4 shrink-0" />}
           </h3>
           <p className="mt-1 flex items-center gap-1.5 text-[0.8125rem] text-ink-muted">
