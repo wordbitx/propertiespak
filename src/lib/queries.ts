@@ -73,8 +73,20 @@ function listedByUser(userId: number): SQL {
   return eq(properties.listedByUserId, userId);
 }
 
+/**
+ * Public inventory never shows a listing its owner has taken down. Storefront
+ * queries add this condition; the owner dashboard and the admin screens keep
+ * their own unfiltered queries on purpose.
+ */
+const isPublished: SQL = eq(properties.published, true);
+
+/** Dealer counters join only the listings that are actually live on the site. */
+function dealerListingJoin() {
+  return and(eq(properties.listedByUserId, users.id), isPublished)!;
+}
+
 export function buildConditions(filters: PropertyFilters): SQL[] {
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [isPublished];
   if (filters.purpose) conditions.push(eq(properties.purpose, filters.purpose));
   if (filters.city) conditions.push(eq(properties.citySlug, filters.city));
   if (filters.town) {
@@ -173,7 +185,11 @@ export async function getLandingProperties(filters: PropertyFilters, limit = 9) 
 
 export async function getPropertyBySlug(slug: string): Promise<Property | undefined> {
   await ensureSeeded();
-  const rows = await db.select().from(properties).where(eq(properties.slug, slug)).limit(1);
+  const rows = await db
+    .select()
+    .from(properties)
+    .where(and(eq(properties.slug, slug), isPublished))
+    .limit(1);
   return rows[0];
 }
 
@@ -182,6 +198,7 @@ export async function getAllPropertySlugs() {
   return db
     .select({ slug: properties.slug, updatedAt: properties.createdAt })
     .from(properties)
+    .where(isPublished)
     .orderBy(desc(properties.createdAt));
 }
 
@@ -193,6 +210,7 @@ export async function getSimilarProperties(property: Property, limit = 3) {
     .where(
       and(
         ne(properties.id, property.id),
+        isPublished,
         or(
           eq(properties.citySlug, property.citySlug),
           eq(properties.propertyType, property.propertyType),
@@ -220,6 +238,7 @@ export async function getNearbyProperties(property: Property, limit = 6, radiusK
     .from(properties)
     .where(and(
       ne(properties.id, property.id),
+      isPublished,
       gte(properties.lat, property.lat - latitudeSpan), lte(properties.lat, property.lat + latitudeSpan),
       gte(properties.lng, property.lng - longitudeSpan), lte(properties.lng, property.lng + longitudeSpan),
       lte(distance, radiusKm),
@@ -235,7 +254,7 @@ export async function getFeaturedProperties(limit = 4) {
     .select(LISTING_WITH_DEALER)
     .from(properties)
     .leftJoin(users, listingOwnerJoin())
-    .where(and(eq(properties.featured, true), eq(properties.verified, true)))
+    .where(and(eq(properties.featured, true), eq(properties.verified, true), isPublished))
     .orderBy(desc(properties.createdAt))
     .limit(limit);
 }
@@ -243,7 +262,7 @@ export async function getFeaturedProperties(limit = 4) {
 export async function getPropertiesByIds(ids: number[]) {
   await ensureSeeded();
   if (ids.length === 0) return [];
-  return db.select().from(properties).where(inArray(properties.id, ids));
+  return db.select().from(properties).where(and(inArray(properties.id, ids), isPublished));
 }
 
 export async function getMapProperties(filters: PropertyFilters = {}, limit = 24) {
@@ -274,6 +293,7 @@ export async function getCityListingCounts() {
   const rows = await db
     .select({ citySlug: properties.citySlug, total: sql<number>`cast(count(*) as int)` })
     .from(properties)
+    .where(isPublished)
     .groupBy(properties.citySlug);
   return new Map(rows.map((row) => [row.citySlug, row.total]));
 }
@@ -336,9 +356,15 @@ export async function getAgentBySlug(slug: string) {
 export async function getPlatformStats() {
   await ensureSeeded();
   const [listingRows, cityRows, verifiedRows, featuredRows] = await Promise.all([
-    db.select({ total: sql<number>`cast(count(*) as int)` }).from(properties),
-    db.select({ total: sql<number>`cast(count(distinct ${properties.citySlug}) as int)` }).from(properties),
-    db.select({ total: sql<number>`cast(count(*) as int)` }).from(properties).where(eq(properties.verified, true)),
+    db.select({ total: sql<number>`cast(count(*) as int)` }).from(properties).where(isPublished),
+    db
+      .select({ total: sql<number>`cast(count(distinct ${properties.citySlug}) as int)` })
+      .from(properties)
+      .where(isPublished),
+    db
+      .select({ total: sql<number>`cast(count(*) as int)` })
+      .from(properties)
+      .where(and(eq(properties.verified, true), isPublished)),
     db.select({ total: sql<number>`cast(count(*) as int)` }).from(projects),
   ]);
   return {
@@ -373,7 +399,7 @@ export async function getFavoritePropertiesForUser(userId: number) {
     })
     .from(favorites)
     .innerJoin(properties, eq(favorites.propertyId, properties.id))
-    .where(eq(favorites.userId, userId))
+    .where(and(eq(favorites.userId, userId), isPublished))
     .orderBy(desc(favorites.createdAt));
 }
 
@@ -458,10 +484,7 @@ export async function getDealers(options: { verifiedOnly?: boolean; city?: strin
   const rows = await db
     .select(dealerAggregates)
     .from(users)
-    .leftJoin(
-      properties,
-      eq(properties.listedByUserId, users.id),
-    )
+    .leftJoin(properties, dealerListingJoin())
     .where(options.city ? eq(users.citySlug, options.city) : undefined)
     .groupBy(users.id)
     .having(sql`count(${properties.id}) > 0`)
@@ -477,10 +500,7 @@ export async function getDealerCount() {
   const rows = await db
     .select({ total: sql<number>`cast(count(distinct ${users.id}) as int)` })
     .from(users)
-    .leftJoin(
-      properties,
-      eq(properties.listedByUserId, users.id),
-    )
+    .leftJoin(properties, dealerListingJoin())
     .having(sql`count(${properties.id}) > 0`);
   return rows[0]?.total ?? 0;
 }
@@ -490,10 +510,7 @@ export async function getDealerBySlug(slug: string): Promise<DealerProfile | und
   const rows = await db
     .select(dealerAggregates)
     .from(users)
-    .leftJoin(
-      properties,
-      eq(properties.listedByUserId, users.id),
-    )
+    .leftJoin(properties, dealerListingJoin())
     .where(eq(users.slug, slug))
     .groupBy(users.id)
     .limit(1);
@@ -505,10 +522,7 @@ export async function getDealerByEmail(email: string): Promise<DealerProfile | u
   const rows = await db
     .select(dealerAggregates)
     .from(users)
-    .leftJoin(
-      properties,
-      eq(properties.listedByUserId, users.id),
-    )
+    .leftJoin(properties, dealerListingJoin())
     .where(sql`lower(${users.email}) = lower(${email})`)
     .groupBy(users.id)
     .limit(1);
@@ -520,10 +534,7 @@ export async function getAllDealerSlugs() {
   return db
     .select({ slug: users.slug, updatedAt: users.createdAt, verified: users.isVerified })
     .from(users)
-    .innerJoin(
-      properties,
-      eq(properties.listedByUserId, users.id),
-    )
+    .innerJoin(properties, dealerListingJoin())
     .where(sql`${users.slug} <> ''`)
     .groupBy(users.slug, users.createdAt, users.isVerified);
 }
@@ -573,7 +584,7 @@ export async function getPropertiesForDealer(user: Pick<User, "id" | "email">, l
     .select(LISTING_WITH_DEALER)
     .from(properties)
     .leftJoin(users, listingOwnerJoin())
-    .where(listedByUser(user.id))
+    .where(and(listedByUser(user.id), isPublished))
     .orderBy(desc(properties.featured), desc(properties.createdAt))
     .limit(Math.max(1, Math.min(48, limit)));
 }
@@ -605,7 +616,7 @@ export async function getLeadDealerForProperty(property: Property): Promise<Deal
   const rows = await db
     .select(dealerAggregates)
     .from(users)
-    .leftJoin(properties, eq(properties.listedByUserId, users.id))
+    .leftJoin(properties, dealerListingJoin())
     .where(eq(users.id, property.listedByUserId))
     .groupBy(users.id)
     .limit(1);
@@ -647,6 +658,7 @@ export async function getListingAreasByCity() {
       total: sql<number>`cast(count(*) as int)`,
     })
     .from(properties)
+    .where(isPublished)
     .groupBy(properties.citySlug, properties.locationArea)
     .orderBy(desc(sql`count(*)`));
   return rows;
@@ -662,7 +674,7 @@ export async function getDealerShowcase(limit = 60) {
   const rows = await db
     .select(dealerAggregates)
     .from(users)
-    .leftJoin(properties, eq(properties.listedByUserId, users.id))
+    .leftJoin(properties, dealerListingJoin())
     .where(or(isNotNull(users.profileCompletedAt), eq(users.role, "dealer"), eq(users.role, "agency")))
     .groupBy(users.id)
     .orderBy(desc(users.isVerified), desc(sql`count(${properties.id})`), asc(users.name))

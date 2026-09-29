@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import { properties } from "@/db/schema";
@@ -16,7 +16,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cit
   if (!CITY_BY_SLUG.has(slug)) return NextResponse.json({ error: "Unknown city" }, { status: 404 });
 
   await ensureSeeded();
-  const rows = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.citySlug, slug));
+  const rows = await db
+    .select({ slug: properties.slug })
+    .from(properties)
+    .where(and(eq(properties.citySlug, slug), eq(properties.published, true)));
 
   const entries: SitemapEntry[] = [
     { path: `/city/${slug}`, changeFrequency: "daily", priority: 0.9 },

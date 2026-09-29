@@ -240,14 +240,32 @@
   }
 
   /* Consistent form label used by the dealer profile setup form. */
-  /* Dealer slider: hidden scrollbar, snap-free continuous motion. */
-  .dealer-slider-track {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-behavior: smooth;
+  /* Dealer belt: a seamless, never-ending loop clipped inside the page. */
+  .dealer-belt-viewport {
+    overflow: hidden;
+    /* Room for the card shadow and the hover lift, without changing the rhythm. */
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
   }
-  .dealer-slider-track::-webkit-scrollbar {
-    display: none;
+  .dealer-belt {
+    display: flex;
+    width: max-content;
+    animation: dealer-belt-scroll linear infinite;
+    will-change: transform;
+  }
+  /* Reading the belt with the keyboard should win over the animation. */
+  .dealer-belt[data-held="true"] {
+    animation-play-state: paused;
+  }
+  .dealer-belt-group {
+    display: flex;
+  }
+  /* Spacing lives on the card, trailing edge included, so translating the belt
+     by exactly half its width lands perfectly and the loop never jumps. */
+  .dealer-belt-group > li {
+    padding-right: 1rem;
   }
 
   .field-label {
@@ -362,6 +380,17 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* One full pass of the dealer belt — the second half of the track takes over
+   where the first half ends, so the loop is invisible. */
+@keyframes dealer-belt-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -619,14 +648,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .hero-signature { margin-top: 24px; font-size: .6875rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.72); }
   .hero-credit { display: inline-flex; align-items: center; min-height: 36px; font-size: .625rem; color: rgba(255,255,255,.55); }
   .hero-credit:hover { color: #fff; }
-  .home-search-wrap { position: relative; z-index: 20; margin-top: -76px; scroll-margin-top: calc(var(--site-header-height) + 16px); }
-  .hero-discovery-meta { padding-top: 24px; }
-  .hero-popular-searches { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
-  .hero-popular-links { display: flex; min-width: 0; max-width: 100%; gap: 12px; overflow-x: auto; padding-block: 4px 9px; overscroll-behavior-x: contain; }
-  .hero-popular-link { display: inline-flex; flex-shrink: 0; align-items: center; gap: 6px; min-height: 40px; font-size: .75rem; font-weight: 500; color: var(--color-ink-muted); }
-  .hero-popular-link:hover { color: var(--color-forest-700); }
-  .hero-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; padding: 22px 0; margin-top: 12px; border-bottom: 1px solid var(--color-soft); }
-  .hero-stats > div { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 8px; min-width: 0; }
+  .home-search-wrap { position: relative; z-index: 20; margin-top: -76px; padding-bottom: 28px; scroll-margin-top: calc(var(--site-header-height) + 16px); }
 
   .property-search-panel { border: 1px solid var(--color-soft); border-radius: 12px; background: #fff; }
   .property-search-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0; padding-inline: 8px; border-bottom: 1px solid var(--color-soft); }
@@ -666,7 +688,6 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 @media (max-width: 374px) {
   .hero-actions { flex-direction: column; }
   .hero-actions .btn { width: 100%; }
-  .hero-stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
   .hero-headline { font-size: 1.875rem; }
   .property-search-tab { font-size: .6875rem; }
 }
@@ -682,8 +703,6 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .property-search-tabs { display: flex; padding-inline: 16px; }
   .property-search-tab { min-width: 100px; padding: 16px; font-size: .8125rem; }
   .property-search-form { padding: 20px; }
-  .hero-popular-links { flex-wrap: wrap; overflow: visible; column-gap: 24px; row-gap: 0; }
-  .hero-stats { gap: 32px; padding-block: 26px; }
   .company-contact-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (min-width: 768px) {
@@ -699,7 +718,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .hero-actions { margin-top: 28px; gap: 14px; }
   .hero-actions .btn { min-height: 50px; padding-inline: 24px; font-size: .875rem; }
   .hero-signature { margin-top: 28px; }
-  .home-search-wrap { margin-top: -84px; }
+  .home-search-wrap { margin-top: -84px; padding-bottom: 40px; }
   .property-search-fields { grid-template-columns: repeat(6,minmax(0,1fr)); }
   .search-field--location, .search-field--type { grid-column: span 3; }
   .search-field--budget { grid-column: span 2; }
@@ -732,4 +751,19 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .site-header { transition: none; }
+  .dealer-belt {
+    animation: none;
+    width: 100%;
+  }
+  .dealer-belt-group[aria-hidden="true"] {
+    display: none;
+  }
+  .dealer-belt-viewport {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .dealer-belt-viewport::-webkit-scrollbar {
+    display: none;
+  }
 }

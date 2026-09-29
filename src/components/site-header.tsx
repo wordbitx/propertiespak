@@ -18,8 +18,18 @@ const PROPERTY_LINKS = [
   { label: "Offices & retail", href: "/properties/commercial" },
   { label: "Farmhouses", href: "/properties?category=farmhouse" },
 ];
-const DESKTOP_LINKS = NAV_LINKS.filter((link) => !["Home", "Insights"].includes(link.label));
-const MOBILE_LINKS = [NAV_LINKS[0], { label: "All properties", href: "/properties" }, ...NAV_LINKS.slice(1)];
+/**
+ * Dealers deliberately stay out of the header: the verified-dealer belt on the
+ * homepage and the footer are the only entry points, so the nav never repeats
+ * a section that already sits one scroll below the hero.
+ */
+const HEADER_HIDDEN_LABELS = ["Home", "Insights", "Dealers"];
+const DESKTOP_LINKS = NAV_LINKS.filter((link) => !HEADER_HIDDEN_LABELS.includes(link.label));
+const MOBILE_LINKS = [
+  NAV_LINKS[0],
+  { label: "All properties", href: "/properties" },
+  ...NAV_LINKS.slice(1).filter((link) => !HEADER_HIDDEN_LABELS.includes(link.label)),
+];
 
 type Panel = "menu" | "search" | null;
 

@@ -1,19 +1,20 @@
 import { test, expect } from "@playwright/test";
+import { visibleTestId } from "./helpers/visible";
 
 test("hero is photographic, borderless and has no featured listing card", async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const hero = page.getByTestId("home-hero");
+  const hero = visibleTestId(page, "home-hero");
   await expect(hero.getByRole("heading", { level: 1 })).toHaveText("Find Your Future.Invest With Clarity.");
-  const image = page.getByTestId("hero-photograph");
+  const image = visibleTestId(page, "hero-photograph");
   await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).complete && (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
   await expect(image).toHaveAttribute("loading", "eager");
   await expect(image).toHaveAttribute("fetchpriority", "high");
   await expect(hero.locator('a[href^="/property/"]')).toHaveCount(0);
   await expect(hero).not.toContainText("Demo listing");
   await expect(hero).not.toContainText("10 Marla Residential Plot");
-  const header = page.getByTestId("site-header");
+  const header = visibleTestId(page, "site-header");
   await expect(header).toHaveAttribute("data-surface", "overlay");
   const headerStyles = await header.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -21,7 +22,7 @@ test("hero is photographic, borderless and has no featured listing card", async 
   });
   expect(headerStyles).toEqual({ border: "0px", background: "rgba(0, 0, 0, 0)", shadow: "none" });
   await page.screenshot({ path: testInfo.outputPath("after-hero-desktop.png") });
-  const brand = page.getByTestId("wordbitx-company");
+  const brand = visibleTestId(page, "wordbitx-company");
   await expect(brand).toHaveCount(1);
   expect(await brand.evaluate((element) => element.nextElementSibling?.getAttribute("data-testid"))).toBe("closing-cta");
   await expect(page.getByRole("contentinfo").getByTestId("wordbitx-company")).toHaveCount(0);
@@ -32,15 +33,17 @@ test("hero is photographic, borderless and has no featured listing card", async 
 
 test("header actions remain tappable without overflow from 320px to desktop", async ({ page }, testInfo) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByTestId("home-hero")).toBeVisible();
+  // Next paints the page inside a hidden prerender shell before swapping it in,
+  // so the id briefly exists twice; scope to the visible copy.
+  await expect(visibleTestId(page, "home-hero").first()).toBeVisible();
   await page.evaluate(async () => { await document.fonts.ready; });
   for (const width of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    const header = page.getByTestId("site-header");
+    const header = visibleTestId(page, "site-header");
     await expect(header).toHaveAttribute("data-surface", "overlay");
-    const controls = [page.getByTestId("header-saved")];
-    if (width < 1280) controls.push(page.getByTestId("header-menu"));
+    const controls = [visibleTestId(page, "header-saved")];
+    if (width < 1280) controls.push(visibleTestId(page, "header-menu"));
     for (const control of controls) {
       await expect(control).toBeVisible();
       const box = await control.boundingBox();
@@ -65,7 +68,7 @@ test("mobile Saved button keeps the saved count and opens the shortlist", async 
   await page.setViewportSize({ width: 320, height: 740 });
   await page.addInitScript(() => localStorage.setItem("estatewx:favorites", "[1]"));
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const saved = page.getByTestId("header-saved");
+  const saved = visibleTestId(page, "header-saved");
   await expect(saved).toHaveAccessibleName("Saved properties, 1 saved");
   await expect(saved.locator(".header-saved-count")).toHaveText("1");
   await saved.click();
@@ -76,7 +79,7 @@ test("mobile Saved button keeps the saved count and opens the shortlist", async 
 test("mobile menu uses the top layer, closes reliably and navigates correctly", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const menuButton = page.getByTestId("header-menu");
+  const menuButton = visibleTestId(page, "header-menu");
   await menuButton.click();
   const menu = page.getByRole("dialog", { name: "Main menu", exact: true });
   await expect(menu).toBeVisible();
@@ -101,7 +104,7 @@ test("mobile menu uses the top layer, closes reliably and navigates correctly", 
 test("mobile search and short-screen menu remain usable", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.getByTestId("header-menu").click();
+  await visibleTestId(page, "header-menu").click();
   await page.getByRole("dialog", { name: "Main menu" }).getByRole("button", { name: "Search city, society or property" }).click();
   const search = page.getByRole("dialog", { name: "Search properties", exact: true });
   await expect(search).toBeVisible();
@@ -111,7 +114,7 @@ test("mobile search and short-screen menu remain usable", async ({ page }, testI
   await expect(page).toHaveURL(/\/properties\?q=Gulberg/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.setViewportSize({ width: 568, height: 320 });
-  await page.getByTestId("header-menu").click();
+  await visibleTestId(page, "header-menu").click();
   const menu = page.getByRole("dialog", { name: "Main menu" });
   const close = menu.getByRole("button", { name: "Close menu", exact: true });
   const box = await close.boundingBox();
@@ -125,7 +128,7 @@ test("mobile search and short-screen menu remain usable", async ({ page }, testI
 test("mobile hero search preserves filters and location suggestions", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const heroSearch = page.getByTestId("hero-search");
+  const heroSearch = visibleTestId(page, "hero-search");
   await heroSearch.getByRole("tab", { name: "Rent", exact: true }).click();
   const form = heroSearch.getByRole("form", { name: "Find a property" });
   await form.getByLabel("Location", { exact: true }).fill("Lahore");
@@ -161,7 +164,7 @@ test("desktop property menu and key pages are responsive", async ({ page }) => {
     await page.getByRole("heading", { level: 1 }).waitFor();
     await page.evaluate(async () => { await document.fonts.ready; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), `overflow on ${path}`).toBeLessThanOrEqual(1);
-    await expect(page.getByTestId("header-saved")).toBeVisible();
-    await expect(page.getByTestId("header-menu")).toBeVisible();
+    await expect(visibleTestId(page, "header-saved")).toBeVisible();
+    await expect(visibleTestId(page, "header-menu")).toBeVisible();
   }
 });

@@ -116,13 +116,16 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero stats={stats} />
+      <Hero />
 
-      {/* Dealer slider sits under the hero; the classic category tiles live further down, just above the city markets. */}
+      {/* Dealer belt sits under the hero; the classic category tiles live further down, just above the city markets. */}
       <DealersSlider dealers={showcaseDealers} />
 
+      {/* Featured inventory leads the marketplace: the strongest listings first, then full discovery. */}
+      <FeaturedProperties properties={featured} />
+
       {/* Property discovery */}
-      <Section tone="light" id="explore">
+      <Section tone="mist" id="explore">
         <div className="ui-container">
           <SectionHeading
             eyebrow="Property discovery"
@@ -152,14 +155,13 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <FeaturedProperties properties={featured} />
       <CommercialSection properties={commercialListings.items} />
+      {/* Discover Properties by Location now sits directly above the new-projects row. */}
+      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <NewProjectsSection projects={projects} />
       {/* "Browse by intent" tiles back in their original spot: directly above the city markets. */}
       <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
-      {/* Moved down: Discover Properties by Location now sits directly above the dealer section */}
-      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
       {/* Smart calculators */}

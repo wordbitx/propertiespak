@@ -109,6 +109,7 @@ async function ensureSchema() {
       listed_by_phone text NOT NULL DEFAULT '',
       listed_by_whatsapp text NOT NULL DEFAULT '',
       listed_by_user_id integer,
+      published boolean NOT NULL DEFAULT true,
       views integer NOT NULL DEFAULT 0,
       created_at timestamptz NOT NULL DEFAULT now()
     );
@@ -118,7 +119,9 @@ async function ensureSchema() {
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_phone text NOT NULL DEFAULT '';
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_whatsapp text NOT NULL DEFAULT '';
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_user_id integer;
+    ALTER TABLE properties ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT true;
     CREATE INDEX IF NOT EXISTS properties_listed_by_user_idx ON properties (listed_by_user_id);
+    CREATE INDEX IF NOT EXISTS properties_published_idx ON properties (published);
     CREATE INDEX IF NOT EXISTS properties_location_area_idx ON properties (location_area);
     CREATE TABLE IF NOT EXISTS listing_media (
       id serial PRIMARY KEY,

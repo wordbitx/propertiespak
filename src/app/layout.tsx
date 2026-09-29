@@ -139,8 +139,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const userId = await getSessionUserId();
 
   return (
-    <html lang="en" className={`${jakarta.variable} ${inter.variable}`}>
-      <body className="bg-white text-ink antialiased">
+    /**
+     * suppressHydrationWarning on html/body: browser extensions, translation
+     * tools and preview-instrumentation scripts add their own attributes to
+     * these two elements before React hydrates. Without this, React treats the
+     * attribute difference as a failed hydration and re-renders the whole tree
+     * on the client, which briefly shows two copies of the page.
+     */
+    <html lang="en" className={`${jakarta.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="bg-white text-ink antialiased" suppressHydrationWarning>
         <FavoritesProvider>
           <CompareProvider>
             <SiteHeader isAuthenticated={userId !== null} />

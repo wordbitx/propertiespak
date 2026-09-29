@@ -247,6 +247,39 @@ export function IconEye(props: IconProps) {
   );
 }
 
+/** Hide / take a listing off the public site. */
+export function IconEyeOff(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
+      <path d="M4.4 8.2C6.3 6.6 9 5.5 12 5.5c3.6 0 6.6 2.1 8.2 4.4M3.4 8.9c1 1.6 2.6 3 4.3 4.1" />
+      <path d="M4 4l16 16" />
+      <path d="M9.6 10.7a4.2 4.2 0 0 0 5.9 5.9" />
+      <path d="M13.9 18.3c-2.1.4-4.2 0-6-1.1" />
+    </svg>
+  );
+}
+
+/** Publish / push a listing back to the live site. */
+export function IconUpload(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
+      <path d="M12 16V5m0 0L8 9m4-4 4 4" />
+      <path d="M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16" />
+    </svg>
+  );
+}
+
+/** Permanent delete. */
+export function IconTrash(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
+      <path d="M5 7h14M10 7V5h4v2" />
+      <path d="M6.5 7l.8 11.2A1.5 1.5 0 0 0 8.8 19.5h6.4a1.5 1.5 0 0 0 1.5-1.3L17.5 7" />
+      <path d="M10.5 11v5m3-5v5" />
+    </svg>
+  );
+}
+
 export function IconLayers(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
