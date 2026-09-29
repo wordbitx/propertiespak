@@ -114,6 +114,9 @@ export default async function HomePage() {
     <>
       <Hero stats={stats} />
 
+      {/* Browse by category sits directly under the hero, above property discovery */}
+      <CategoryGrid />
+
       {/* Property discovery */}
       <Section tone="light" id="explore">
         <div className="ui-container">
@@ -149,7 +152,6 @@ export default async function HomePage() {
       <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <CommercialSection properties={commercialListings.items} />
       <NewProjectsSection projects={projects} />
-      <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
       <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
