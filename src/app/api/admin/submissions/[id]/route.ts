@@ -5,6 +5,7 @@ import { ensureSeeded } from "@/db/seed";
 import { listingSubmissions, properties, users } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { photo } from "@/lib/images";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +167,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       })
       .where(eq(listingSubmissions.id, submissionId));
 
+    invalidateCatalog();
     return NextResponse.json({ ok: true, status: "approved", propertySlug: inserted[0]?.slug ?? null });
   } catch (error) {
     console.error("admin review failed", error);

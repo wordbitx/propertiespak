@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/auth";
 import { updateDealerProfile, type DealerProfileInput } from "@/lib/queries";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +76,7 @@ export async function PATCH(request: Request) {
 
   try {
     const user = await updateDealerProfile(userId, input);
+    if (user) invalidateCatalog();
     if (!user) {
       return NextResponse.json({ ok: false, error: "Nothing to update." }, { status: 400 });
     }
