@@ -30,21 +30,33 @@ export const photos = {
   },
 } as const;
 
+const HERO_PHOTO_ID = 28054849;
+const heroSrc = (width: number, height?: number) =>
+  `https://images.pexels.com/photos/${HERO_PHOTO_ID}/pexels-photo-${HERO_PHOTO_ID}.jpeg?auto=compress&cs=tinysrgb` +
+  (height ? `&fit=crop&w=${width}&h=${height}` : `&w=${width}`);
+
 /**
- * Architectural photography by Max Vakhtbovych (Pexels photo 8134750).
- * Local assets generated from a 3600×2400 source, never upscaled.
- * Portrait crops are art-directed separately; AVIF has a WebP fallback.
+ * Hero: twilight stone villa with infinity pool by Ahmet Çötür (Pexels photo
+ * 28054849), shot at 8192 × 5464. It is served straight from the Pexels image
+ * CDN, which resizes from that full-resolution original, so every width in the
+ * srcset is a true downscale — including 3840px for 4K and retina desktops.
+ * Portrait mobile crops are cut at 3:4 by the CDN. The hero component
+ * preconnects to images.pexels.com so the first byte is not delayed.
  */
 export const heroImage = {
-  desktop: "/images/residence-3200.webp",
-  tablet: "/images/residence-1600.webp",
-  mobile: "/images/residence-mobile-768.webp",
-  desktopSrcSet: "/images/residence-1600.webp 1600w, /images/residence-2400.webp 2400w, /images/residence-3200.webp 3200w",
-  avifSrcSet: "/images/residence-1600.avif 1600w, /images/residence-2400.avif 2400w, /images/residence-3200.avif 3200w",
-  mobileSrcSet: "/images/residence-mobile-768.webp 768w, /images/residence-mobile-1280.webp 1280w",
-  mobileAvifSrcSet: "/images/residence-mobile-768.avif 768w, /images/residence-mobile-1280.avif 1280w",
+  origin: "https://images.pexels.com",
+  desktop: heroSrc(2400),
+  desktopSrcSet: [1280, 1600, 2000, 2400, 3200, 3840].map((w) => `${heroSrc(w)} ${w}w`).join(", "),
+  mobileSrcSet: [
+    [640, 854],
+    [960, 1280],
+    [1280, 1707],
+  ]
+    .map(([w, h]) => `${heroSrc(w, h)} ${w}w`)
+    .join(", "),
+  /** Local, real-JPEG social card (WhatsApp / Facebook / X previews). */
   og: "/images/residence-social.jpg",
-  alt: "Contemporary residence with floor-to-ceiling windows, a landscaped lawn and a swimming pool",
+  alt: "Stone villa with floor-to-ceiling glass and an illuminated infinity pool at twilight",
 };
 
 export const investmentImage = {

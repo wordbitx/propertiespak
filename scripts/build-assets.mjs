@@ -30,23 +30,8 @@ const investmentSource = path.join(sourceDir, "investment-source.jpg");
 
 const NAVY = "#061C33";
 
-/** The brand mark, identical to src/app/icon.svg (kept in sync by hand). */
-const mark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0B355C"/><stop offset="1" stop-color="#04182C"/>
-    </linearGradient>
-    <linearGradient id="roof" x1="0.15" y1="0" x2="0.85" y2="1">
-      <stop offset="0" stop-color="#0D8A4C"/><stop offset="1" stop-color="#22C55E"/>
-    </linearGradient>
-  </defs>
-  <rect width="48" height="48" rx="13.5" fill="url(#bg)"/>
-  <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="1.2"/>
-  <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#roof)"/>
-  <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF"/>
-  <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill="#04182C" opacity="0.16"/>
-  <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill="#0B355C"/>
-</svg>`;
+/** The brand mark: src/app/icon.svg is the single source of truth. */
+const mark = fs.readFileSync(path.join(root, "src", "app", "icon.svg"), "utf8");
 
 const markSvg = (size) => Buffer.from(mark.replace("<svg ", `<svg width="${size}" height="${size}" `));
 

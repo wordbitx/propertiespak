@@ -30,16 +30,30 @@ export async function GET(request: Request) {
   const logo = (
     <svg width="86" height="86" viewBox="0 0 48 48">
       <defs>
-        <linearGradient id="ogRoof" x1="0.15" y1="0" x2="0.85" y2="1">
-          <stop offset="0" stopColor={GREEN_DEEP} />
+        <linearGradient id="ogBar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#2BD673" />
+          <stop offset="1" stopColor={GREEN_DEEP} />
+        </linearGradient>
+        <linearGradient id="ogRoof" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stopColor="#11A852" />
           <stop offset="1" stopColor={GREEN} />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="13.5" fill="#FFFFFF" fillOpacity="0.1" />
-      <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#ogRoof)" />
-      <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF" />
-      <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill={NAVY} opacity="0.16" />
-      <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill={NAVY_SOFT} />
+      <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
+        <path d="M560 246 L596 219 L596 376 L560 405 Z" fill="#FFFFFF" />
+        <path d="M609 197 L637 175 L637 340 L609 363 Z" fill="#FFFFFF" />
+        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="url(#ogBar)" />
+        <path
+          d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
+          fill="#FFFFFF"
+        />
+        <path
+          d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
+          fill="url(#ogRoof)"
+        />
+        <path d="M759 354h28v29h-28Zm37 0h28v29h-28Zm-37 38h28v29h-28Zm37 0h28v29h-28Z" fill="#FFFFFF" />
+      </g>
     </svg>
   );
 

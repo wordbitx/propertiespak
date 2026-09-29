@@ -1,14 +1,30 @@
 # Pak Property hero photography
 
-The homepage uses architectural photography by Max Vakhtbovych from Pexels:
+The homepage hero is a twilight stone villa with an infinity pool by Ahmet Çötür on Pexels
+(free Pexels licence):
 
-https://www.pexels.com/photo/a-modern-house-with-swimming-pool-under-the-blue-sky-8134750/
+https://www.pexels.com/photo/a-luxury-villa-with-a-swimming-pool-at-dusk-28054849/
 
-A 3600 × 2400 source was used to produce native-resolution, locally served AVIF and WebP variants. No variant is upscaled. Desktop outputs are 1600, 2400 and 3200 pixels wide; portrait mobile crops are 768 and 1280 pixels wide. The JPEG social card is a real JPEG (1200 × 630).
+The original is 8192 × 5464. It is served straight from the Pexels image CDN
+(`images.pexels.com`), which resizes from that original, so every candidate is a true
+downscale: desktop `srcset` widths 1280, 1600, 2000, 2400, 3200 and 3840 (4K / retina), and
+3:4 portrait crops at 640, 960 and 1280 for phones below 768px. The URLs are built by
+`heroImage` in `src/lib/images.ts`.
 
-The hero uses representative architectural photography rather than a photograph of a specific advertised listing. No listing price or property-specific claim is embedded in the hero. Uploaded listing photography is independent and remains unchanged.
+The previous hero (`public/images/residence-*`) was a soft, upscaled render; only
+`residence-social.jpg` is still referenced (social card fallback in `src/lib/seo.ts`).
 
-Responsive `picture` sources select mobile crops below 768px and serve AVIF where supported with WebP fallback. The hero is eager-loaded with high fetch priority and explicit dimensions. The previous hero assets remain available for existing references.
+On desktop the photo is mirrored with CSS (`transform: scaleX(-1)`) so the villa sits on the
+right and the headline reads over open sky. The photo contains no text or signage, so the
+mirror is invisible.
+
+Performance: the hero `<img>` is eager with `fetchpriority="high"` and explicit dimensions,
+and the hero renders a `<link rel="preconnect" href="https://images.pexels.com">` that React
+hoists into `<head>`. The same CDN already serves listing photography, so no new third party
+is introduced.
+
+The hero is representative architectural photography, not a photograph of a specific
+advertised listing. No price or property-specific claim is embedded in it.
 
 ## Section artwork (bundled)
 
