@@ -135,6 +135,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * Toggles `data-header-solid` on <html> once the page scrolls past the hero
+ * edge. The header's solid styling keys off this attribute in CSS, so it never
+ * depends on React hydrating. SiteHeader keeps its own state for data-surface.
+ */
+const HEADER_SCROLL_SCRIPT = `(function(){var d=document.documentElement,s;function u(){var v=(window.scrollY||d.scrollTop)>36;if(v===s)return;s=v;if(v)d.setAttribute("data-header-solid","");else d.removeAttribute("data-header-solid")}u();addEventListener("scroll",u,{passive:true});addEventListener("pageshow",u);addEventListener("resize",u)})()`;
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const userId = await getSessionUserId();
 
@@ -148,6 +155,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
      */
     <html lang="en" className={`${jakarta.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className="bg-white text-ink antialiased" suppressHydrationWarning>
+        {/* Runs straight from the HTML, before and independently of React, so the header turns solid on scroll even if hydration is slow or a JS chunk fails. */}
+        <script dangerouslySetInnerHTML={{ __html: HEADER_SCROLL_SCRIPT }} />
         <FavoritesProvider>
           <CompareProvider>
             <SiteHeader isAuthenticated={userId !== null} />

@@ -593,8 +593,14 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .brand-lockup--large .brand-lockup-name { font-size: 1.5rem; }
   .brand-lockup--large .brand-lockup-mark { width: 50px; height: 50px; }
   .site-header { position: fixed; inset: 0 0 auto; z-index: 60; border: 0; padding-top: env(safe-area-inset-top, 0px); transition: background-color .2s ease, box-shadow .2s ease, color .2s ease; }
-  .site-header--overlay { background: transparent; color: #fff; box-shadow: none; }
-  .site-header--solid { background: #fff; color: var(--color-navy-900); box-shadow: 0 6px 24px -18px rgba(6, 28, 51, .45); }
+  /* Overlay by default; solid when React says so (admin, scroll) OR when the
+     inline scroll script in layout.tsx has marked <html> — the latter works
+     even before/without hydration. */
+  .site-header--overlay { background: transparent; color: #fff; box-shadow: none; --brand-name: #fff; --brand-accent: var(--color-forest-400); --brand-tagline: rgba(255,255,255,.7); }
+  .site-header--solid, html[data-header-solid] .site-header { background: #fff; color: var(--color-navy-900); box-shadow: 0 6px 24px -18px rgba(6, 28, 51, .45); --brand-name: var(--color-navy-900); --brand-accent: var(--color-forest-700); --brand-tagline: var(--color-ink-muted); }
+  .brand-lockup--adaptive .brand-lockup-name { color: var(--brand-name, var(--color-navy-900)); transition: color .2s ease; }
+  .brand-lockup--adaptive .brand-lockup-accent { color: var(--brand-accent, var(--color-forest-700)); transition: color .2s ease; }
+  .brand-lockup--adaptive .brand-lockup-tagline { color: var(--brand-tagline, var(--color-ink-muted)); transition: color .2s ease; }
   .header-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 12px; padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
   .header-brand { display: inline-flex; min-width: 0; flex-shrink: 0; }
   .header-desktop-nav { display: none; align-items: center; gap: 17px; }
@@ -606,10 +612,11 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .header-saved-count { position: absolute; right: 1px; top: 0; display: grid; place-items: center; min-width: 16px; height: 16px; padding-inline: 3px; border-radius: 10px; background: var(--color-forest-700); color: #fff; font-size: 9px; font-weight: 700; line-height: 1; }
   .header-search-action, .header-account, .header-list-property { display: none; }
   .site-header--overlay .header-action:hover, .site-header--overlay .header-account:hover { background: rgba(255,255,255,.1); }
-  .site-header--solid .header-action:hover, .site-header--solid .header-account:hover { background: var(--color-mist); }
+  .site-header--solid .header-action:hover, .site-header--solid .header-account:hover,
+  html[data-header-solid] .site-header .header-action:hover, html[data-header-solid] .site-header .header-account:hover { background: var(--color-mist); }
   .header-account { align-items: center; gap: 7px; min-height: 44px; padding: 0 10px; border-radius: 9px; font-size: .8125rem; font-weight: 600; }
   .header-list-property { align-items: center; min-height: 44px; padding: 0 16px; margin-left: 4px; border-radius: 9px; background: var(--color-forest-700); color: white; font-family: var(--font-sans); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
-  .site-header--solid .header-list-property { background: var(--color-navy-800); }
+  .site-header--solid .header-list-property, html[data-header-solid] .site-header .header-list-property { background: var(--color-navy-800); }
   .header-list-property:hover { background: var(--color-forest-600); }
 
   .navigation-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-ink); overflow: hidden; }

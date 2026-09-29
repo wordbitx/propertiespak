@@ -95,7 +95,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         className={`site-header ${solid ? "site-header--solid" : "site-header--overlay"}`}
       >
         <div className="ui-container header-inner">
-          <Link href="/" className="header-brand" aria-label={`${SITE.name} — ${SITE.tagline}`}><BrandLockup light={!solid} compact /></Link>
+          <Link href="/" className="header-brand" aria-label={`${SITE.name} — ${SITE.tagline}`}><BrandLockup adaptive compact /></Link>
 
           <nav className="header-desktop-nav" aria-label="Primary">
             <Link href="/" data-active={pathname === "/"} className="nav-link">Home</Link>
