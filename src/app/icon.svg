@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Properties Pak">
+  <defs>
+    <linearGradient id="ppBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B355C" />
+      <stop offset="1" stop-color="#04182C" />
+    </linearGradient>
+    <linearGradient id="ppRoof" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16B364" />
+      <stop offset="1" stop-color="#4ADE80" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="13" fill="url(#ppBg)" />
+  <path d="M24 12.4 9.9 24.9a1.95 1.95 0 0 0 1.29 3.38h25.62a1.95 1.95 0 0 0 1.29-3.38Z" fill="url(#ppRoof)" />
+  <path d="M15.3 27.3h17.4v8.1a1.95 1.95 0 0 1-1.95 1.95H17.25A1.95 1.95 0 0 1 15.3 35.4Z" fill="#FFFFFF" />
+  <path d="M21.2 37.35v-5.5a1.55 1.55 0 0 1 1.55-1.55h2.5a1.55 1.55 0 0 1 1.55 1.55v5.5Z" fill="#0B355C" />
+</svg>
