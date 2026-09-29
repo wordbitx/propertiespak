@@ -163,7 +163,7 @@ export default async function DealersPage({
               </div>
             </div>
           ) : (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {allDealers.map((dealer) => (
                 <DealerCard key={dealer.id} dealer={dealer} />
               ))}

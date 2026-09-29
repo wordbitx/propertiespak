@@ -6,6 +6,7 @@ import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import { Calculators } from "@/components/calculators";
 import {
+  CategoryGrid,
   CityDiscovery,
   CommercialSection,
   FeaturedProperties,
@@ -117,7 +118,7 @@ export default async function HomePage() {
     <>
       <Hero stats={stats} />
 
-      {/* Dealer slider takes the place of the old "Browse by intent" tiles */}
+      {/* Dealer slider sits under the hero; the classic category tiles live further down, just above the city markets. */}
       <DealersSlider dealers={showcaseDealers} />
 
       {/* Property discovery */}
@@ -154,6 +155,8 @@ export default async function HomePage() {
       <FeaturedProperties properties={featured} />
       <CommercialSection properties={commercialListings.items} />
       <NewProjectsSection projects={projects} />
+      {/* "Browse by intent" tiles back in their original spot: directly above the city markets. */}
+      <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
       {/* Moved down: Discover Properties by Location now sits directly above the dealer section */}
       <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />

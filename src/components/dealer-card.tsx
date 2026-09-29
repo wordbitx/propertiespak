@@ -64,7 +64,7 @@ export function DealerCard({ dealer, compact = false }: { dealer: DealerProfile;
         </div>
       </dl>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
         {dealer.isVerified ? (
           <span className="text-[0.75rem] font-semibold text-[#0b6fb8]">Identity &amp; contact verified</span>
         ) : (
