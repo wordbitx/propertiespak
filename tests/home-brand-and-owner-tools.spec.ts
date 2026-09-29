@@ -64,6 +64,18 @@ test.afterAll(async () => {
   await pool.end();
 });
 
+/**
+ * Streaming SSR and client-side refreshes briefly hold two copies of a subtree
+ * in the DOM while a swap commits. Poll until the tree has settled on one node
+ * before asserting, so the suite tests the app rather than the transition.
+ */
+async function settle(page: Page, testId: string, expected = 1) {
+  // Client fetches (shortlist / compare hydration) land shortly after the first
+  // paint and re-render the tree. Wait for those to finish, then for the count.
+  await page.waitForLoadState("networkidle").catch(() => {});
+  await expect.poll(() => page.getByTestId(testId).count(), { timeout: 15_000 }).toBe(expected);
+}
+
 async function signedInAsOwner(page: Page) {
   await page.context().addCookies([
     { name: "estatewx_session", value: sessionToken(ownerId), domain: "127.0.0.1", path: "/" },
@@ -72,6 +84,7 @@ async function signedInAsOwner(page: Page) {
 
 test("homepage hero is a clean brand statement followed by the featured, then explore, sections", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await settle(page, "home-hero");
   const hero = page.getByTestId("home-hero");
   await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
   for (const clutter of ["Popular searches", "Live properties", "Cities to explore", "Property tools"]) {
@@ -107,6 +120,7 @@ test("homepage hero is a clean brand statement followed by the featured, then ex
 test("dealer belt runs a continuous loop that never leaves the page", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await settle(page, "dealers-marquee");
   const viewport = page.getByTestId("dealers-marquee");
   await viewport.scrollIntoViewIfNeeded();
   const belt = viewport.locator(".dealer-belt");
@@ -166,6 +180,7 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
 test("owner can hide, restore and delete a listing they posted", async ({ page }) => {
   await signedInAsOwner(page);
   await page.goto("/account", { waitUntil: "domcontentloaded" });
+  await settle(page, "account-listings");
   const manager = page.getByTestId("account-listings");
   await manager.scrollIntoViewIfNeeded();
   await expect(manager.getByRole("link", { name: listingTitle, exact: true })).toBeVisible();
@@ -174,6 +189,8 @@ test("owner can hide, restore and delete a listing they posted", async ({ page }
   // Hide it: off the public site, still listed in the dashboard.
   await manager.getByRole("button", { name: "Hide from site" }).click();
   await manager.getByRole("button", { name: "Yes, hide it" }).click();
+  await expect(page.getByText("Listing hidden from the public site.", { exact: true })).toBeVisible();
+  await settle(page, "account-listings");
   await expect(manager.getByText("Hidden", { exact: true })).toBeVisible();
   await expect(page.getByText("Listing hidden from the public site.", { exact: true })).toBeVisible();
   await page.goto(`/property/${listingSlug}`, { waitUntil: "domcontentloaded" });
@@ -181,13 +198,16 @@ test("owner can hide, restore and delete a listing they posted", async ({ page }
 
   // Restore it.
   await page.goto("/account", { waitUntil: "domcontentloaded" });
+  await settle(page, "account-listings");
   await page.getByRole("button", { name: "Publish again" }).click();
   await expect(page.getByText("Listing published again — it is back on the site.", { exact: true })).toBeVisible();
+  await settle(page, "account-listings");
   await page.goto(`/property/${listingSlug}`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: /QA Town Lahore/ })).toBeVisible();
 
   // Withdraw the queued submission, then delete the live listing for good.
   await page.goto("/account", { waitUntil: "domcontentloaded" });
+  await settle(page, "account-listings");
   const secondManager = page.getByTestId("account-listings");
   await secondManager.scrollIntoViewIfNeeded();
   await secondManager.getByRole("button", { name: "Withdraw submission" }).click();
@@ -198,6 +218,7 @@ test("owner can hide, restore and delete a listing they posted", async ({ page }
   await secondManager.getByRole("button", { name: "Delete", exact: true }).click();
   await secondManager.getByRole("button", { name: "Yes, delete it" }).click();
   await expect(page.getByText("Listing deleted permanently.", { exact: true })).toBeVisible();
+  await settle(page, "account-listings");
   await expect(secondManager.getByRole("link", { name: listingTitle, exact: true })).toHaveCount(0);
   await page.goto(`/property/${listingSlug}`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /no longer available/i })).toBeVisible();
@@ -216,6 +237,7 @@ test("admin can delete a client enquiry from the inbox", async ({ page }) => {
   expect(login.ok()).toBeTruthy();
 
   await page.goto("/admin?tab=inquiries", { waitUntil: "domcontentloaded" });
+  await settle(page, "admin-inquiry-inbox");
   await page.getByLabel("Search client or property").fill(enquiryMarker);
   const card = page.getByRole("article").filter({ hasText: `${enquiryMarker} Client` });
   await expect(card).toHaveCount(1);
@@ -225,6 +247,9 @@ test("admin can delete a client enquiry from the inbox", async ({ page }) => {
   await expect(page.getByText("Enquiry deleted permanently.", { exact: true })).toBeVisible();
   await expect(page.getByRole("article").filter({ hasText: `${enquiryMarker} Client` })).toHaveCount(0);
 
-  const remaining = await request.get(`/api/admin/inquiries?q=${enquiryMarker}`);
-  expect((await remaining.json()).total).toBe(0);
+  // Deletion is confirmed straight from the database: the browser's admin
+  // session cookie is Secure on non-canonical hosts, and Playwright's API
+  // client only replays it over https, so an API re-check would 401 here.
+  const { rows } = await pool.query("select count(*)::int as total from inquiries where name like $1", [`${enquiryMarker}%`]);
+  expect(rows[0].total).toBe(0);
 });

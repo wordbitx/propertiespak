@@ -32,6 +32,10 @@ test("hero is photographic, borderless and has no featured listing card", async 
 
 test("header actions remain tappable without overflow from 320px to desktop", async ({ page }, testInfo) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  // Some browser builds mutate the DOM before hydration; React then swaps the
+  // tree once. Wait for the duplicate to clear so the assertions below are not
+  // racing that single commit.
+  await expect.poll(() => page.getByTestId("home-hero").count()).toBe(1);
   await expect(page.getByTestId("home-hero")).toBeVisible();
   await page.evaluate(async () => { await document.fonts.ready; });
   for (const width of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440]) {
