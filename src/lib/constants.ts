@@ -33,6 +33,18 @@ export const SITE = {
     youtube: "https://www.youtube.com/@propertiespak",
     x: "https://x.com/propertiespak",
   },
+  /**
+   * Social profiles for the parent company, WordbitX. The footer renders a
+   * "Follow WordbitX" row containing whichever platforms have a URL below;
+   * leave a value empty to hide that platform.
+   */
+  companySocial: {
+    facebook: "",
+    instagram: "",
+    linkedin: "",
+    youtube: "",
+    x: "",
+  },
   backlinks: {
     wordbitxHome: "https://wordbitxtech.com/",
     wordbitxServices: "https://wordbitxtech.com/",

@@ -1,9 +1,26 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand-lockup";
-import { IconArrowRight, IconMail } from "@/components/icons";
+import {
+  IconArrowRight,
+  IconFacebook,
+  IconInstagram,
+  IconLinkedIn,
+  IconMail,
+  IconX,
+  IconYouTube,
+} from "@/components/icons";
 import { WordbitxContacts } from "@/components/wordbitx-section";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { SITE } from "@/lib/constants";
+
+/** Parent-company profiles are opt-in: only platforms with a URL are rendered. */
+const COMPANY_SOCIAL = [
+  { platform: "Facebook", href: SITE.companySocial.facebook, Icon: IconFacebook },
+  { platform: "Instagram", href: SITE.companySocial.instagram, Icon: IconInstagram },
+  { platform: "LinkedIn", href: SITE.companySocial.linkedin, Icon: IconLinkedIn },
+  { platform: "YouTube", href: SITE.companySocial.youtube, Icon: IconYouTube },
+  { platform: "X", href: SITE.companySocial.x, Icon: IconX },
+].filter((entry) => entry.href.trim().length > 0);
 
 const COLUMNS = [
   {
@@ -104,6 +121,27 @@ export function SiteFooter() {
             <p className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">A WordbitX Product</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400">WordbitX Software Company</a>
             <a href={`mailto:${SITE.companyEmail}`} className="mt-2 flex items-center gap-2 text-[0.75rem] text-white/60 hover:text-white"><IconMail className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{SITE.companyEmail}</span></a>
+            {COMPANY_SOCIAL.length > 0 && (
+              <div className="mt-5">
+                <h2 className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">Follow WordbitX</h2>
+                <ul className="mt-3 flex flex-wrap items-center gap-2.5">
+                  {COMPANY_SOCIAL.map(({ platform, href, Icon }) => (
+                    <li key={platform}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${SITE.company} on ${platform}`}
+                        title={`${SITE.company} on ${platform}`}
+                        className="grid h-9 w-9 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-forest-400 hover:text-forest-400"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <WordbitxContacts light />
         </div>

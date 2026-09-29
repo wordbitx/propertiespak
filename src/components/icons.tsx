@@ -256,6 +256,64 @@ export function IconLayers(props: IconProps) {
   );
 }
 
+/* ---------------------------------------------------------------------------
+ * Brand marks used for company social profiles (footer). These are filled
+ * glyphs rather than the site's line icons so each platform stays recognisable
+ * at small sizes.
+ * ------------------------------------------------------------------------- */
+
+export function IconFacebook(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M13.4 21.2v-7.1h2.6l.4-3h-3V9.2c0-.87.24-1.46 1.5-1.46h1.6V5.05c-.28-.04-1.23-.12-2.34-.12-2.32 0-3.9 1.42-3.9 4.02v1.15H7.6v3h2.66v7.1Z" />
+    </svg>
+  );
+}
+
+export function IconInstagram(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path
+        fillRule="evenodd"
+        d="M8.1 2.7h7.8a5.4 5.4 0 0 1 5.4 5.4v7.8a5.4 5.4 0 0 1-5.4 5.4H8.1a5.4 5.4 0 0 1-5.4-5.4V8.1a5.4 5.4 0 0 1 5.4-5.4Zm0 2A3.4 3.4 0 0 0 4.7 8.1v7.8a3.4 3.4 0 0 0 3.4 3.4h7.8a3.4 3.4 0 0 0 3.4-3.4V8.1a3.4 3.4 0 0 0-3.4-3.4H8.1Zm3.9 2.9a4.4 4.4 0 1 1 0 8.8 4.4 4.4 0 0 1 0-8.8Zm0 2a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8Zm4.75-3.1a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+export function IconLinkedIn(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M6.9 20.4h-3V9h3Zm-1.5-13a1.78 1.78 0 1 1 0-3.56 1.78 1.78 0 0 1 0 3.56Zm4.1 1.6h2.88v1.56h.04c.4-.75 1.38-1.55 2.85-1.55 3.05 0 3.61 2 3.61 4.6v6.79h-3v-6.02c0-1.44-.03-3.28-2-3.28-2 0-2.3 1.56-2.3 3.17v6.13H9.5Z" />
+    </svg>
+  );
+}
+
+export function IconYouTube(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path
+        fillRule="evenodd"
+        d="M20.4 6.3a2.9 2.9 0 0 1 2.05 2.06c.35 1.4.4 3.1.4 3.64s-.05 2.24-.4 3.64a2.9 2.9 0 0 1-2.05 2.06c-1.62.4-8.4.4-8.4.4s-6.78 0-8.4-.4A2.9 2.9 0 0 1 1.55 15.6C1.2 14.2 1.15 12.5 1.15 12s.05-2.24.4-3.64A2.9 2.9 0 0 1 3.6 6.3c1.62-.4 8.4-.4 8.4-.4s6.78 0 8.4.4Zm-11.6 3.9 5.6 3.8-5.6 3.8Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+export function IconX(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path
+        fillRule="evenodd"
+        d="M17.2 3.6h2.94l-6.42 7.34 7.55 9.46h-5.91l-4.63-6.05-5.3 6.05H2.48l6.86-7.85L2.1 3.6h6.06l4.19 5.54Zm-1.04 14.5h1.63L7.5 5.24H5.75Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 /**
  * Properties Pak brand mark — a green canopy roof over a solid body with a
  * navy doorway on a deep-navy tile. Vector-only so it stays crisp from 16px
