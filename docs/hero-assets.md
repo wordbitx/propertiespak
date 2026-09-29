@@ -9,3 +9,11 @@ A 3600 × 2400 source was used to produce native-resolution, locally served AVIF
 The hero uses representative architectural photography rather than a photograph of a specific advertised listing. No listing price or property-specific claim is embedded in the hero. Uploaded listing photography is independent and remains unchanged.
 
 Responsive `picture` sources select mobile crops below 768px and serve AVIF where supported with WebP fallback. The hero is eager-loaded with high fetch priority and explicit dimensions. The previous hero assets remain available for existing references.
+
+## Commercial section photography
+
+"Spaces Built for Business" on the homepage uses two locally served images:
+`public/images/commercial-tower-{800,1200}.{avif,webp}` (glass office tower at dusk) and
+`public/images/commercial-lobby-{480,960}.{avif,webp}` (marble and walnut reception lobby).
+Both are AI-generated artwork. They are representative, not photographs of a specific
+listing, and are never upscaled past their 1200 px / 1312 px sources.
