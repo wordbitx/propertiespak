@@ -140,8 +140,10 @@ export const POPULAR_AREAS = [
 ] as const;
 
 /**
- * High-intent searches surfaced in the hero and on listing pages.
- * Every entry points at a real, indexable internal landing page.
+ * High-intent searches surfaced in the header search panel and on listing pages.
+ * Every entry points at a real, indexable internal landing page. The homepage
+ * hero deliberately stays free of them — the market hub and keyword layers below
+ * carry the internal links instead.
  */
 export const POPULAR_SEARCHES = [
   { label: "Houses for Sale in Lahore", href: "/houses-for-sale-in-lahore" },

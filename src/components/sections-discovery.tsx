@@ -281,7 +281,7 @@ export function FeaturedProperties({ properties }: { properties: Property[] }) {
 export function NewProjectsSection({ projects }: { projects: Project[] }) {
   if (projects.length === 0) return null;
   return (
-    <Section tone="mist" id="projects">
+    <Section tone="light" id="projects">
       <div className="ui-container">
         <SectionHeading
           eyebrow="New developments"

@@ -114,6 +114,12 @@ export const properties = pgTable(
     listedByWhatsapp: text("listed_by_whatsapp").notNull().default(""),
     /** Registered account that owns this listing (null for platform inventory). */
     listedByUserId: integer("listed_by_user_id"),
+    /**
+     * Owner visibility switch. An owner can pull a published listing off the
+     * public site from their dashboard and restore it later; unpublished rows
+     * stay in the database with their photos and enquiries intact.
+     */
+    published: boolean("published").notNull().default(true),
     views: integer("views").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

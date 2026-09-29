@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { IconArrowRight, IconCalendar, IconCheck, IconChevronDown, IconMail, IconPhone, IconSearch, IconWhatsApp } from "@/components/icons";
+import { IconArrowRight, IconCalendar, IconCheck, IconChevronDown, IconClose, IconMail, IconPhone, IconSearch, IconTrash, IconWhatsApp } from "@/components/icons";
 import { contactDigits, INQUIRY_LABELS, INQUIRY_STATUSES, INQUIRY_TYPES, type InboxItem, type InboxResponse, type InquiryStatus } from "@/lib/inquiry-options";
 
 function timestamp(value: string) {
@@ -94,6 +94,9 @@ function InquiryDetails({ item, onSaved }: { item: InboxItem; onSaved: () => voi
 
 export function AdminInquiryInbox({ onNewCount }: { onNewCount?: (count: number) => void }) {
   const [data, setData] = useState<InboxResponse | null>(null);
+  /** Enquiry awaiting delete confirmation, and the one currently being deleted. */
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
@@ -123,6 +126,27 @@ export function AdminInquiryInbox({ onNewCount }: { onNewCount?: (count: number)
   }, [query, type, status, page, tick, onNewCount]);
 
   function refreshed() { setNotice("Follow-up saved."); setTick((value) => value + 1); }
+
+  /** Admin-only permanent delete of a client enquiry. */
+  async function deleteInquiry(id: number) {
+    setDeletingId(id);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/admin/inquiries/${id}`, { method: "DELETE" });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) throw new Error(payload.error || "Could not delete this enquiry.");
+      setNotice("Enquiry deleted permanently.");
+      setConfirmId(null);
+      // The whole page of results shifts up after a delete, so start from page 1.
+      if (page !== 1) setPage(1);
+      setTick((value) => value + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete this enquiry.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
   const stats = data?.stats;
 
   return (
@@ -181,11 +205,31 @@ export function AdminInquiryInbox({ onNewCount }: { onNewCount?: (count: number)
                     {item.type === "visit" && item.preferredDate && <p className="mt-2 flex items-center gap-1.5 text-[0.75rem] font-semibold text-forest-700"><IconCalendar className="h-4 w-4" />Requested visit: {item.preferredDate}</p>}
                   </div>
                   <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end"><p className="text-[0.6875rem] text-ink-muted">{timestamp(item.createdAt)} PKT</p>
-                    <button type="button" aria-expanded={expanded} aria-controls={`inquiry-details-${item.id}`} onClick={() => setOpenId(expanded ? null : item.id)} className="btn btn-outline px-3.5 py-2.5 text-[0.8125rem]">
-                      {expanded ? "Hide details" : "View full details"}<IconChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" aria-expanded={expanded} aria-controls={`inquiry-details-${item.id}`} onClick={() => setOpenId(expanded ? null : item.id)} className="btn btn-outline px-3.5 py-2.5 text-[0.8125rem]">
+                        {expanded ? "Hide details" : "View full details"}<IconChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                      </button>
+                      <button type="button" onClick={() => setConfirmId(confirmId === item.id ? null : item.id)} aria-label={`Delete enquiry from ${item.name}`} className="btn btn-outline px-3.5 py-2.5 text-[0.8125rem] text-red-700 hover:border-red-300 hover:bg-red-50">
+                        <IconTrash className="h-4 w-4" />Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
+                {confirmId === item.id && (
+                  <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-red-200 bg-red-50 p-3">
+                    <p className="text-[0.8125rem] font-medium text-red-900">
+                      Delete this enquiry permanently? The client&rsquo;s message and follow-up notes cannot be recovered.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => deleteInquiry(item.id)} disabled={deletingId === item.id} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-red-700 px-3 py-1.5 font-sans text-[0.75rem] font-semibold text-white transition-colors hover:bg-red-800 disabled:opacity-60">
+                        <IconTrash className="h-3.5 w-3.5" />{deletingId === item.id ? "Deleting…" : "Yes, delete it"}
+                      </button>
+                      <button type="button" onClick={() => setConfirmId(null)} disabled={deletingId === item.id} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-soft bg-white px-3 py-1.5 font-sans text-[0.75rem] font-semibold text-navy-900 transition-colors hover:border-navy-200 disabled:opacity-60">
+                        <IconClose className="h-3.5 w-3.5" />Keep it
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {expanded && <div id={`inquiry-details-${item.id}`}><InquiryDetails item={item} onSaved={refreshed} /></div>}
               </article>
             );
