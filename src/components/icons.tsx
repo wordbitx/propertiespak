@@ -302,6 +302,14 @@ export function IconYouTube(props: IconProps) {
   );
 }
 
+export function IconTikTok(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M16.5 2.6c.4 2.1 1.7 3.3 3.9 3.5v2.7c-1.4.05-2.7-.35-3.9-1.15v6.5c0 3.9-2.9 6.35-6.2 5.75-2.5-.45-4.1-2.5-3.95-5.15.15-2.7 2.4-4.6 5.1-4.35.3.03.5.05.75.12v2.85c-.25-.08-.5-.13-.75-.15-1.3-.1-2.35.75-2.4 2-.05 1.2.85 2.1 2.05 2.05 1.2-.05 2.05-.95 2.05-2.3V2.6Z" />
+    </svg>
+  );
+}
+
 export function IconX(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
@@ -316,26 +324,31 @@ export function IconX(props: IconProps) {
 
 /**
  * Properties Pak brand mark — a green canopy roof over a solid body with a
- * navy doorway on a deep-navy tile. Vector-only so it stays crisp from 16px
- * favicons up to the 512px app icon.
+ * navy doorway on a deep-navy tile. The roof uses the site's own greens
+ * (forest-700 → forest-500), the eave casts a hairline shadow so the mark keeps
+ * depth at large sizes, and the tile carries a 9% inner ring so it stays crisp
+ * on light backgrounds. Vector-only so it reads cleanly from 16px favicons up
+ * to the 512px app icon.
  */
 export function IconLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id="ppMarkBg" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="ppMarkTile" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#0B355C" />
           <stop offset="1" stopColor="#04182C" />
         </linearGradient>
-        <linearGradient id="ppMarkRoof" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#16B364" />
-          <stop offset="1" stopColor="#4ADE80" />
+        <linearGradient id="ppMarkRoof" x1="0.15" y1="0" x2="0.85" y2="1">
+          <stop offset="0" stopColor="#0D8A4C" />
+          <stop offset="1" stopColor="#22C55E" />
         </linearGradient>
       </defs>
-      <rect width="48" height="48" rx="13" fill="url(#ppMarkBg)" />
-      <path d="M24 12.4 9.9 24.9a1.95 1.95 0 0 0 1.29 3.38h25.62a1.95 1.95 0 0 0 1.29-3.38Z" fill="url(#ppMarkRoof)" />
-      <path d="M15.3 27.3h17.4v8.1a1.95 1.95 0 0 1-1.95 1.95H17.25A1.95 1.95 0 0 1 15.3 35.4Z" fill="#FFFFFF" />
-      <path d="M21.2 37.35v-5.5a1.55 1.55 0 0 1 1.55-1.55h2.5a1.55 1.55 0 0 1 1.55 1.55v5.5Z" fill="#0B355C" />
+      <rect width="48" height="48" rx="13.5" fill="url(#ppMarkTile)" />
+      <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" strokeOpacity="0.09" strokeWidth="1.2" />
+      <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#ppMarkRoof)" />
+      <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF" />
+      <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill="#04182C" opacity="0.16" />
+      <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill="#0B355C" />
     </svg>
   );
 }

@@ -35,15 +35,18 @@ export const SITE = {
   },
   /**
    * Social profiles for the parent company, WordbitX. The footer renders a
-   * "Follow WordbitX" row containing whichever platforms have a URL below;
-   * leave a value empty to hide that platform.
+   * "Follow WordbitX" row containing whichever platforms have a URL below
+   * (see SITE.companySocialLinks); leave a value empty to hide that platform.
+   * Handles verified against the company's own GitHub organisation
+   * (github.com/wordbitx) and X profile.
    */
   companySocial: {
     facebook: "",
-    instagram: "",
-    linkedin: "",
-    youtube: "",
-    x: "",
+    instagram: "https://www.instagram.com/wordbitx",
+    linkedin: "https://www.linkedin.com/company/wordbitx",
+    youtube: "https://www.youtube.com/@wordbitx",
+    x: "https://x.com/wordbitx",
+    tiktok: "https://www.tiktok.com/@wordbitx",
   },
   backlinks: {
     wordbitxHome: "https://wordbitxtech.com/",
@@ -52,6 +55,14 @@ export const SITE = {
     officialPlatform: "https://propertiespak.com",
   },
 };
+
+/**
+ * Published WordbitX profile URLs — platforms without a link are omitted, so
+ * the footer row and structured data only ever reference live accounts.
+ */
+export const COMPANY_SOCIAL_LINKS: string[] = Object.values(SITE.companySocial).filter(
+  (url) => url.trim().length > 0,
+);
 
 export const NAV_LINKS = [
   { label: "Home", href: "/" },

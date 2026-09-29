@@ -67,6 +67,10 @@ Rich results: paste any listing, project or guide URL into
 6. **Brand properties** — publish the Facebook, Instagram, LinkedIn, YouTube and X
    profiles and paste their URLs into `SITE.social` in `src/lib/constants.ts`
    (they are already wired into `sameAs` structured data and the footer).
+   WordbitX company profiles live in `SITE.companySocial` (same file): the footer
+   renders a "Follow WordbitX" row for every platform that has a URL, and the
+   same list feeds the parent Organization `sameAs`. Platforms are omitted when
+   the value is empty, so a missing account never renders as a dead link.
 
 ## Part 3 — Content plan (this is what wins rankings)
 

@@ -1,16 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Properties Pak">
   <defs>
-    <linearGradient id="ppBg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="ppTile" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0B355C" />
       <stop offset="1" stop-color="#04182C" />
     </linearGradient>
-    <linearGradient id="ppRoof" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#16B364" />
-      <stop offset="1" stop-color="#4ADE80" />
+    <linearGradient id="ppRoof" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#0D8A4C" />
+      <stop offset="1" stop-color="#22C55E" />
     </linearGradient>
   </defs>
-  <rect width="48" height="48" rx="13" fill="url(#ppBg)" />
-  <path d="M24 12.4 9.9 24.9a1.95 1.95 0 0 0 1.29 3.38h25.62a1.95 1.95 0 0 0 1.29-3.38Z" fill="url(#ppRoof)" />
-  <path d="M15.3 27.3h17.4v8.1a1.95 1.95 0 0 1-1.95 1.95H17.25A1.95 1.95 0 0 1 15.3 35.4Z" fill="#FFFFFF" />
-  <path d="M21.2 37.35v-5.5a1.55 1.55 0 0 1 1.55-1.55h2.5a1.55 1.55 0 0 1 1.55 1.55v5.5Z" fill="#0B355C" />
+  <rect width="48" height="48" rx="13.5" fill="url(#ppTile)" />
+  <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="1.2" />
+  <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#ppRoof)" />
+  <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF" />
+  <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill="#04182C" opacity="0.16" />
+  <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill="#0B355C" />
 </svg>

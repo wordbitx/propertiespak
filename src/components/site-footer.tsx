@@ -6,6 +6,7 @@ import {
   IconInstagram,
   IconLinkedIn,
   IconMail,
+  IconTikTok,
   IconX,
   IconYouTube,
 } from "@/components/icons";
@@ -20,6 +21,7 @@ const COMPANY_SOCIAL = [
   { platform: "LinkedIn", href: SITE.companySocial.linkedin, Icon: IconLinkedIn },
   { platform: "YouTube", href: SITE.companySocial.youtube, Icon: IconYouTube },
   { platform: "X", href: SITE.companySocial.x, Icon: IconX },
+  { platform: "TikTok", href: SITE.companySocial.tiktok, Icon: IconTikTok },
 ].filter((entry) => entry.href.trim().length > 0);
 
 const COLUMNS = [

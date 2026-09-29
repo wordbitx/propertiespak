@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE } from "@/lib/constants";
+import { COMPANY_SOCIAL_LINKS, SITE } from "@/lib/constants";
 import { ogCard, ogImage } from "@/lib/images";
 import type { Post, Project, Property } from "@/db/schema";
 import { formatArea, formatPrice } from "@/lib/format";
@@ -149,11 +149,7 @@ export function organizationJsonLd() {
       url: SITE.companyUrl,
       email: "info@wordbitxtech.com",
       telephone: SITE.companyPhone,
-      sameAs: [
-        "https://www.linkedin.com/",
-        "https://www.facebook.com/",
-        "https://www.instagram.com/",
-      ],
+      sameAs: COMPANY_SOCIAL_LINKS,
       address: {
         "@type": "PostalAddress",
         addressCountry: "PK",
