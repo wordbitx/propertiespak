@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setUserVerification } from "@/lib/queries";
+import { clearVerificationRequest, setUserVerification } from "@/lib/queries";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +22,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   try {
     const body = (await request.json()) as { verified?: boolean; action?: string };
+
+    // Reviewing a request (approved or rejected) clears it from the queue.
+    if (body.action === "clear-request") {
+      const cleared = await clearVerificationRequest(userId);
+      if (!cleared) {
+        return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     const verified =
       typeof body.verified === "boolean"
         ? body.verified

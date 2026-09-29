@@ -6,7 +6,6 @@ import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import { Calculators } from "@/components/calculators";
 import {
-  CategoryGrid,
   CityDiscovery,
   CommercialSection,
   FeaturedProperties,
@@ -17,10 +16,12 @@ import {
 } from "@/components/sections-discovery";
 
 import { CtaSection, InvestmentSection, TestimonialsSection, WhyEstateWx } from "@/components/sections-editorial";
+import { DealersSlider } from "@/components/dealers-slider";
 import { VerifiedDealersSection } from "@/components/dealers-section";
 import {
   getCities,
   getCityListingCounts,
+  getDealerShowcase,
   getDealers,
   getFeaturedProperties,
   getMapProperties,
@@ -74,6 +75,7 @@ export default async function HomePage() {
     testimonials,
     verifiedDealers,
     allDealers,
+    showcaseDealers,
   ] = await Promise.all([
     getPlatformStats(),
     getFeaturedProperties(6),
@@ -89,6 +91,7 @@ export default async function HomePage() {
     getTestimonials(),
     getDealers({ verifiedOnly: true, limit: 4 }),
     getDealers({ limit: 60 }),
+    getDealerShowcase(48),
   ]);
 
   const mapProperties: MapProperty[] = mapRows.map((property) => ({
@@ -114,8 +117,8 @@ export default async function HomePage() {
     <>
       <Hero stats={stats} />
 
-      {/* Browse by category sits directly under the hero, above property discovery */}
-      <CategoryGrid />
+      {/* Dealer slider takes the place of the old "Browse by intent" tiles */}
+      <DealersSlider dealers={showcaseDealers} />
 
       {/* Property discovery */}
       <Section tone="light" id="explore">
@@ -149,10 +152,11 @@ export default async function HomePage() {
       </Section>
 
       <FeaturedProperties properties={featured} />
-      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <CommercialSection properties={commercialListings.items} />
       <NewProjectsSection projects={projects} />
       <CityDiscovery cities={cities} counts={cityCounts} />
+      {/* Moved down: Discover Properties by Location now sits directly above the dealer section */}
+      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
       {/* Smart calculators */}

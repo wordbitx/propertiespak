@@ -186,6 +186,16 @@ async function ensureSchema() {
       bio text NOT NULL DEFAULT '',
       whatsapp text NOT NULL DEFAULT '',
       avatar_url text NOT NULL DEFAULT '',
+      designation text NOT NULL DEFAULT '',
+      office_address text NOT NULL DEFAULT '',
+      company_phone text NOT NULL DEFAULT '',
+      company_website text NOT NULL DEFAULT '',
+      company_logo text NOT NULL DEFAULT '',
+      experience text NOT NULL DEFAULT '',
+      areas text NOT NULL DEFAULT '',
+      verification_note text NOT NULL DEFAULT '',
+      profile_completed_at timestamptz,
+      verification_requested_at timestamptz,
       is_verified boolean NOT NULL DEFAULT false,
       verified_at timestamptz,
       created_at timestamptz NOT NULL DEFAULT now()
@@ -198,6 +208,16 @@ async function ensureSchema() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS bio text NOT NULL DEFAULT '';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp text NOT NULL DEFAULT '';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS designation text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS office_address text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_phone text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_website text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_logo text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS experience text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS areas text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_note text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_completed_at timestamptz;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_requested_at timestamptz;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_at timestamptz;
     CREATE INDEX IF NOT EXISTS users_slug_idx ON users (slug);
@@ -363,6 +383,13 @@ async function seedDealerAccounts() {
         agency: dealer.agency,
         bio: dealer.bio,
         whatsapp: phoneDigits,
+        designation: dealer.designation,
+        experience: dealer.experience,
+        areas: dealer.areas,
+        officeAddress: dealer.officeAddress,
+        companyPhone: dealer.companyPhone,
+        companyWebsite: dealer.companyWebsite,
+        profileCompletedAt: new Date(),
         isVerified: dealer.isVerified,
         verifiedAt: dealer.isVerified ? new Date() : null,
       });
@@ -381,6 +408,13 @@ async function seedDealerAccounts() {
         agency: dealer.agency,
         bio: dealer.bio,
         whatsapp: phoneDigits,
+        designation: dealer.designation,
+        experience: dealer.experience,
+        areas: dealer.areas,
+        officeAddress: dealer.officeAddress,
+        companyPhone: dealer.companyPhone,
+        companyWebsite: dealer.companyWebsite,
+        profileCompletedAt: new Date(),
       })
       .where(eq(users.email, dealer.email));
   }

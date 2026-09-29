@@ -8,13 +8,14 @@ import { IconCheck, IconClose, IconSearch } from "@/components/icons";
 import type { DealerProfile } from "@/lib/queries";
 import { formatDate } from "@/lib/format";
 
-type Filter = "all" | "verified" | "unverified" | "dealers";
+type Filter = "all" | "verified" | "unverified" | "dealers" | "requested";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "All accounts" },
   { key: "dealers", label: "Has listings" },
   { key: "verified", label: "Verified" },
   { key: "unverified", label: "Not verified" },
+  { key: "requested", label: "Verification requests" },
 ];
 
 /**
@@ -25,7 +26,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 export function AdminUsersPanel() {
   const router = useRouter();
   const [items, setItems] = useState<DealerProfile[]>([]);
-  const [counts, setCounts] = useState({ total: 0, verified: 0, dealers: 0 });
+  const [counts, setCounts] = useState({ total: 0, verified: 0, dealers: 0, profiles: 0, requested: 0 });
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ export function AdminUsersPanel() {
       const payload = (await response.json()) as {
         ok?: boolean;
         items?: DealerProfile[];
-        counts?: { total: number; verified: number; dealers: number };
+        counts?: { total: number; verified: number; dealers: number; profiles: number; requested: number };
         error?: string;
       };
       if (!response.ok || !payload.ok) {
@@ -53,7 +54,7 @@ export function AdminUsersPanel() {
         return;
       }
       setItems(payload.items ?? []);
-      setCounts(payload.counts ?? { total: 0, verified: 0, dealers: 0 });
+      setCounts(payload.counts ?? { total: 0, verified: 0, dealers: 0, profiles: 0, requested: 0 });
     } catch {
       setError("Network error. Please refresh and try again.");
     } finally {
@@ -93,13 +94,39 @@ export function AdminUsersPanel() {
     }
   }
 
+  async function clearRequest(user: DealerProfile) {
+    setActing(user.id);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear-request" }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) {
+        setError(payload.error ?? "Could not clear the request.");
+        return;
+      }
+      setNotice(`Verification request for ${user.name} marked as reviewed.`);
+      await load();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setActing(null);
+    }
+  }
+
   const visible = items.filter((user) => {
     if (filter === "verified" && !user.isVerified) return false;
     if (filter === "unverified" && user.isVerified) return false;
     if (filter === "dealers" && user.listings === 0) return false;
+    if (filter === "requested" && !(user.verificationRequestedAt && !user.isVerified)) return false;
     if (query.trim()) {
       const term = query.trim().toLowerCase();
-      const haystack = `${user.name} ${user.email} ${user.cityName} ${user.agency}`.toLowerCase();
+      const haystack =
+        `${user.name} ${user.email} ${user.cityName} ${user.agency} ${user.designation} ${user.areas} ${user.whatsapp} ${user.companyPhone}`.toLowerCase();
       if (!haystack.includes(term)) return false;
     }
     return true;
@@ -121,6 +148,14 @@ export function AdminUsersPanel() {
           <p className="mt-1 flex items-center gap-2 font-sans text-[1.5rem] font-bold text-navy-900">
             {counts.verified} <BlueTick className="h-5 w-5" />
           </p>
+        </div>
+        <div className="rounded-panel border border-soft bg-white px-5 py-4">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink-muted">Profiles completed</p>
+          <p className="mt-1 font-sans text-[1.5rem] font-bold text-navy-900">{counts.profiles}</p>
+        </div>
+        <div className={`rounded-panel border px-5 py-4 ${counts.requested > 0 ? "border-amber-300 bg-amber-50" : "border-soft bg-white"}`}>
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink-muted">Verification requests</p>
+          <p className="mt-1 font-sans text-[1.5rem] font-bold text-navy-900">{counts.requested}</p>
         </div>
       </div>
 
@@ -238,6 +273,79 @@ export function AdminUsersPanel() {
                   </button>
                 </div>
               </div>
+
+              <div className="mt-4 grid gap-x-6 gap-y-3 border-t border-soft pt-4 text-[0.75rem] sm:grid-cols-2 xl:grid-cols-3">
+                <div>
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Profile</p>
+                  <p className="mt-1 text-navy-900">
+                    {user.profileCompletedAt ? `Completed ${formatDate(user.profileCompletedAt)}` : "Not completed"}
+                    {user.verificationRequestedAt && !user.isVerified
+                      ? ` · verification requested ${formatDate(user.verificationRequestedAt)}`
+                      : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Agency / designation</p>
+                  <p className="mt-1 text-navy-900">
+                    {user.agency || "—"}
+                    {user.designation ? ` · ${user.designation}` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">WhatsApp / company phone</p>
+                  <p className="mt-1 text-navy-900">
+                    {user.whatsapp || "—"}
+                    {user.companyPhone ? ` · ${user.companyPhone}` : ""}
+                  </p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Areas you deal in</p>
+                  <p className="mt-1 text-navy-900">{user.areas || "—"}</p>
+                </div>
+                <div>
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Experience</p>
+                  <p className="mt-1 text-navy-900">{user.experience || "—"}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Office address</p>
+                  <p className="mt-1 text-navy-900">{user.officeAddress || "—"}</p>
+                </div>
+                <div>
+                  <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Company website</p>
+                  <p className="mt-1 break-words text-navy-900">
+                    {user.companyWebsite ? (
+                      <a href={user.companyWebsite} target="_blank" rel="noopener noreferrer" className="font-semibold text-forest-700 hover:underline">
+                        {user.companyWebsite}
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </p>
+                </div>
+                {(user.bio || user.verificationNote) && (
+                  <div className="sm:col-span-2 xl:col-span-3">
+                    <p className="font-semibold uppercase tracking-[0.1em] text-ink-muted">Bio / verification notes</p>
+                    {user.bio && <p className="mt-1 text-navy-900">{user.bio}</p>}
+                    {user.verificationNote && <p className="mt-1 text-ink-muted">Verification: {user.verificationNote}</p>}
+                  </div>
+                )}
+              </div>
+
+              {user.verificationRequestedAt && !user.isVerified && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+                  <p className="text-[0.8125rem] font-medium text-amber-800">
+                    This account asked to be verified{user.verificationNote ? " and supplied notes above" : ""}.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={acting === user.id}
+                    onClick={() => clearRequest(user)}
+                    className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-amber-800 hover:border-amber-500"
+                  >
+                    Mark as reviewed
+                  </button>
+                </div>
+              )}
 
               {user.listings > 0 && (
                 <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-soft pt-4">

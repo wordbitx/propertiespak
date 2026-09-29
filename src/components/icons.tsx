@@ -302,6 +302,23 @@ export function IconYouTube(props: IconProps) {
   );
 }
 
+export function IconPlay(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M8.5 5.4a1 1 0 0 1 1.52-.85l8.1 5.6a1 1 0 0 1 0 1.7l-8.1 5.6A1 1 0 0 1 8.5 16.6Z" />
+    </svg>
+  );
+}
+
+export function IconPause(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>
+      <rect x="7" y="5" width="3.6" height="14" rx="1.2" />
+      <rect x="13.4" y="5" width="3.6" height="14" rx="1.2" />
+    </svg>
+  );
+}
+
 export function IconTikTok(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" {...props}>

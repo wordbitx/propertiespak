@@ -239,6 +239,27 @@
       box-shadow 0.2s ease;
   }
 
+  /* Consistent form label used by the dealer profile setup form. */
+  /* Dealer slider: hidden scrollbar, snap-free continuous motion. */
+  .dealer-slider-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+  }
+  .dealer-slider-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
   .field:hover {
     border-color: #cbd8e3;
   }

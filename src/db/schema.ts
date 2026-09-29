@@ -190,6 +190,24 @@ export const users = pgTable("users", {
   bio: text("bio").notNull().default(""),
   whatsapp: text("whatsapp").notNull().default(""),
   avatarUrl: text("avatar_url").notNull().default(""),
+  /* ---- professional profile (dealer setup) ---- */
+  /** Job title shown on the dealer profile, e.g. "Sales Director". */
+  designation: text("designation").notNull().default(""),
+  /** Street / office address entered by the account owner. */
+  officeAddress: text("office_address").notNull().default(""),
+  companyPhone: text("company_phone").notNull().default(""),
+  companyWebsite: text("company_website").notNull().default(""),
+  companyLogo: text("company_logo").notNull().default(""),
+  /** Free-text experience line, e.g. "9 years in DHA and Bahria Town". */
+  experience: text("experience").notNull().default(""),
+  /** Comma-separated areas the account deals in. */
+  areas: text("areas").notNull().default(""),
+  /** Documents or notes supplied with a verification request. */
+  verificationNote: text("verification_note").notNull().default(""),
+  /** Set when the account owner finishes the profile setup form. */
+  profileCompletedAt: timestamp("profile_completed_at", { withTimezone: true }),
+  /** Set when the account asks to be reviewed for the blue tick. */
+  verificationRequestedAt: timestamp("verification_requested_at", { withTimezone: true }),
   /** Blue tick state — set only from the admin workspace. */
   isVerified: boolean("is_verified").notNull().default(false),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),

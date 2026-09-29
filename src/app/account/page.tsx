@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { IconArrowRight, IconCalendar, IconMail, IconPhone, IconShield } from "@/components/icons";
+import { IconArrowRight, IconCalendar, IconMail, IconPhone, IconShield, IconUser } from "@/components/icons";
 import { FavoritesSync } from "@/components/favorites-sync";
 import { PageHero } from "@/components/page-hero";
+import { ProfileSetupDialog, type ProfileUser } from "@/components/profile-setup";
 import { PropertyRow } from "@/components/property-card";
 import { Section } from "@/components/section";
 import { getSessionUser } from "@/lib/auth";
@@ -46,6 +47,30 @@ export default async function AccountPage() {
   ]);
   // Approved submissions already appear as published listings, so only the ones
   // still in the admin queue (or sent back) need their own rows here.
+  const profileUser: ProfileUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    whatsapp: user.whatsapp,
+    bio: user.bio,
+    experience: user.experience,
+    areas: user.areas,
+    avatarUrl: user.avatarUrl,
+    agency: user.agency,
+    designation: user.designation,
+    officeAddress: user.officeAddress,
+    citySlug: user.citySlug,
+    cityName: user.cityName,
+    companyPhone: user.companyPhone,
+    companyWebsite: user.companyWebsite,
+    companyLogo: user.companyLogo,
+    verificationNote: user.verificationNote,
+    isVerified: user.isVerified,
+    profileCompletedAt: user.profileCompletedAt ? user.profileCompletedAt.toISOString() : null,
+    verificationRequestedAt: user.verificationRequestedAt ? user.verificationRequestedAt.toISOString() : null,
+  };
+
   const openSubmissions = submissions.filter((item) => item.status !== "approved");
   const pendingCount = openSubmissions.filter((item) => item.status === "pending").length;
   const rejectedCount = openSubmissions.filter((item) => item.status === "rejected").length;
@@ -61,6 +86,13 @@ export default async function AccountPage() {
           { name: "Account", href: "/account" },
         ]}
       />
+
+      {/* First-login prompt: hidden button, auto-opens while the profile is unfinished. */}
+      {!user.profileCompletedAt && (
+        <div className="hidden">
+          <ProfileSetupDialog user={profileUser} autoOpen label="Complete Profile" />
+        </div>
+      )}
 
       <Section tone="light">
         <div className="ui-container">
@@ -92,6 +124,39 @@ export default async function AccountPage() {
                     Sign out
                   </button>
                 </form>
+              </div>
+
+              <div className="mt-5 rounded-panel border border-soft bg-white p-5 shadow-soft">
+                <p className="flex flex-wrap items-center gap-2 font-sans text-[0.9375rem] font-semibold text-navy-900">
+                  <IconUser className="h-4 w-4 text-forest-600" />
+                  Professional profile
+                  {user.profileCompletedAt ? (
+                    <span className="rounded-md bg-forest-50 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-forest-700">
+                      Complete
+                    </span>
+                  ) : (
+                    <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-amber-700">
+                      Incomplete
+                    </span>
+                  )}
+                </p>
+                <dl className="mt-3 space-y-2 text-[0.8125rem] text-ink-muted">
+                  <div>
+                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em]">Agency</dt>
+                    <dd className="text-navy-900">{user.agency || "Not set"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em]">Areas you deal in</dt>
+                    <dd className="text-navy-900">{user.areas || "Not set"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em]">City</dt>
+                    <dd className="text-navy-900">{user.cityName || "Not set"}</dd>
+                  </div>
+                </dl>
+                <div className="mt-4">
+                  <ProfileSetupDialog user={profileUser} />
+                </div>
               </div>
 
               <div

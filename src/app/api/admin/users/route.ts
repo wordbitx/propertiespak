@@ -18,6 +18,8 @@ export async function GET() {
         total: users.length,
         verified: users.filter((user) => user.isVerified).length,
         dealers: users.filter((user) => user.listings > 0).length,
+        profiles: users.filter((user) => user.profileCompletedAt).length,
+        requested: users.filter((user) => user.verificationRequestedAt && !user.isVerified).length,
       },
     });
   } catch (error) {

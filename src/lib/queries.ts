@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, getTableColumns, gte, ilike, inArray, lte, ne, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, gte, ilike, inArray, isNotNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import {
@@ -431,6 +431,16 @@ const dealerAggregates = {
   agency: users.agency,
   bio: users.bio,
   avatarUrl: users.avatarUrl,
+  designation: users.designation,
+  officeAddress: users.officeAddress,
+  companyPhone: users.companyPhone,
+  companyWebsite: users.companyWebsite,
+  companyLogo: users.companyLogo,
+  experience: users.experience,
+  areas: users.areas,
+  verificationNote: users.verificationNote,
+  profileCompletedAt: users.profileCompletedAt,
+  verificationRequestedAt: users.verificationRequestedAt,
   isVerified: users.isVerified,
   verifiedAt: users.verifiedAt,
   createdAt: users.createdAt,
@@ -640,4 +650,100 @@ export async function getListingAreasByCity() {
     .groupBy(properties.citySlug, properties.locationArea)
     .orderBy(desc(sql`count(*)`));
   return rows;
+}
+
+/**
+ * Dealer cards for the homepage slider. Includes every account that either
+ * publishes listings or has completed a professional profile, so a new signup
+ * appears as soon as they finish setup — before that the account stays private.
+ */
+export async function getDealerShowcase(limit = 60) {
+  await ensureSeeded();
+  const rows = await db
+    .select(dealerAggregates)
+    .from(users)
+    .leftJoin(properties, eq(properties.listedByUserId, users.id))
+    .where(or(isNotNull(users.profileCompletedAt), eq(users.role, "dealer"), eq(users.role, "agency")))
+    .groupBy(users.id)
+    .orderBy(desc(users.isVerified), desc(sql`count(${properties.id})`), asc(users.name))
+    .limit(Math.max(1, Math.min(60, limit)));
+  return rows as unknown as DealerProfile[];
+}
+
+/** Fields the account owner can edit from the dashboard. */
+export type DealerProfileInput = {
+  name?: string;
+  whatsapp?: string;
+  bio?: string;
+  experience?: string;
+  areas?: string;
+  avatarUrl?: string;
+  agency?: string;
+  designation?: string;
+  officeAddress?: string;
+  citySlug?: string;
+  cityName?: string;
+  companyPhone?: string;
+  companyWebsite?: string;
+  companyLogo?: string;
+  verificationNote?: string;
+  markComplete?: boolean;
+  requestVerification?: boolean;
+};
+
+const PROFILE_TEXT_FIELDS = [
+  "name",
+  "whatsapp",
+  "bio",
+  "experience",
+  "areas",
+  "avatarUrl",
+  "agency",
+  "designation",
+  "officeAddress",
+  "citySlug",
+  "cityName",
+  "companyPhone",
+  "companyWebsite",
+  "companyLogo",
+  "verificationNote",
+] as const;
+
+/** Saves the professional profile; only the account owner can call this. */
+export async function updateDealerProfile(userId: number, input: DealerProfileInput) {
+  await ensureSeeded();
+  const patch: Record<string, unknown> = {};
+
+  for (const field of PROFILE_TEXT_FIELDS) {
+    const value = input[field];
+    if (typeof value !== "string") continue;
+    const trimmed = value.trim();
+    // Never blank the account name — it is required and shown across the site.
+    if (field === "name" && trimmed.length < 2) continue;
+    patch[field] = trimmed.slice(0, 600);
+  }
+  // An account that fills in the dealer form becomes a dealer, so their profile
+  // can be linked from listings and the dealer directory.
+  if (Object.keys(patch).length > 0) {
+    const current = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+    if (current[0]?.role === "member") patch.role = "dealer";
+  }
+  if (input.markComplete) patch.profileCompletedAt = new Date();
+  if (input.requestVerification) patch.verificationRequestedAt = new Date();
+
+  if (Object.keys(patch).length === 0) return undefined;
+
+  const updated = await db.update(users).set(patch).where(eq(users.id, userId)).returning();
+  return updated[0];
+}
+
+/** Admin: clear a verification request after the account has been reviewed. */
+export async function clearVerificationRequest(userId: number) {
+  await ensureSeeded();
+  const updated = await db
+    .update(users)
+    .set({ verificationRequestedAt: null })
+    .where(eq(users.id, userId))
+    .returning({ id: users.id });
+  return updated[0];
 }
