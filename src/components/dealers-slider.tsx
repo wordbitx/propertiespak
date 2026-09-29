@@ -12,12 +12,13 @@ function initialsFor(name: string) {
 }
 
 /**
- * One card leaves the left edge every ~5 seconds. The duration grows with the
- * number of cards, so the belt always travels at the same calm speed regardless
- * of how many profiles exist.
+ * One card leaves the left edge every 3.5 seconds. The duration is counted over
+ * the cards actually on the belt (including the repeats that pad a short list),
+ * so the belt travels at the same calm speed regardless of how many profiles
+ * exist.
  */
-const SECONDS_PER_CARD = 5;
-const MIN_DURATION_SECONDS = 26;
+const SECONDS_PER_CARD = 3.5;
+const MIN_DURATION_SECONDS = 36;
 /** Cards rendered per belt pass — a short list is repeated so the belt stays seamless. */
 const MIN_GROUP_CARDS = 12;
 
@@ -45,7 +46,7 @@ export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
 
   const repeats = Math.max(1, Math.ceil(MIN_GROUP_CARDS / Math.max(1, dealers.length)));
   const belt = Array.from({ length: repeats }, () => dealers).flat();
-  const duration = Math.max(MIN_DURATION_SECONDS, Math.round(dealers.length * SECONDS_PER_CARD));
+  const duration = Math.max(MIN_DURATION_SECONDS, Math.round(belt.length * SECONDS_PER_CARD));
 
   /**
    * Fallback loop. The stylesheet animates the belt; if that animation is not
