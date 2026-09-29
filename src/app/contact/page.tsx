@@ -179,7 +179,7 @@ export default async function ContactPage() {
             </dl>
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.8125rem] text-ink-muted">
               <span>
-                Office: {SITE.companyAddress.street}, {SITE.companyAddress.city}, {SITE.companyAddress.country}
+                Based in: {SITE.companyAddress.city}, {SITE.companyAddress.country}
               </span>
               <a
                 href={SITE.companyUrl}

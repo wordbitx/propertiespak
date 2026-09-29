@@ -262,9 +262,9 @@ export default async function AboutPage() {
               <div className="flex items-start gap-2.5">
                 <IconShield className="mt-0.5 h-4 w-4 shrink-0 text-forest-600" />
                 <div>
-                  <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">Office</dt>
+                  <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">Location</dt>
                   <dd className="mt-1 text-navy-900">
-                    {SITE.companyAddress.street}, {SITE.companyAddress.city}, {SITE.companyAddress.country}
+                    {SITE.companyAddress.city}, {SITE.companyAddress.country}
                   </dd>
                 </div>
               </div>

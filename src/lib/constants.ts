@@ -13,13 +13,16 @@ export const SITE = {
   companyEmail: "info@propertiespak.com",
   companyPhone: "+92 325 1888841",
   companyPhoneUs: "+1 (929) 619-7699",
+  /**
+   * Public-facing location for the company. Only the city and country are
+   * published — the street/office address is deliberately not displayed.
+   */
   companyAddress: {
-    street: "Office #306, Taj Heights, Johar Town",
     city: "Lahore",
     country: "Pakistan",
   },
-  /** Company (not site) address for the vendor credit line. */
-  companyAddressLine: "Office #306, Taj Heights, Johar Town, Lahore, Pakistan",
+  /** Company (not site) location for the vendor credit line. */
+  companyAddressLine: "Lahore, Pakistan",
   locale: "en_PK",
   language: "en-PK",
   platformLabel: "Official real estate platform by WordbitX Software Company",

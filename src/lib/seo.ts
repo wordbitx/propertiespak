@@ -136,7 +136,6 @@ export function organizationJsonLd() {
     ],
     address: {
       "@type": "PostalAddress",
-      streetAddress: SITE.companyAddress.street,
       addressCountry: "PK",
       addressRegion: "Punjab",
       addressLocality: SITE.companyAddress.city,
@@ -157,7 +156,6 @@ export function organizationJsonLd() {
       ],
       address: {
         "@type": "PostalAddress",
-        streetAddress: SITE.companyAddress.street,
         addressCountry: "PK",
         addressRegion: "Punjab",
         addressLocality: SITE.companyAddress.city,

@@ -41,7 +41,7 @@ export function WordbitxSection() {
             <p className="mt-2 text-[0.8125rem] leading-6 text-white/65">Pakistan and international company enquiries.</p>
             <div className="mt-6"><WordbitxContacts light /></div>
             <a href={`mailto:${SITE.companyEmail}`} className="mt-5 flex min-h-11 items-center gap-2.5 text-[0.8125rem] text-white/85 hover:text-forest-400"><IconMail className="h-4 w-4 shrink-0 text-forest-400" /><span className="break-all">{SITE.companyEmail}</span></a>
-            <p className="mt-2 flex items-start gap-2.5 text-[0.75rem] leading-6 text-white/55"><IconPin className="mt-1 h-4 w-4 shrink-0 text-forest-400" /><span>{SITE.companyAddress.street}, {SITE.companyAddress.city}, {SITE.companyAddress.country}</span></p>
+            <p className="mt-2 flex items-start gap-2.5 text-[0.75rem] leading-6 text-white/55"><IconPin className="mt-1 h-4 w-4 shrink-0 text-forest-400" /><span>{SITE.companyAddress.city}, {SITE.companyAddress.country}</span></p>
             <p className="mt-5 border-t border-white/10 pt-4 text-[0.6875rem] leading-5 text-white/50">For a property enquiry, please use that listing’s owner or agent contact. These numbers connect you to WordbitX.</p>
           </div>
         </div>

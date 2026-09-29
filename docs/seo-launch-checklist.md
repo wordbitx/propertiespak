@@ -58,10 +58,10 @@ Rich results: paste any listing, project or guide URL into
    - Set the international target to Pakistan (`en-PK`) and enable email alerts.
 3. **Bing Webmaster Tools** — import the property from Search Console (one click),
    submit the same sitemap index.
-4. **Google Business Profile** — create the Lahore office listing
-   (Office #306, Taj Heights, Johar Town), category *Real Estate Agency*, add the
-   website, phone, hours, photos and a weekly post. Reviews on the profile are a
-   strong local ranking signal.
+4. **Google Business Profile** — create the Lahore listing, category
+   *Real Estate Agency*, add the website, phone, hours, photos and a weekly post.
+   Public pages show the city only (`Lahore, Pakistan`) — never publish the
+   detailed office address. Reviews on the profile are a strong local ranking signal.
 5. **Analytics** — add GA4 or a privacy-friendly alternative, link it to Search
    Console, and set goals on: enquiry form submit, phone tap, WhatsApp tap.
 6. **Brand properties** — publish the Facebook, Instagram, LinkedIn, YouTube and X
