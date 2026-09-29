@@ -54,6 +54,11 @@ function pinSvg(color: string) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="41" viewBox="0 0 30 41"><path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`;
 }
 
+/** Body of the draggable picker pin popup — rebuilt on every label change. */
+function pickerPopupHtml(label: string, subtitle?: string): string {
+  return `<div class="ewx-popup"><b>${escapeText(label)}</b>${subtitle ? `<br/><span>${escapeText(subtitle)}</span>` : ""}<br/><span class="ewx-muted">Drag the pin or tap the map to adjust</span></div>`;
+}
+
 export function LeafletMap({
   center,
   zoom = 14,
@@ -91,12 +96,19 @@ export function LeafletMap({
   const autoLocated = useRef(false);
   const lastFit = useRef("");
 
+  /**
+   * Leaflet handlers live for the lifetime of the map, while the parent passes
+   * fresh callbacks on every render. Keeping the latest ones in refs (synced in
+   * an effect) avoids re-creating the map and keeps the handlers current.
+   */
   const onPickRef = useRef(onPick);
-  onPickRef.current = onPick;
   const onLocateRef = useRef(onLocate);
-  onLocateRef.current = onLocate;
   const onPinSelectRef = useRef(onPinSelect);
-  onPinSelectRef.current = onPinSelect;
+  useEffect(() => {
+    onPickRef.current = onPick;
+    onLocateRef.current = onLocate;
+    onPinSelectRef.current = onPinSelect;
+  }, [onPick, onLocate, onPinSelect]);
 
   /* ---------- create map ---------- */
   useEffect(() => {
@@ -119,6 +131,8 @@ export function LeafletMap({
         maxZoom: 20,
         layers: [gsat],
         zoomControl: true,
+        // In picker mode the map tap moves the pin, so the pin's popup must stay open.
+        closePopupOnClick: !onPick,
         scrollWheelZoom: false, // Handled smoothly via custom requestAnimationFrame wheel listener
         zoomSnap: 0,            // Full fractional continuous zoom without discrete jumping
         zoomDelta: 1,
@@ -306,13 +320,41 @@ export function LeafletMap({
         const p = pickerRef.current!.getLatLng();
         onPickRef.current?.(p.lat, p.lng);
       });
+      /*
+       * Bind the popup exactly once. Calling `bindPopup(html, options)` again
+       * makes Leaflet build a NEW popup object and leaves the previously opened
+       * one on the map as an orphan layer — which is how a run of map taps ended
+       * up stacking a row of stale labelled popups across the map.
+       */
+      pickerRef.current.bindPopup(pickerPopupHtml(pickerLabel ?? "Property location", pickerSubtitle), {
+        closeButton: false,
+        autoClose: false,
+        closeOnClick: false,
+        autoPan: false,
+      });
     } else {
       const cur = pickerRef.current.getLatLng();
       if (Math.abs(cur.lat - pickerPosition.lat) > 1e-9 || Math.abs(cur.lng - pickerPosition.lng) > 1e-9) pickerRef.current.setLatLng([pickerPosition.lat, pickerPosition.lng]);
     }
-    const html = `<div class="ewx-popup"><b>${escapeText(pickerLabel ?? "Property location")}</b>${pickerSubtitle ? `<br/><span>${escapeText(pickerSubtitle)}</span>` : ""}<br/><span class="ewx-muted">Drag the pin or tap the map to adjust</span></div>`;
-    pickerRef.current.bindPopup(html, { closeButton: false, autoClose: false, closeOnClick: false }).openPopup();
-  }, [pickerPosition?.lat, pickerPosition?.lng, pickerLabel, pickerSubtitle, ready]);
+    pickerRef.current.setPopupContent(pickerPopupHtml(pickerLabel ?? "Property location", pickerSubtitle));
+    // Safety net: drop any popup that is not the pin's own, so a single pin can
+    // never show more than one label (picker maps host no other popups).
+    const own = pickerRef.current.getPopup();
+    const orphans: L.Popup[] = [];
+    map.eachLayer((layer) => {
+      if (layer instanceof Lmod.Popup && layer !== own) orphans.push(layer);
+    });
+    for (const orphan of orphans) map.removeLayer(orphan);
+    if (!pickerRef.current.isPopupOpen()) pickerRef.current.openPopup();
+  }, [pickerPosition?.lat, pickerPosition?.lng, ready]);
+
+  /* ---------- keep the pin popup text in step with the resolved area name ---------- */
+  useEffect(() => {
+    const marker = pickerRef.current;
+    if (!marker || !ready) return;
+    marker.setPopupContent(pickerPopupHtml(pickerLabel ?? "Property location", pickerSubtitle));
+    if (!marker.isPopupOpen()) marker.openPopup();
+  }, [pickerLabel, pickerSubtitle, ready]);
 
   /* ---------- GPS ---------- */
   function locate(silent = false) {
