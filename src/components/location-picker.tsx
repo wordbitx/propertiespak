@@ -53,14 +53,75 @@ export function LocationPicker({
   const [searching, setSearching] = useState(false);
   const [showList, setShowList] = useState(false);
   const [previewLabel, setPreviewLabel] = useState("");
+  /** Name of the area the pin currently sits in — never the previously picked one. */
+  const [pinLabel, setPinLabel] = useState("");
+  const [pinDetail, setPinDetail] = useState("");
+  const [pinBusy, setPinBusy] = useState(false);
+  /** True once the user moved the pin on the map — the pin then names the place. */
+  const [pinTouched, setPinTouched] = useState(false);
   const lastQuery = useRef("");
+  /** Label we pushed into the form ourselves, so its effect does not re-open the list. */
+  const pushedLabel = useRef("");
+  const reverseSeq = useRef(0);
+  /** Set only when this map moved the pin, so typed addresses are never overwritten. */
+  const wantsReverse = useRef(false);
+  /** Kept in a ref so an inline parent callback never retriggers the lookup. */
+  const onLocationLabelRef = useRef(onLocationLabel);
+  useEffect(() => {
+    onLocationLabelRef.current = onLocationLabel;
+  }, [onLocationLabel]);
 
   const society = useMemo(() => findSocietyMap(`${locationQuery ?? ""} ${previewLabel}`, citySlug), [locationQuery, previewLabel, citySlug]);
+
+  /**
+   * Resolve a dropped / dragged pin back to an area name. The old label is
+   * cleared first, so the header and the pin popup can never keep showing the
+   * society that was selected before the user tapped somewhere else.
+   */
+  useEffect(() => {
+    if (!wantsReverse.current) return; // typed address / initial render: nothing to rename
+    wantsReverse.current = false;
+    const seq = (reverseSeq.current += 1);
+    let active = true;
+    const params = new URLSearchParams({
+      lat: lat.toFixed(6),
+      lng: lng.toFixed(6),
+      city: citySlug,
+      cityName: cityName ?? "",
+    });
+    fetch(`/api/geocode?${params}`)
+      .then((res) => res.json())
+      .then((data: { reverse?: { label?: string; detail?: string } | null }) => {
+        if (!active || seq !== reverseSeq.current) return;
+        const label = data.reverse?.label?.trim() ?? "";
+        setPinLabel(label);
+        setPinDetail(data.reverse?.detail?.trim() ?? "");
+        if (label) {
+          pushedLabel.current = label;
+          onLocationLabelRef.current?.(label);
+        }
+      })
+      .catch(() => {
+        if (!active || seq !== reverseSeq.current) return;
+        setPinLabel("");
+        setPinDetail("");
+      })
+      .finally(() => {
+        if (active && seq === reverseSeq.current) setPinBusy(false);
+      });
+    return () => {
+      active = false;
+    };
+    // Only re-resolve when the coordinates move after a map interaction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
 
   useEffect(() => {
     const query = (locationQuery ?? "").trim();
     if (query === lastQuery.current) return;
     lastQuery.current = query;
+    // A label we wrote from the map must not bounce back as a suggestion list.
+    if (query && query === pushedLabel.current) { setResults([]); setShowList(false); setSearching(false); return; }
     if (query.length < 2) { setResults([]); setShowList(false); return; }
     const controller = new AbortController();
     const t = window.setTimeout(async () => {
@@ -85,12 +146,31 @@ export function LocationPicker({
 
   function jumpToCity(slug: string) {
     const p = CITY_CENTERS[slug]; if (!p) return;
-    setCenter({ lat: p.lat, lng: p.lng }); setZoom(p.zoom); onChange(p.lat, p.lng);
+    setCenter({ lat: p.lat, lng: p.lng }); setZoom(p.zoom); setPreviewLabel(""); setPinDetail(""); setPinTouched(true);
+    wantsReverse.current = true;
+    onChange(p.lat, p.lng); // the reverse lookup renames the pin for the new centre
   }
   function chooseResult(r: GeoResult) {
     const nlat = Math.round(r.lat * 1e5) / 1e5, nlng = Math.round(r.lng * 1e5) / 1e5;
     setCenter({ lat: nlat, lng: nlng }); setZoom(r.kind === "society" || r.kind === "city" ? 15 : 17);
-    setPreviewLabel(r.label); onChange(nlat, nlng); onLocationLabel?.(r.label); setShowList(false);
+    setPreviewLabel(r.label); setPinLabel(r.label); setPinDetail(""); setPinBusy(false);
+    reverseSeq.current += 1; // a pending reverse lookup must not overwrite this pick
+    pushedLabel.current = r.label;
+    onChange(nlat, nlng); onLocationLabel?.(r.label); setShowList(false);
+  }
+  /**
+   * Map tap / dragged pin. The coordinate change triggers the reverse lookup,
+   * but we clear the previous society label immediately so nothing stale shows
+   * in the map header or in the pin popup while the lookup runs.
+   */
+  function handlePick(pl: number, pg: number) {
+    setPreviewLabel("");
+    setPinLabel("");
+    setPinDetail("");
+    setPinBusy(true);
+    setPinTouched(true);
+    wantsReverse.current = true;
+    onChange(Math.round(pl * 1e5) / 1e5, Math.round(pg * 1e5) / 1e5);
   }
 
   return (
@@ -132,12 +212,29 @@ export function LocationPicker({
           zoom={zoom}
           heightClass="h-[460px] sm:h-[540px] lg:h-[600px]"
           society={society}
-          header={{ subtitle: previewLabel ? previewLabel.split(",")[0] : locationQuery?.trim() || cityName || "Tap map to drop pin", title: previewLabel || locationQuery || "Pin your exact property location" }}
+          header={{
+            subtitle: pinBusy
+              ? "Locating address…"
+              : (pinDetail || pinLabel || cityName || "Tap map to drop pin").split(",")[0],
+            title: pinBusy
+              ? "Locating address…"
+              : pinLabel
+                ? pinDetail && !pinLabel.includes(pinDetail)
+                  ? `${pinLabel} · ${pinDetail}`
+                  : pinLabel
+                : pinTouched
+                  ? "Pinned location — tap again or drag the pin"
+                  : locationQuery || "Pin your exact property location",
+          }}
           pickerPosition={{ lat, lng }}
-          pickerLabel={plotLabel || "Property location"}
-          pickerSubtitle={plotSubtitle}
-          onPick={(pl, pg) => onChange(Math.round(pl * 1e5) / 1e5, Math.round(pg * 1e5) / 1e5)}
-          onLocate={(gl, gg) => { const a = Math.round(gl * 1e5) / 1e5, b = Math.round(gg * 1e5) / 1e5; setCenter({ lat: a, lng: b }); setZoom(17.5); onChange(a, b); setPreviewLabel("My current location"); }}
+          pickerLabel={
+            pinBusy
+              ? "Locating address…"
+              : pinLabel || (pinTouched ? "Pinned property location" : plotLabel || "Property location")
+          }
+          pickerSubtitle={pinDetail || pinBusy ? [pinBusy ? "" : pinDetail, plotSubtitle].filter(Boolean).join(" · ") : plotSubtitle}
+          onPick={handlePick}
+          onLocate={(gl, gg) => { const a = Math.round(gl * 1e5) / 1e5, b = Math.round(gg * 1e5) / 1e5; setCenter({ lat: a, lng: b }); setZoom(17.5); setPreviewLabel(""); setPinTouched(true); wantsReverse.current = true; onChange(a, b); }}
           autoLocate={autoLocate}
         />
       </div>
@@ -145,6 +242,18 @@ export function LocationPicker({
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[0.8125rem] text-ink-muted">
         <p className="flex items-center gap-1.5"><IconPin className="h-4 w-4 text-forest-600" />Pinned at <span className="font-semibold tabular-nums text-navy-900">{lat.toFixed(5)}, {lng.toFixed(5)}</span></p>
         <p>Scroll / pinch to zoom · drag the blue pin or tap the map · ⊕ my location · layers icon (top-left) for Satellite / Map / society layout</p>
+        {pinBusy ? (
+          <p className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-forest-700" role="status">
+            Checking the area name for this pin…
+          </p>
+        ) : (
+          pinLabel && (
+            <p className="flex items-center gap-1.5 text-[0.8125rem] text-ink-muted">
+              <IconPin className="h-4 w-4 text-forest-600" />Area name:{" "}
+              <span className="font-semibold text-navy-900">{[pinLabel, pinDetail].filter(Boolean).join(" · ")}</span>
+            </p>
+          )
+        )}
       </div>
     </div>
   );

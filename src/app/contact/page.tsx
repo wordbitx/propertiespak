@@ -151,7 +151,7 @@ export default async function ContactPage() {
             </p>
             <h2 className="display-3 mt-3 text-navy-900">Platform, software &amp; partnership enquiries</h2>
             <p className="lede mt-4 max-w-3xl">
-              {SITE.name} is the official real estate platform demo developed by{" "}
+              {SITE.name} is the official real estate platform developed by{" "}
               <a
                 href={SITE.companyUrl}
                 target="_blank"
@@ -179,7 +179,7 @@ export default async function ContactPage() {
             </dl>
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.8125rem] text-ink-muted">
               <span>
-                Office: {SITE.companyAddress.street}, {SITE.companyAddress.city}, {SITE.companyAddress.country}
+                Based in: {SITE.companyAddress.city}, {SITE.companyAddress.country}
               </span>
               <a
                 href={SITE.companyUrl}

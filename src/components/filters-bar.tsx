@@ -1,21 +1,35 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { IconClose, IconSearch, IconSliders } from "@/components/icons";
 import { BUDGETS_BUY, BUDGETS_RENT, SORT_OPTIONS } from "@/lib/constants";
 
 type Option = { label: string; value: string };
+export type TownGroup = { citySlug: string; cityName: string; towns: Option[] };
+
+const AREA_OPTIONS = [
+  { label: "Any size", value: "" },
+  { label: "3 Marla +", value: "675" },
+  { label: "5 Marla +", value: "1125" },
+  { label: "10 Marla +", value: "2250" },
+  { label: "1 Kanal +", value: "4500" },
+  { label: "2 Kanal +", value: "9000" },
+];
+
+const BATH_OPTIONS = ["1", "2", "3", "4", "5"];
 
 export function FiltersBar({
   basePath,
   cityOptions,
+  townGroups,
   typeOptions,
   total,
   purposeKind = "buy",
 }: {
   basePath: string;
   cityOptions: Option[];
+  townGroups: TownGroup[];
   typeOptions: string[];
   total: number;
   purposeKind?: "buy" | "rent" | "mixed";
@@ -26,12 +40,31 @@ export function FiltersBar({
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
 
   const budgets = purposeKind === "rent" ? BUDGETS_RENT : BUDGETS_BUY;
+  const selectedCity = searchParams.get("city") ?? "";
 
   const update = useCallback(
-    (key: string, value: string) => {
+    (key: string, value: string, extra?: Record<string, string>) => {
       const params = new URLSearchParams(searchParams.toString());
       if (value) params.set(key, value);
       else params.delete(key);
+      for (const [extraKey, extraValue] of Object.entries(extra ?? {})) {
+        if (extraValue) params.set(extraKey, extraValue);
+        else params.delete(extraKey);
+      }
+      params.delete("page");
+      const query = params.toString();
+      router.push(query ? `${basePath}?${query}` : basePath);
+    },
+    [basePath, router, searchParams],
+  );
+
+  /** City changes reset the town filter: a Lahore town is meaningless in Karachi. */
+  const onCityChange = useCallback(
+    (slug: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (slug) params.set("city", slug);
+      else params.delete("city");
+      params.delete("town");
       params.delete("page");
       const query = params.toString();
       router.push(query ? `${basePath}?${query}` : basePath);
@@ -46,14 +79,20 @@ export function FiltersBar({
     return `${min}-${max}`;
   })();
 
-  const activeCount = ["q", "city", "type", "beds", "minPrice", "category", "minArea"].filter((key) =>
-    searchParams.get(key),
+  // Towns for the chosen city only; without a city the list is grouped by city.
+  const visibleTownGroups = useMemo(
+    () => (selectedCity ? townGroups.filter((group) => group.citySlug === selectedCity) : townGroups),
+    [selectedCity, townGroups],
+  );
+
+  const activeCount = ["q", "city", "town", "type", "beds", "baths", "minPrice", "maxPrice", "category", "minArea"].filter(
+    (key) => searchParams.get(key),
   ).length;
 
   const fields = (
-    <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
       <form
-        className="sm:col-span-2 xl:col-span-1"
+        className="sm:col-span-2 xl:col-span-2"
         onSubmit={(event) => {
           event.preventDefault();
           update("q", keyword.trim());
@@ -68,28 +107,72 @@ export function FiltersBar({
             id="filter-keyword"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="Society, area or type"
+            placeholder="Society, town, area or property type"
             className="field pl-9"
           />
         </div>
       </form>
 
+      {purposeKind === "mixed" && (
+        <div>
+          <label htmlFor="filter-purpose" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+            Purpose
+          </label>
+          <select
+            id="filter-purpose"
+            className="field mt-2"
+            value={searchParams.get("purpose") ?? ""}
+            onChange={(event) => update("purpose", event.target.value)}
+          >
+            <option value="">Sale &amp; rent</option>
+            <option value="buy">For sale</option>
+            <option value="rent">For rent</option>
+          </select>
+        </div>
+      )}
+
       <div>
         <label htmlFor="filter-city" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
           City
         </label>
-        <select
-          id="filter-city"
-          className="field mt-2"
-          value={searchParams.get("city") ?? ""}
-          onChange={(event) => update("city", event.target.value)}
-        >
+        <select id="filter-city" className="field mt-2" value={selectedCity} onChange={(event) => onCityChange(event.target.value)}>
           <option value="">All cities</option>
           {cityOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="filter-town" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+          Town / Society
+        </label>
+        <select
+          id="filter-town"
+          className="field mt-2"
+          value={searchParams.get("town") ?? ""}
+          onChange={(event) => update("town", event.target.value)}
+        >
+          <option value="">All towns &amp; societies</option>
+          {selectedCity
+            ? visibleTownGroups.flatMap((group) =>
+                group.towns.map((town) => (
+                  <option key={`${group.citySlug}-${town.value}`} value={town.value}>
+                    {town.label}
+                  </option>
+                )),
+              )
+            : visibleTownGroups.map((group) => (
+                <optgroup key={group.citySlug} label={group.cityName}>
+                  {group.towns.map((town) => (
+                    <option key={`${group.citySlug}-${town.value}`} value={town.value}>
+                      {town.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
         </select>
       </div>
 
@@ -161,6 +244,43 @@ export function FiltersBar({
       </div>
 
       <div>
+        <label htmlFor="filter-baths" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+          Bathrooms
+        </label>
+        <select
+          id="filter-baths"
+          className="field mt-2"
+          value={searchParams.get("baths") ?? ""}
+          onChange={(event) => update("baths", event.target.value)}
+        >
+          <option value="">Any</option>
+          {BATH_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {value}+
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="filter-area" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+          Size
+        </label>
+        <select
+          id="filter-area"
+          className="field mt-2"
+          value={searchParams.get("minArea") ?? ""}
+          onChange={(event) => update("minArea", event.target.value)}
+        >
+          {AREA_OPTIONS.map((option) => (
+            <option key={option.label} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
         <label htmlFor="filter-sort" className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
           Sort by
         </label>
@@ -178,7 +298,7 @@ export function FiltersBar({
         </select>
       </div>
 
-      <div className="flex items-end xl:col-span-1">
+      <div className="flex items-end sm:col-span-2 xl:col-span-2">
         <button
           type="button"
           onClick={() => {
@@ -187,7 +307,7 @@ export function FiltersBar({
           }}
           className="btn btn-outline w-full"
         >
-          <IconClose className="h-4 w-4" /> Clear filters
+          <IconClose className="h-4 w-4" /> Clear all filters
         </button>
       </div>
     </div>
@@ -198,7 +318,11 @@ export function FiltersBar({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-sans text-[0.9375rem] font-semibold text-navy-900">
           {total.toLocaleString("en-PK")} {total === 1 ? "property" : "properties"} found
-          {activeCount > 0 && <span className="ml-2 text-[0.8125rem] font-medium text-ink-muted">{activeCount} filter{activeCount > 1 ? "s" : ""} active</span>}
+          {activeCount > 0 && (
+            <span className="ml-2 text-[0.8125rem] font-medium text-ink-muted">
+              {activeCount} filter{activeCount > 1 ? "s" : ""} active
+            </span>
+          )}
         </p>
         <button
           type="button"

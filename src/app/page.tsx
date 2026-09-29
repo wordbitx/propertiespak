@@ -17,9 +17,13 @@ import {
 } from "@/components/sections-discovery";
 
 import { CtaSection, InvestmentSection, TestimonialsSection, WhyEstateWx } from "@/components/sections-editorial";
+import { DealersSlider } from "@/components/dealers-slider";
+import { VerifiedDealersSection } from "@/components/dealers-section";
 import {
   getCities,
   getCityListingCounts,
+  getDealerShowcase,
+  getDealers,
   getFeaturedProperties,
   getMapProperties,
   getPlatformStats,
@@ -70,6 +74,9 @@ export default async function HomePage() {
     mapRows,
     posts,
     testimonials,
+    verifiedDealers,
+    allDealers,
+    showcaseDealers,
   ] = await Promise.all([
     getPlatformStats(),
     getFeaturedProperties(6),
@@ -83,6 +90,9 @@ export default async function HomePage() {
     getMapProperties({}, 100),
     getPosts(3),
     getTestimonials(),
+    getDealers({ verifiedOnly: true, limit: 4 }),
+    getDealers({ limit: 60 }),
+    getDealerShowcase(48),
   ]);
 
   const mapProperties: MapProperty[] = mapRows.map((property) => ({
@@ -107,6 +117,9 @@ export default async function HomePage() {
   return (
     <>
       <Hero stats={stats} />
+
+      {/* Dealer slider sits under the hero; the classic category tiles live further down, just above the city markets. */}
+      <DealersSlider dealers={showcaseDealers} />
 
       {/* Property discovery */}
       <Section tone="light" id="explore">
@@ -140,11 +153,14 @@ export default async function HomePage() {
       </Section>
 
       <FeaturedProperties properties={featured} />
-      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <CommercialSection properties={commercialListings.items} />
       <NewProjectsSection projects={projects} />
+      {/* "Browse by intent" tiles back in their original spot: directly above the city markets. */}
       <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
+      {/* Moved down: Discover Properties by Location now sits directly above the dealer section */}
+      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
+      <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
       {/* Smart calculators */}
       <Section tone="light" id="tools">

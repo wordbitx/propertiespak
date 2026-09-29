@@ -29,6 +29,8 @@ export function LocationAutocomplete({
   placeholder = "e.g. DHA Phase 6, Bahria Town Sector C, Lake City M-7",
   required = false,
   className = "",
+  /** Value written by the map pin; it must not trigger a fresh suggestion list. */
+  skipQuery = "",
 }: {
   id?: string;
   value: string;
@@ -39,6 +41,7 @@ export function LocationAutocomplete({
   placeholder?: string;
   required?: boolean;
   className?: string;
+  skipQuery?: string;
 }) {
   const reactId = useId();
   const inputId = id ?? `loc-${reactId}`;
@@ -56,6 +59,11 @@ export function LocationAutocomplete({
       return;
     }
     const q = value.trim();
+    if (q && skipQuery && q === skipQuery.trim()) {
+      setItems([]);
+      setOpen(false);
+      return;
+    }
     if (q.length < 2) {
       setItems([]);
       setOpen(false);
@@ -81,7 +89,7 @@ export function LocationAutocomplete({
       controller.abort();
       window.clearTimeout(t);
     };
-  }, [value, citySlug, cityName]);
+  }, [value, citySlug, cityName, skipQuery]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {

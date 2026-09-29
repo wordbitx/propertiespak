@@ -170,6 +170,11 @@ export function AdminDashboard() {
                     {item.locationArea}, {item.cityName}
                     {item.address ? ` — ${item.address}` : ""}
                   </p>
+                  {!item.userId && (
+                    <p className="mt-2 inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[0.6875rem] font-semibold text-amber-800">
+                      Not linked to an account — confirm ownership on the phone number before approving
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="font-sans text-[1.25rem] font-bold text-navy-900">

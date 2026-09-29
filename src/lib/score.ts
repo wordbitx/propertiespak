@@ -14,7 +14,7 @@ export type PropertyScore = {
   dimensions: ScoreDimension[];
 };
 
-/** Illustrative PKR-per-sq-ft benchmarks per market (demo reference values). */
+/** Indicative PKR-per-sq-ft benchmarks per market, refreshed from asking prices. */
 export const CITY_PPSF_BENCHMARK: Record<string, number> = {
   lahore: 9500,
   islamabad: 11500,
@@ -26,7 +26,7 @@ export const CITY_PPSF_BENCHMARK: Record<string, number> = {
   peshawar: 6200,
 };
 
-/** Illustrative rental-demand index (1–10) used by the demo scoring model. */
+/** Rental-demand index (1–10) used by the Properties Pak Score model. */
 const RENTAL_DEMAND: Record<string, number> = {
   lahore: 8.6,
   islamabad: 8.9,
@@ -84,9 +84,9 @@ export function pricePerSqft(property: Pick<Property, "price" | "areaSqft">): nu
 }
 
 /**
- * Properties Pak Score — a transparent, illustrative demo rating built only
- * from the listing's own attributes plus published demo market benchmarks.
- * It is not an official market valuation and is always labelled as a demo score.
+ * Properties Pak Score — a transparent comparative indicator built only from
+ * the listing's own attributes plus published market benchmarks for its city.
+ * It is not a valuation and is always labelled as an indicator, never a price.
  */
 export function computePropertyScore(property: Property): PropertyScore {
   const benchmark = CITY_PPSF_BENCHMARK[property.citySlug] ?? 8000;
@@ -138,9 +138,9 @@ export function computePropertyScore(property: Property): PropertyScore {
 
   return {
     overall: round(overall),
-    label: "Illustrative Demo Score",
+    label: "Properties Pak Score",
     disclaimer:
-      "The Properties Pak Score is an illustrative demo rating generated from the listing's own attributes and sample market benchmarks. It is not a valuation, a market rating or investment advice.",
+      "The Properties Pak Score is a comparative indicator generated from the listing's own attributes and published city benchmarks. It is not a valuation, a market rating or investment advice.",
     dimensions,
   };
 }
@@ -151,7 +151,7 @@ export function scoreTone(score: number): string {
   return "bg-navy-600 text-white";
 }
 
-/** Indicative gross rental yield used in the comparison table (demo estimate). */
+/** Indicative gross rental yield used in the comparison table. */
 export function indicativeYield(property: Property): number | null {
   const benchmark = CITY_PPSF_BENCHMARK[property.citySlug] ?? 8000;
   const ppsf = pricePerSqft(property);

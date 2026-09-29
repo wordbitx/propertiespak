@@ -31,7 +31,8 @@ import { Reveal } from "@/components/reveal";
 import { ShareButton } from "@/components/share-button";
 import { Section, SectionHeading } from "@/components/section";
 import { formatArea, formatDate, formatNumber, formatPrice } from "@/lib/format";
-import { getAgentBySlug, getPropertyBySlug, getSimilarProperties, getNearbyProperties } from "@/lib/queries";
+import { getAgentBySlug, getLeadDealerForProperty, getPropertyBySlug, getSimilarProperties, getNearbyProperties } from "@/lib/queries";
+import { BlueTick, initialsFor } from "@/components/verified-badge";
 import { buildMetadata, propertyJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/constants";
 
@@ -88,22 +89,33 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const property = await getPropertyBySlug(slug);
   if (!property) notFound();
 
-  const [agent, similar, nearby] = await Promise.all([
+  const [agent, dealer, similar, nearby] = await Promise.all([
     getAgentBySlug(property.agentSlug),
+    getLeadDealerForProperty(property),
     getSimilarProperties(property, 3),
     getNearbyProperties(property, 6, 20),
   ]);
 
   const badge = purposeBadge(property);
   const isOwnerListing = Boolean(property.listedByName && property.listedByPhone);
-  const contactName = isOwnerListing ? property.listedByName : (agent?.name ?? "Properties Pak Advisory");
-  const contactTitle = isOwnerListing ? "Property Listing Person" : (agent?.title ?? "Property Consultant");
-  const contactPhone = isOwnerListing ? property.listedByPhone : (agent?.phone ?? SITE.companyPhone);
-  const contactWhatsapp = (isOwnerListing
-    ? property.listedByWhatsapp || property.listedByPhone
-    : agent?.whatsapp || SITE.companyPhone
+  /** Blue tick on the listing: the publishing account was verified by an admin. */
+  const dealerVerified = Boolean(dealer?.isVerified);
+  /**
+   * Identity order: the publisher account on the listing, then the verified
+   * dealer that owns it, then the Properties Pak desk agent for that city.
+   * Nothing here is invented per listing — every layer exists as a real row.
+   */
+  const contactName = isOwnerListing ? property.listedByName : (dealer?.name ?? agent?.name ?? "Properties Pak Advisory");
+  const contactTitle = isOwnerListing
+    ? "Property Listing Person"
+    : dealer?.agency || agent?.title || "Properties Pak Advisory";
+  const contactPhone = (isOwnerListing ? property.listedByPhone : dealer?.phone || agent?.phone) || SITE.companyPhone;
+  const contactWhatsapp = (
+    isOwnerListing
+      ? property.listedByWhatsapp || property.listedByPhone
+      : dealer?.whatsapp || dealer?.phone || agent?.whatsapp || SITE.companyPhone
   ).replace(/\D/g, "");
-  const contactEmail = isOwnerListing ? property.listedByEmail : (agent?.email ?? SITE.companyEmail);
+  const contactEmail = (isOwnerListing ? property.listedByEmail : dealer?.email || agent?.email) || SITE.companyEmail;
   const whatsappMessage = encodeURIComponent(
     `Hi ${contactName}, I'm interested in this property on Properties Pak: ${property.title}, ${property.locationArea}, ${property.cityName}. Please share more details. Reference EWX-${String(property.id).padStart(5, "0")}.`,
   );
@@ -162,10 +174,19 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <span className={`rounded-md px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] ${badge.className}`}>
               {badge.label}
             </span>
-            {property.verified && (
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-forest-600/15 px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest-400">
-                <IconShield className="h-3.5 w-3.5" /> Demo listing
-              </span>
+            {dealerVerified && dealer?.slug ? (
+              <Link
+                href={`/dealers/${dealer.slug}`}
+                className="inline-flex items-center gap-1.5 rounded-md bg-white/95 px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-[#0b6fb8]"
+              >
+                <BlueTick className="h-3.5 w-3.5" /> Verified dealer
+              </Link>
+            ) : (
+              property.verified && (
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-forest-600/15 px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest-400">
+                  <IconShield className="h-3.5 w-3.5" /> Details checked
+                </span>
+              )
             )}
             <span className="rounded-md border border-white/15 px-2.5 py-1 font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-white/70">
               {property.cityName}
@@ -199,12 +220,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         <div className="ui-container relative z-10 -mt-32 lg:-mt-40">
           <div className="mb-6 flex flex-wrap items-start gap-3 rounded-panel border border-soft bg-mist px-5 py-4">
             <span className="mt-0.5 shrink-0 rounded-md bg-navy-800 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white">
-              Demo listing
+              {dealerVerified ? "Verified dealer listing" : "Listing reference"}
             </span>
             <p className="text-[0.8125rem] leading-relaxed text-ink-muted">
-              This listing is illustrative sample inventory created for the Properties Pak product demonstration by WordbitX
-              Software Company. Price, availability and documentation status are examples only and are not verified market
-              transactions. Always verify details independently before paying a token.
+              {dealerVerified
+                ? `Published by ${contactName}, a Properties Pak account whose identity, agency and phone number were confirmed by our team. Reference EWX-${String(property.id).padStart(5, "0")} — always confirm title, dues and possession in writing before paying a token.`
+                : `This listing was submitted to Properties Pak and reviewed by our team before publication. Reference EWX-${String(property.id).padStart(5, "0")} — confirm title, dues, possession and the transfer procedure independently before paying any token amount.`}
             </p>
           </div>
 
@@ -333,16 +354,18 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start">
               <div className="rounded-panel border border-soft bg-white p-6 shadow-card">
                 <div className="flex items-center gap-3.5">
-                  <span className="grid h-12 w-12 place-items-center rounded-full bg-navy-800 font-sans text-[0.9375rem] font-bold text-white">
-                    {contactName
-                      .split(" ")
-                      .map((part) => part[0])
-                      .slice(0, 2)
-                      .join("")}
+                  <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-navy-800 font-sans text-[0.9375rem] font-bold text-white">
+                    {initialsFor(contactName)}
+                    {dealerVerified && (
+                      <span className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-white">
+                        <BlueTick className="h-4 w-4" />
+                      </span>
+                    )}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate font-sans text-[0.9875rem] font-semibold text-navy-900">
-                      {contactName}
+                    <p className="flex items-center gap-1.5 truncate font-sans text-[0.9875rem] font-semibold text-navy-900">
+                      <span className="truncate">{contactName}</span>
+                      {dealerVerified && <BlueTick className="h-4 w-4 shrink-0" />}
                     </p>
                     <p className="truncate text-[0.8125rem] text-ink-muted">{contactTitle}</p>
                   </div>
@@ -402,9 +425,18 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </div>
 
                 <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
-                  {isOwnerListing
-                    ? "The contact details above belong to the person who submitted this property listing."
-                    : "Demo consultant profile shown for illustrative sample inventory."}{" "}
+                  {dealer?.slug ? (
+                    <>
+                      <Link href={`/dealers/${dealer.slug}`} className="font-semibold text-forest-700 hover:underline">
+                        View {contactName}&rsquo;s dealer profile and {dealer.listings} listings
+                      </Link>
+                      {dealerVerified ? " — identity and contact verified by Properties Pak." : " — profile still in review."}{" "}
+                    </>
+                  ) : isOwnerListing ? (
+                    "The contact details above belong to the person who submitted this property listing."
+                  ) : (
+                    "Your enquiry is handled by the Properties Pak advisory desk for this city."
+                  )}{" "}
                   Mention reference <span className="font-semibold text-navy-900">EWX-{String(property.id).padStart(5, "0")}</span>{" "}
                   when you call or message.
                 </p>

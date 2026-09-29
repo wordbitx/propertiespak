@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { searchProperties, getPropertiesByIds } from "@/lib/queries";
+import { townMatchFor } from "@/lib/towns";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +27,14 @@ export async function GET(request: Request) {
     const result = await searchProperties({
       purpose: searchParams.get("purpose") ?? undefined,
       city: searchParams.get("city") ?? undefined,
+      town: searchParams.get("town") ? townMatchFor(searchParams.get("town") as string) : undefined,
       type: searchParams.get("type") ?? undefined,
       category: searchParams.get("category") ?? undefined,
       q: searchParams.get("q") ?? undefined,
       minPrice: numberParam(searchParams.get("minPrice")),
       maxPrice: numberParam(searchParams.get("maxPrice")),
       beds: numberParam(searchParams.get("beds")),
+      baths: numberParam(searchParams.get("baths")),
       minArea: numberParam(searchParams.get("minArea")),
       featured: searchParams.get("featured") === "1" ? true : undefined,
       verified: searchParams.get("verified") === "1" ? true : undefined,

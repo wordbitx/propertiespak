@@ -1,6 +1,10 @@
-import { inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { agents, cities, posts, projects, properties, testimonials } from "@/db/schema";
+import { agents, cities, posts, projects, properties, testimonials, users } from "@/db/schema";
+import { dealerSeed } from "@/db/seed-dealers";
+import { townPropertySeed } from "@/db/seed-towns";
+import { societyPropertySeed } from "@/db/seed-societies";
+import { hashPassword } from "@/lib/password";
 import { agentSeed, citySeed, postSeed, projectSeed, propertySeed, testimonialSeed } from "@/db/seed-data";
 import { extraPropertySeed } from "@/db/seed-data-extra";
 import { EXTRA_POSTS, POST_LINKS } from "@/db/seed-content";
@@ -104,6 +108,7 @@ async function ensureSchema() {
       listed_by_email text NOT NULL DEFAULT '',
       listed_by_phone text NOT NULL DEFAULT '',
       listed_by_whatsapp text NOT NULL DEFAULT '',
+      listed_by_user_id integer,
       views integer NOT NULL DEFAULT 0,
       created_at timestamptz NOT NULL DEFAULT now()
     );
@@ -112,6 +117,9 @@ async function ensureSchema() {
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_email text NOT NULL DEFAULT '';
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_phone text NOT NULL DEFAULT '';
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_whatsapp text NOT NULL DEFAULT '';
+    ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_user_id integer;
+    CREATE INDEX IF NOT EXISTS properties_listed_by_user_idx ON properties (listed_by_user_id);
+    CREATE INDEX IF NOT EXISTS properties_location_area_idx ON properties (location_area);
     CREATE TABLE IF NOT EXISTS listing_media (
       id serial PRIMARY KEY,
       file_name text NOT NULL,
@@ -170,8 +178,49 @@ async function ensureSchema() {
       email text NOT NULL UNIQUE,
       phone text NOT NULL DEFAULT '',
       password_hash text NOT NULL,
+      slug text NOT NULL DEFAULT '',
+      role text NOT NULL DEFAULT 'member',
+      city_slug text NOT NULL DEFAULT '',
+      city_name text NOT NULL DEFAULT '',
+      agency text NOT NULL DEFAULT '',
+      bio text NOT NULL DEFAULT '',
+      whatsapp text NOT NULL DEFAULT '',
+      avatar_url text NOT NULL DEFAULT '',
+      designation text NOT NULL DEFAULT '',
+      office_address text NOT NULL DEFAULT '',
+      company_phone text NOT NULL DEFAULT '',
+      company_website text NOT NULL DEFAULT '',
+      company_logo text NOT NULL DEFAULT '',
+      experience text NOT NULL DEFAULT '',
+      areas text NOT NULL DEFAULT '',
+      verification_note text NOT NULL DEFAULT '',
+      profile_completed_at timestamptz,
+      verification_requested_at timestamptz,
+      is_verified boolean NOT NULL DEFAULT false,
+      verified_at timestamptz,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS slug text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'member';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS city_slug text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS city_name text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS agency text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS bio text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS designation text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS office_address text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_phone text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_website text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS company_logo text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS experience text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS areas text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_note text NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_completed_at timestamptz;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_requested_at timestamptz;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_at timestamptz;
+    CREATE INDEX IF NOT EXISTS users_slug_idx ON users (slug);
     CREATE TABLE IF NOT EXISTS favorites (
       id serial PRIMARY KEY,
       user_id integer NOT NULL,
@@ -219,9 +268,11 @@ async function ensureSchema() {
       features jsonb NOT NULL DEFAULT '[]'::jsonb,
       amenities jsonb NOT NULL DEFAULT '[]'::jsonb,
       image_urls jsonb NOT NULL DEFAULT '[]'::jsonb,
+      user_id integer,
       created_at timestamptz NOT NULL DEFAULT now(),
       reviewed_at timestamptz
     );
+    ALTER TABLE listing_submissions ADD COLUMN IF NOT EXISTS user_id integer;
     UPDATE properties p
     SET listed_by_name = s.name,
         listed_by_email = s.email,
@@ -305,12 +356,159 @@ async function refreshReferenceContent() {
   }
 }
 
+/**
+ * Founding dealer accounts. Profile fields are refreshed on every boot; the
+ * verification flag is only *seeded* once so an administrator's decision in the
+ * admin workspace is never overwritten by a restart.
+ */
+async function seedDealerAccounts() {
+  for (const dealer of dealerSeed) {
+    const phoneDigits = dealer.phone.replace(/[^0-9]/g, "");
+    const existing = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, dealer.email))
+      .limit(1);
+
+    if (existing.length === 0) {
+      await db.insert(users).values({
+        name: dealer.name,
+        email: dealer.email,
+        phone: dealer.phone,
+        passwordHash: hashPassword(dealer.password),
+        slug: dealer.slug,
+        role: "dealer",
+        citySlug: dealer.citySlug,
+        cityName: dealer.cityName,
+        agency: dealer.agency,
+        bio: dealer.bio,
+        whatsapp: phoneDigits,
+        designation: dealer.designation,
+        experience: dealer.experience,
+        areas: dealer.areas,
+        officeAddress: dealer.officeAddress,
+        companyPhone: dealer.companyPhone,
+        companyWebsite: dealer.companyWebsite,
+        profileCompletedAt: new Date(),
+        isVerified: dealer.isVerified,
+        verifiedAt: dealer.isVerified ? new Date() : null,
+      });
+      continue;
+    }
+
+    await db
+      .update(users)
+      .set({
+        name: dealer.name,
+        phone: dealer.phone,
+        slug: dealer.slug,
+        role: "dealer",
+        citySlug: dealer.citySlug,
+        cityName: dealer.cityName,
+        agency: dealer.agency,
+        bio: dealer.bio,
+        whatsapp: phoneDigits,
+        designation: dealer.designation,
+        experience: dealer.experience,
+        areas: dealer.areas,
+        officeAddress: dealer.officeAddress,
+        companyPhone: dealer.companyPhone,
+        companyWebsite: dealer.companyWebsite,
+        profileCompletedAt: new Date(),
+      })
+      .where(eq(users.email, dealer.email));
+  }
+}
+
+/**
+ * Gives every founding dealer a real portfolio: unassigned listings in their
+ * own city are distributed round-robin and stamped with the dealer's contact
+ * details, so `/dealers/<slug>` pages, the blue tick and the owner contact
+ * block on each listing all agree.
+ */
+async function linkDealerListings() {
+  const cities = Array.from(new Set(dealerSeed.map((dealer) => dealer.citySlug)));
+
+  for (const citySlug of cities) {
+    const cityDealers = dealerSeed.filter((dealer) => dealer.citySlug === citySlug);
+    const accounts: { id: number; name: string; phone: string; email: string }[] = [];
+
+    for (const dealer of cityDealers) {
+      const rows = await db
+        .select({ id: users.id, name: users.name, phone: users.phone })
+        .from(users)
+        .where(eq(users.email, dealer.email))
+        .limit(1);
+      const account = rows[0];
+      if (account) accounts.push({ ...account, email: dealer.email });
+    }
+    if (accounts.length === 0) continue;
+
+    const unassigned = await db
+      .select({ id: properties.id })
+      .from(properties)
+      .where(and(isNull(properties.listedByUserId), eq(properties.citySlug, citySlug)))
+      .orderBy(asc(properties.id));
+    if (unassigned.length === 0) continue;
+
+    // Round-robin keeps every dealer's portfolio believable. The cap counts
+    // listings the account already publishes, so repeated seeds stay stable
+    // and whatever is left over stays a Properties Pak desk listing.
+    const MAX_PER_DEALER = 24;
+    const existing = await db
+      .select({ userId: properties.listedByUserId, total: sql<number>`count(*)::int` })
+      .from(properties)
+      .where(sql`${properties.listedByUserId} is not null`)
+      .groupBy(properties.listedByUserId);
+    const capacity = new Map<number, number>(
+      accounts.map((account) => {
+        const used = existing.find((row) => row.userId === account.id)?.total ?? 0;
+        return [account.id, Math.max(0, MAX_PER_DEALER - Number(used))];
+      }),
+    );
+
+    const buckets = new Map<number, number[]>();
+    let cursor = 0;
+    for (const row of unassigned) {
+      let picked: (typeof accounts)[number] | null = null;
+      for (let offset = 0; offset < accounts.length; offset += 1) {
+        const candidate = accounts[(cursor + offset) % accounts.length];
+        if ((capacity.get(candidate.id) ?? 0) > 0) {
+          picked = candidate;
+          cursor = (cursor + offset + 1) % accounts.length;
+          break;
+        }
+      }
+      if (!picked) break;
+      const bucket = buckets.get(picked.id) ?? [];
+      bucket.push(row.id);
+      buckets.set(picked.id, bucket);
+      capacity.set(picked.id, (capacity.get(picked.id) ?? 1) - 1);
+    }
+
+    for (const account of accounts) {
+      const ids = buckets.get(account.id) ?? [];
+      if (ids.length === 0) continue;
+      await db
+        .update(properties)
+        .set({
+          listedByUserId: account.id,
+          listedByName: account.name,
+          listedByEmail: account.email,
+          listedByPhone: account.phone,
+          listedByWhatsapp: account.phone.replace(/[^0-9]/g, ""),
+        })
+        .where(inArray(properties.id, ids));
+    }
+  }
+}
+
 async function seedProperties() {
   // Additive: insert only slugs that are missing, so new inventory lands
   // without touching existing listings or admin-approved properties.
   const existing = await db.select({ slug: properties.slug }).from(properties);
   const existingSlugs = new Set(existing.map((row) => row.slug));
-  const pending = [...propertySeed, ...extraPropertySeed].filter(
+  const pending = [...propertySeed, ...extraPropertySeed, ...townPropertySeed, ...societyPropertySeed].filter(
     (property) => !existingSlugs.has(property.slug),
   );
   if (pending.length === 0) return;
@@ -358,7 +556,9 @@ async function seedProperties() {
 async function runSeed() {
   await ensureSchema();
   await refreshReferenceContent();
+  await seedDealerAccounts();
   await seedProperties();
+  await linkDealerListings();
 }
 
 let seedPromise: Promise<void> | null = null;

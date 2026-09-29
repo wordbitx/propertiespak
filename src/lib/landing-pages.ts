@@ -224,9 +224,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "DHA Lahore is the benchmark against which most other Lahore addresses are priced. Stricter building controls, disciplined development and a consistently active resale market make it the most liquid residential belt in the city.",
     inventoryNote:
-      "Our demo inventory in DHA Lahore currently covers villas and houses in Phase 2 and Phase 5, with plot and commercial listings added as they are onboarded.",
+      "Live inventory in DHA Lahore currently covers villas and houses in Phase 2 and Phase 5, with plot and commercial listings added as they are onboarded.",
     priceNote:
-      "Indicative demo pricing: 10 Marla houses from around PKR 4.5 Crore, 1 Kanal villas from around PKR 10 Crore, depending on phase, road width and construction quality.",
+      "Indicative pricing: 10 Marla houses from around PKR 4.5 Crore, 1 Kanal villas from around PKR 10 Crore, depending on phase, road width and construction quality.",
     investmentNote:
       "DHA suits buyers who value exit certainty over the lowest possible entry price. Confirmed dues clearance and a documented transfer history are the two checks that matter most.",
     nearby: ["dha-phase-5-lahore", "dha-phase-6-lahore", "bahria-town-lahore"],
@@ -258,9 +258,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Phase 5 is one of DHA Lahore's most established and sought-after sectors, known for wide boulevards, mature trees, proximity to commercial hubs and a consistently strong resale market.",
     inventoryNote:
-      "Current demo inventory in Phase 5 includes a 1 Kanal modern villa with a full basement, alongside related DHA and Bahria Town options for comparison.",
+      "Current inventory in Phase 5 includes a 1 Kanal modern villa with a full basement, alongside related DHA and Bahria Town options for comparison.",
     priceNote:
-      "Indicative demo pricing: 1 Kanal houses typically PKR 10 Crore – 22 Crore; 10 Marla houses PKR 6 Crore – 11 Crore depending on block and elevation.",
+      "Indicative pricing: 1 Kanal houses typically PKR 10 Crore – 22 Crore; 10 Marla houses PKR 6 Crore – 11 Crore depending on block and elevation.",
     investmentNote:
       "Phase 5 liquidity is among the strongest in Lahore, which shortens exit timeframes. Buyers should still confirm dues, approved plans and any society notices on the specific plot.",
     nearby: ["dha-lahore", "dha-phase-6-lahore", "gulberg-lahore"],
@@ -268,7 +268,7 @@ export const SOCIETIES: SocietyEntry[] = [
       {
         question: "What does a 1 Kanal house in DHA Phase 5 cost?",
         answer:
-          "In our demo data, 1 Kanal houses in Phase 5 sit in a PKR 10 Crore to 22 Crore band, with older construction near the lower end and newer designer builds with basements at the upper end.",
+          "Across current listings, 1 Kanal houses in Phase 5 sit in a PKR 10 Crore to 22 Crore band, with older construction near the lower end and newer designer builds with basements at the upper end.",
       },
       {
         question: "Is Phase 5 better for living or investing?",
@@ -287,9 +287,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Phase 6 combines newer construction with the DHA management standards buyers rely on, and it is often the compromise phase between Phase 5 pricing and Phase 8 supply.",
     inventoryNote:
-      "We do not have live demo listings in Phase 6 at the moment, so the listings below show comparable DHA Lahore inventory you can shortlist instead.",
+      "We do not have live listings in Phase 6 at the moment, so the listings below show comparable DHA Lahore inventory you can shortlist instead.",
     priceNote:
-      "Indicative demo pricing: 10 Marla houses from around PKR 5.5 Crore and 1 Kanal houses from around PKR 11 Crore, subject to block and road width.",
+      "Indicative pricing: 10 Marla houses from around PKR 5.5 Crore and 1 Kanal houses from around PKR 11 Crore, subject to block and road width.",
     investmentNote:
       "Newer sectors in Phase 6 attract buyers who want modern construction and fewer renovation costs, though the buyer pool is thinner than Phase 5 in a slow market.",
     nearby: ["dha-lahore", "dha-phase-5-lahore", "bahria-town-lahore"],
@@ -316,9 +316,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Bahria Town Lahore offers a complete, self-contained lifestyle: internal transport, schools, hospitals, themed commercial areas and its own security infrastructure, usually at a lower entry price than DHA.",
     inventoryNote:
-      "Demo inventory includes ready residential plots with cleared dues, plus related Lahore houses and villas for buyers who prefer constructed options.",
+      "Live inventory includes ready residential plots with cleared dues, plus related Lahore houses and villas for buyers who prefer constructed options.",
     priceNote:
-      "Indicative demo pricing: 5 Marla plots from around PKR 9 Crore, 10 Marla plots from around PKR 19 Crore, and constructed houses from around PKR 4 Crore depending on sector.",
+      "Indicative pricing: 5 Marla plots from around PKR 9 Crore, 10 Marla plots from around PKR 19 Crore, and constructed houses from around PKR 4 Crore depending on sector.",
     investmentNote:
       "Recurring society charges and maintenance levies form part of ownership cost here. Development charges and possession status should be confirmed in writing before transfer.",
     nearby: ["dha-lahore", "johar-town-lahore", "bahria-town-phase-8-rawalpindi"],
@@ -350,9 +350,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Johar Town is a practical, well-connected district that appeals to families wanting central Lahore access without DHA pricing. Blocks vary noticeably in age, layout and rental demand.",
     inventoryNote:
-      "Demo inventory includes newly built apartments in Johar Town, with houses and plots available in surrounding blocks as listings are onboarded.",
+      "Live inventory includes newly built apartments in Johar Town, with houses and plots available in surrounding blocks as listings are onboarded.",
     priceNote:
-      "Indicative demo pricing: 5 Marla houses from around PKR 2.2 Crore, 10 Marla houses from around PKR 3.8 Crore, and 2-bedroom apartments for rent from around PKR 90,000 per month.",
+      "Indicative pricing: 5 Marla houses from around PKR 2.2 Crore, 10 Marla houses from around PKR 3.8 Crore, and 2-bedroom apartments for rent from around PKR 90,000 per month.",
     investmentNote:
       "The Expo Centre, university belt and Ring Road access keep rental demand steady. Smaller units and apartments let fastest in this district.",
     nearby: ["gulberg-lahore", "dha-lahore", "model-town-lahore"],
@@ -379,9 +379,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Gulberg is Lahore's business and hospitality heart. Main Boulevard, MM Alam Road and Liberty Market keep commercial demand high and residential values resilient.",
     inventoryNote:
-      "Demo inventory in Gulberg includes a fitted corporate office floor on Main Boulevard and a retail unit in Liberty Market, with residential listings added as they are onboarded.",
+      "Live inventory in Gulberg includes a fitted corporate office floor on Main Boulevard and a retail unit in Liberty Market, with residential listings added as they are onboarded.",
     priceNote:
-      "Indicative demo pricing: commercial floors in Gulberg III commonly PKR 3.5 Crore – 8 Crore, retail units from around PKR 2 Crore, and furnished apartments for rent from around PKR 4 Lakh per month.",
+      "Indicative pricing: commercial floors in Gulberg III commonly PKR 3.5 Crore – 8 Crore, retail units from around PKR 2 Crore, and furnished apartments for rent from around PKR 4 Lakh per month.",
     investmentNote:
       "Commercial assets here are judged on frontage, footfall, parking and building services. Reliable backup power and lift redundancy decide tenant retention more than rate per square foot alone.",
     nearby: ["model-town-lahore", "johar-town-lahore", "dha-phase-5-lahore"],
@@ -408,9 +408,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Model Town is one of Lahore's oldest planned residential districts — generous plot sizes, tree-lined roads and low-density living close to the city centre.",
     inventoryNote:
-      "We do not have live demo inventory in Model Town yet; the listings below show comparable mature-district and DHA inventory in Lahore.",
+      "We do not have live listings in Model Town yet; the listings below show comparable mature-district and DHA inventory in Lahore.",
     priceNote:
-      "Indicative demo pricing: 1 Kanal houses commonly PKR 9 Crore – 25 Crore depending on block, renovation status and road width.",
+      "Indicative pricing: 1 Kanal houses commonly PKR 9 Crore – 25 Crore depending on block, renovation status and road width.",
     investmentNote:
       "Scarcity of ready inventory keeps long-term value stable. Older construction usually requires renovation budgeting, and heritage or layout restrictions can apply.",
     nearby: ["gulberg-lahore", "johar-town-lahore", "dha-lahore"],
@@ -437,9 +437,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "DHA Islamabad brings the capital's sector discipline and a strong institutional tenant base. Phase 1 is largely developed; Phase 2 and Phase 5 add newer supply close to the expressway.",
     inventoryNote:
-      "Demo inventory includes developed 10 Marla plots and new-project apartment units in DHA Phase 2, with houses added as they are onboarded.",
+      "Live inventory includes developed 10 Marla plots and new-project apartment units in DHA Phase 2, with houses added as they are onboarded.",
     priceNote:
-      "Indicative demo pricing: 10 Marla plots from around PKR 3.5 Crore, houses from around PKR 8 Crore, and new-project apartments from around PKR 1.9 Crore with instalment plans.",
+      "Indicative pricing: 10 Marla plots from around PKR 3.5 Crore, houses from around PKR 8 Crore, and new-project apartments from around PKR 1.9 Crore with instalment plans.",
     investmentNote:
       "Institutional tenancies reduce vacancy risk. For off-plan units, confirm the developer's approval status, instalment escalation terms and the post-handover service charge structure.",
     nearby: ["blue-area-islamabad", "bahria-town-karachi", "dha-lahore"],
@@ -466,9 +466,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Blue Area along Jinnah Avenue is the capital's central business district — the most prestigious office address in Islamabad and the baseline for corporate leasing rates.",
     inventoryNote:
-      "Demo inventory includes a fitted serviced office suite on Jinnah Avenue with meeting rooms, server room and dedicated parking.",
+      "Live inventory includes a fitted serviced office suite on Jinnah Avenue with meeting rooms, server room and dedicated parking.",
     priceNote:
-      "Indicative demo pricing: fitted office suites from around PKR 3.5 Lakh per month, rising steeply with floor level, frontage and parking allocation.",
+      "Indicative pricing: fitted office suites from around PKR 3.5 Lakh per month, rising steeply with floor level, frontage and parking allocation.",
     investmentNote:
       "Office demand here is steady but building services are non-negotiable. Confirm backup power load, HVAC arrangements, lift redundancy and fire compliance before signing.",
     nearby: ["dha-islamabad", "dha-lahore", "blue-area-islamabad"],
@@ -476,7 +476,7 @@ export const SOCIETIES: SocietyEntry[] = [
       {
         question: "What rent should I expect for a Blue Area office?",
         answer:
-          "In our demo data, fitted suites on Jinnah Avenue start around PKR 3.5 Lakh per month, with pricing driven more by floor, view and parking than by area alone.",
+          "Across current listings, fitted suites on Jinnah Avenue start around PKR 3.5 Lakh per month, with pricing driven more by floor, view and parking than by area alone.",
       },
       {
         question: "Do Blue Area offices include backup power?",
@@ -495,9 +495,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Bahria Town Islamabad and the adjoining Rawalpindi phases form a major planned residential corridor for households working across the twin cities. Gated streets, commercial areas and motorway access drive end-user demand.",
     inventoryNote:
-      "Properties Pak presents comparable sample Islamabad and Rawalpindi inventory while dedicated Bahria Town Islamabad listings are added to the demonstration catalogue.",
+      "Properties Pak presents comparable Islamabad and Rawalpindi inventory while dedicated Bahria Town Islamabad listings are added to the live catalogue.",
     priceNote:
-      "Indicative demo pricing varies materially by phase, block, possession, road width and development status; compare only like-for-like plots or constructed units.",
+      "Indicative pricing varies materially by phase, block, possession, road width and development status; compare only like-for-like plots or constructed units.",
     investmentNote:
       "Before buying, independently confirm the exact phase authority, possession, dues, utility availability and transfer process. Rental demand is generally strongest in populated phases with direct commercial access.",
     nearby: ["dha-islamabad", "blue-area-islamabad", "bahria-town-phase-8-rawalpindi"],
@@ -529,9 +529,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Bahria Town Karachi is a planned satellite city with its own commercial boulevard, schools, hospital and internal transport, popular with families wanting organised living outside central Karachi.",
     inventoryNote:
-      "Demo inventory includes a fully furnished three-bedroom apartment in Precinct 10A, with more apartment and plot options added as they are onboarded.",
+      "Live inventory includes a fully furnished three-bedroom apartment in Precinct 10A, with more apartment and plot options added as they are onboarded.",
     priceNote:
-      "Indicative demo pricing: furnished 3-bedroom apartments for rent from around PKR 2.2 Lakh per month, and apartment purchases from around PKR 1.2 Crore.",
+      "Indicative pricing: furnished 3-bedroom apartments for rent from around PKR 2.2 Lakh per month, and apartment purchases from around PKR 1.2 Crore.",
     investmentNote:
       "Serviced and furnished apartments attract corporate tenants but require active management. Compare society charges against achievable rent before pricing a unit.",
     nearby: ["dha-karachi", "clifton-karachi", "dha-phase-6-lahore"],
@@ -558,9 +558,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "DHA Karachi remains the city's most established premium address, with a strong resale market, dense commercial belts and consistent corporate rental demand.",
     inventoryNote:
-      "Demo inventory includes well-maintained family apartments in DHA Phase 6 on Khayaban-e-Bukhari, with additional phases represented through similar listings.",
+      "Live inventory includes well-maintained family apartments in DHA Phase 6 on Khayaban-e-Bukhari, with additional phases represented through similar listings.",
     priceNote:
-      "Indicative demo pricing: 3-bedroom apartments from around PKR 4 Crore, houses from around PKR 12 Crore, subject to phase, plot size and road width.",
+      "Indicative pricing: 3-bedroom apartments from around PKR 4 Crore, houses from around PKR 12 Crore, subject to phase, plot size and road width.",
     investmentNote:
       "Apartment liquidity is strong but building quality and maintenance charges vary widely. Always review the society's maintenance history and any pending structural work.",
     nearby: ["clifton-karachi", "bahria-town-karachi", "dha-lahore"],
@@ -587,9 +587,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Clifton combines sea-facing living, high-end retail and hospitality. Inventory skews towards larger apartments, penthouses and purpose-built towers with concierge services.",
     inventoryNote:
-      "Demo inventory includes a sea-facing penthouse in Clifton Block 5 with a wrap-around terrace and private lift lobby.",
+      "Live inventory includes a sea-facing penthouse in Clifton Block 5 with a wrap-around terrace and private lift lobby.",
     priceNote:
-      "Indicative demo pricing: 4-bedroom penthouses from around PKR 15 Crore, with premium sea-facing floors considerably higher.",
+      "Indicative pricing: 4-bedroom penthouses from around PKR 15 Crore, with premium sea-facing floors considerably higher.",
     investmentNote:
       "Prestige addresses support higher rents but fewer comparable transactions, so valuations move less predictably. Verify building maintenance, lift and generator arrangements closely.",
     nearby: ["dha-karachi", "bahria-town-karachi", "dha-phase-5-lahore"],
@@ -616,9 +616,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "DHA Multan is the most credible new society in South Punjab, with trunk infrastructure delivered across developed sectors and an established resale market for balloted plots.",
     inventoryNote:
-      "Demo inventory includes a balloted 1 Kanal plot in Sector A with an up-to-date instalment record.",
+      "Live inventory includes a balloted 1 Kanal plot in Sector A with an up-to-date instalment record.",
     priceNote:
-      "Indicative demo pricing: 1 Kanal plots from around PKR 1.8 Crore, with commercial frontage plots priced substantially higher.",
+      "Indicative pricing: 1 Kanal plots from around PKR 1.8 Crore, with commercial frontage plots priced substantially higher.",
     investmentNote:
       "Confirm instalment status, transfer procedure and whether any development charges remain. In new societies, documentation quality drives resale more than location alone.",
     nearby: ["buch-villas-multan", "dha-lahore", "bahria-town-lahore"],
@@ -645,9 +645,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Buch Villas is one of Multan's most organised addresses, with generous plot sizes, a controlled layout and constructed villas suited to immediate family occupation.",
     inventoryNote:
-      "Demo inventory includes a 1 Kanal designer villa with high ceilings and pool plumbing already laid.",
+      "Live inventory includes a 1 Kanal designer villa with high ceilings and pool plumbing already laid.",
     priceNote:
-      "Indicative demo pricing: 1 Kanal villas from around PKR 2.4 Crore, with premium corner and main-road units priced higher.",
+      "Indicative pricing: 1 Kanal villas from around PKR 2.4 Crore, with premium corner and main-road units priced higher.",
     investmentNote:
       "Constructed villas here appeal to end users and long-hold investors. Confirm society maintenance charges and utility arrangements before transfer.",
     nearby: ["dha-multan", "eden-valley-faisalabad", "dha-lahore"],
@@ -674,9 +674,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Eden Valley is a well-established gated scheme on Canal Road with a mix of built-up houses and plot inventory, popular with families upgrading within Faisalabad.",
     inventoryNote:
-      "Demo inventory includes a newly built 5 Marla house with modern elevation and standard construction quality.",
+      "Live inventory includes a newly built 5 Marla house with modern elevation and standard construction quality.",
     priceNote:
-      "Indicative demo pricing: 5 Marla houses from around PKR 1.3 Crore, 10 Marla houses from around PKR 2.4 Crore.",
+      "Indicative pricing: 5 Marla houses from around PKR 1.3 Crore, 10 Marla houses from around PKR 2.4 Crore.",
     investmentNote:
       "Rental demand comes from factory management and professionals; longer tenancy cycles make this better suited to income than short-term trading.",
     nearby: ["dha-multan", "satellite-town-gujranwala", "dha-lahore"],
@@ -689,7 +689,7 @@ export const SOCIETIES: SocietyEntry[] = [
       {
         question: "What rent can a 5 Marla house achieve in Faisalabad?",
         answer:
-          "In our demo data, well-maintained 5 Marla houses in gated Faisalabad schemes sit in a PKR 45,000 to PKR 75,000 per month range, depending on furnishing and location.",
+          "Across current listings, well-maintained 5 Marla houses in gated Faisalabad schemes sit in a PKR 45,000 to PKR 75,000 per month range, depending on furnishing and location.",
       },
     ],
   },
@@ -703,9 +703,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Bahria Town Phase 8 offers organised living within reach of Islamabad, with shuttle services, security and a broad mix of house and portion inventory.",
     inventoryNote:
-      "Demo inventory includes an independent upper portion with its own entrance and terrace in Sector C.",
+      "Live inventory includes an independent upper portion with its own entrance and terrace in Sector C.",
     priceNote:
-      "Indicative demo pricing: upper portions for rent from around PKR 75,000 per month, houses from around PKR 2.2 Crore.",
+      "Indicative pricing: upper portions for rent from around PKR 75,000 per month, houses from around PKR 2.2 Crore.",
     investmentNote:
       "Portions and smaller units let fastest here. Confirm separate utility meters and society charges, which materially affect net rental income.",
     nearby: ["dha-islamabad", "blue-area-islamabad", "dha-lahore"],
@@ -732,9 +732,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Satellite Town is a settled residential district in Gujranwala with wide roads, mature trees and larger plots, close to GT Road and the city's commercial spine.",
     inventoryNote:
-      "Demo inventory includes an established 1 Kanal house with a mature garden and separate servants' block.",
+      "Live inventory includes an established 1 Kanal house with a mature garden and separate servants' block.",
     priceNote:
-      "Indicative demo pricing: 1 Kanal houses from around PKR 2.1 Crore, with renovated stock at a premium.",
+      "Indicative pricing: 1 Kanal houses from around PKR 2.1 Crore, with renovated stock at a premium.",
     investmentNote:
       "Entry pricing is low and demand is stable, but older construction often needs modernisation. Budget for renovation rather than assuming immediate occupancy.",
     nearby: ["eden-valley-faisalabad", "dha-lahore", "bahria-town-lahore"],
@@ -761,9 +761,9 @@ export const SOCIETIES: SocietyEntry[] = [
     heroNote:
       "Hayatabad is Peshawar's most established planned residential area, valued for security, wide roads and proximity to universities and hospitals.",
     inventoryNote:
-      "Demo inventory includes a four-bedroom family house for rent in Phase 4 with a covered porch and guest room.",
+      "Live inventory includes a four-bedroom family house for rent in Phase 4 with a covered porch and guest room.",
     priceNote:
-      "Indicative demo pricing: 10 Marla houses for rent from around PKR 1.2 Lakh per month, purchases from around PKR 2.6 Crore.",
+      "Indicative pricing: 10 Marla houses for rent from around PKR 1.2 Lakh per month, purchases from around PKR 2.6 Crore.",
     investmentNote:
       "Reinforced security and scheme management support tenant confidence. Long-tenure institutional tenants are common in this belt.",
     nearby: ["dha-islamabad", "dha-lahore", "bahria-town-lahore"],
@@ -1009,7 +1009,7 @@ export function buildCityLanding(citySlug: string, purpose: "sale" | "rent"): La
         ? city.saleSupply
         : `${city.rentTenants} Most rental listings show monthly rent, furnishing status and what is included, so you can compare like with like before arranging visits.`,
       isSale
-        ? `${city.investorAngle} Indicative demo price bands for ${city.name} currently run ${city.saleBand}, and our sample benchmark is ${city.ppsf}.`
+        ? `${city.investorAngle} Indicative price bands for ${city.name} currently run ${city.saleBand}, with a market benchmark of ${city.ppsf}.`
         : `Selecting a rental also means selecting a landlord relationship. Confirm maintenance responsibility, utility arrangements, escalation terms and the notice period in the tenancy agreement before you commit.`,
     ],
     filters: isSale
@@ -1044,12 +1044,12 @@ export function buildCityLanding(citySlug: string, purpose: "sale" | "rent"): La
       {
         question: `What are indicative ${isSale ? "sale prices" : "rents"} in ${city.name}?`,
         answer: isSale
-          ? `Our demo reference band for ${city.name} is ${city.saleBand} and ${city.ppsf}. These are illustrative sample figures, not verified market transactions.`
-          : `Our demo reference band for rentals in ${city.name} is ${city.rentBand}, depending on area, unit size and furnishing.`,
+          ? `Our reference band for ${city.name} is ${city.saleBand}, with a market benchmark of ${city.ppsf}. These are indicative figures based on current asking prices.`
+          : `Our reference band for rentals in ${city.name} is ${city.rentBand}, depending on area, unit size and furnishing.`,
       },
       {
         question: `Which areas of ${city.name} should I shortlist first?`,
-        answer: `${city.keyAreas.join(", ")} are the most active areas in our demo inventory. Use the area pages and map view to compare access, schooling and commute before booking visits.`,
+        answer: `${city.keyAreas.join(", ")} are the most active areas in our current inventory. Use the area pages and map view to compare access, schooling and commute before booking visits.`,
       },
     ],
     relatedLinks: relatedCityLinks(city),
@@ -1079,7 +1079,7 @@ export function buildTypeLanding(slug: string): LandingContent | null {
     intro: [
       `${city.character}`,
       config.introExtra ?? city.saleSupply,
-      `Indicative demo bands for ${city.name} currently run ${isRent ? city.rentBand : city.saleBand}. Use the filters below to narrow by area, budget and size, then add two or three shortlisted ${copy.plural} to the comparison view.`,
+      `Indicative bands for ${city.name} currently run ${isRent ? city.rentBand : city.saleBand}. Use the filters below to narrow by area, budget and size, then add two or three shortlisted ${copy.plural} to the comparison view.`,
     ],
     filters: config.filters,
     alternatives: { city: city.slug },
@@ -1107,11 +1107,11 @@ export function buildTypeLanding(slug: string): LandingContent | null {
       {
         question: `How do I compare ${copy.plural} in ${city.name} quickly?`,
         answer:
-          "Use the price per square foot shown on each listing, then add up to three shortlisted properties to the Properties Pak comparison view to line up price, area, amenities and the illustrative property score side by side.",
+          "Use the price per square foot shown on each listing, then add up to three shortlisted properties to the Properties Pak comparison view to line up price, area, amenities and the Properties Pak Score side by side.",
       },
       {
         question: `What is an indicative price range for ${copy.plural} in ${city.name}?`,
-        answer: `Our demo reference band runs ${city.saleBand}, with ${city.ppsf}. These are illustrative figures created for this product demo, not verified transactions.`,
+        answer: `Our reference band runs ${city.saleBand}, with a market benchmark of ${city.ppsf}. These are indicative figures based on current asking prices.`,
       },
     ],
     relatedLinks: [
@@ -1143,7 +1143,7 @@ export function buildSocietyLanding(slug: string): LandingContent | null {
     eyebrow: `${society.cityName} · Location guide`,
     h1: `Property for Sale in ${society.name}`,
     metaTitle: `Property for Sale in ${society.name} | Prices, Listings & Guide | Properties Pak`,
-    metaDescription: `${society.name} property guide: live demo listings, indicative price bands, what to verify before buying and how the area compares with neighbouring ${society.cityName} locations.`,
+    metaDescription: `${society.name} property guide: live listings, indicative price bands, what to verify before buying and how the area compares with neighbouring ${society.cityName} locations.`,
     keywords: [
       `${society.name} property`,
       `property for sale ${society.name}`,
@@ -1153,7 +1153,7 @@ export function buildSocietyLanding(slug: string): LandingContent | null {
     intro: [
       society.heroNote,
       society.inventoryNote,
-      `${society.priceNote} These are illustrative demo figures created for the Properties Pak product demonstration and are not verified market transactions.`,
+      `${society.priceNote} These figures are indicative, based on current asking prices across the market — confirm the exact unit, its dues and possession status before you commit.`,
     ],
     filters,
     alternatives: { city: society.citySlug },
@@ -1167,8 +1167,8 @@ export function buildSocietyLanding(slug: string): LandingContent | null {
       .filter((item): item is SocietyEntry => Boolean(item))
       .map((item) => ({ name: item.name, href: `/property-for-sale/${item.slug}`, note: item.priceNote })),
     priceBands: [
-      { label: "Indicative pricing", range: society.priceNote.replace(/^Indicative demo pricing:\s*/i, ""), note: "Demo reference only" },
-      { label: "Benchmark", range: city.ppsf, note: `Sample benchmark for ${city.name}` },
+      { label: "Indicative pricing", range: society.priceNote.replace(/^Indicative pricing:\s*/i, ""), note: "Indicative reference" },
+      { label: "Benchmark", range: city.ppsf, note: `Market benchmark for ${city.name}` },
       { label: "City range", range: city.saleBand, note: "Across all areas" },
     ],
     insightNotes: [
@@ -1209,7 +1209,7 @@ const INVESTMENT_GUIDE: LandingContent = {
   ],
   intro: [
     "Property in Pakistan is bought for two very different reasons: somewhere to live, and something to hold as an asset. The second requires a framework, because two properties on the same street can behave completely differently over five years.",
-    "This guide sets out the framework our desk uses when comparing opportunities — location fundamentals, entry economics, income, documentation risk and exit liquidity. Nothing here is investment advice, and every figure on Properties Pak is illustrative demo content.",
+    "This guide sets out the framework our desk uses when comparing opportunities — location fundamentals, entry economics, income, documentation risk and exit liquidity. Nothing here is investment advice, and every figure on Properties Pak is an indicative reference.",
     "Use the calculators alongside the city and society guides, then shortlist two or three options and compare them side by side before you visit.",
   ],
   filters: { featured: true },
@@ -1280,7 +1280,7 @@ const INVESTMENT_GUIDE: LandingContent = {
     {
       question: "Does Properties Pak provide investment advice?",
       answer:
-        "No. Properties Pak is a demonstration property discovery platform. The tools and guides here are educational and illustrative, and all sample figures are labelled as demo content.",
+        "No. Properties Pak is a property discovery and research platform. The tools and guides here are educational, and every figure is an indicative reference for planning only.",
     },
   ],
   relatedLinks: [

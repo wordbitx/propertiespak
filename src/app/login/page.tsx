@@ -77,7 +77,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
                 Sign in <IconArrowRight className="h-4 w-4" />
               </button>
               <p className="mt-4 text-[0.75rem] leading-relaxed text-ink-muted">
-                Accounts are stored securely on {SITE.name} with hashed passwords. This is a demo product by {SITE.company}.
+                Accounts are stored securely on {SITE.name} with hashed passwords. Accounts are operated by {SITE.company}.
               </p>
             </form>
 
@@ -164,7 +164,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
           <p className="mt-8 text-center text-[0.8125rem] text-ink-muted">
             Looking for a property?{" "}
             <Link href="/properties" className="font-semibold text-navy-900 hover:text-forest-700">
-              Browse demo listings
+              Browse live listings
             </Link>{" "}
             or{" "}
             <Link href="/contact" className="font-semibold text-navy-900 hover:text-forest-700">

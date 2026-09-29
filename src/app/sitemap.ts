@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/constants";
-import { getAllPostSlugs, getAllProjectSlugs, getAllPropertySlugs, getCities } from "@/lib/queries";
+import { getAllDealerSlugs, getAllPostSlugs, getAllProjectSlugs, getAllPropertySlugs, getCities } from "@/lib/queries";
 import { getAllLandingSlugs, getAllSocietySlugs } from "@/lib/landing-pages";
 import { getAllKeywordLandingSlugs } from "@/lib/keyword-landings";
+import { TOWNS, getAllTownSlugs } from "@/lib/towns";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,13 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/list-property", priority: 0.7, changeFrequency: "monthly" },
   { path: "/sitemap", priority: 0.8, changeFrequency: "daily" },
+  { path: "/dealers", priority: 0.9, changeFrequency: "daily" },
+  { path: "/towns", priority: 0.9, changeFrequency: "weekly" },
+  ...Array.from(new Set(TOWNS.map((town) => town.citySlug))).map((city) => ({
+    path: `/towns/${city}`,
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  })),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -53,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  const society: MetadataRoute.Sitemap = getAllSocietySlugs().map((slug) => ({
+  const society: MetadataRoute.Sitemap = [...getAllSocietySlugs(), ...getAllTownSlugs()].map((slug) => ({
     url: `${SITE.url}/property-for-sale/${slug}`,
     lastModified: now,
     changeFrequency: "weekly",
@@ -61,11 +69,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const [properties, projects, posts, cities] = await Promise.all([
+    const [properties, projects, posts, cities, dealers] = await Promise.all([
       getAllPropertySlugs(),
       getAllProjectSlugs(),
       getAllPostSlugs(),
       getCities(),
+      getAllDealerSlugs(),
     ]);
 
     return [
@@ -96,6 +105,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.6,
       })),
+      ...dealers
+        .filter((dealer) => dealer.slug)
+        .map((dealer) => ({
+          url: `${SITE.url}/dealers/${dealer.slug}`,
+          lastModified: dealer.updatedAt instanceof Date ? dealer.updatedAt : now,
+          changeFrequency: "weekly" as const,
+          priority: dealer.verified ? 0.8 : 0.6,
+        })),
     ];
   } catch {
     return [...base, ...landing, ...society];

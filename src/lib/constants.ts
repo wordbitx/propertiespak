@@ -13,16 +13,19 @@ export const SITE = {
   companyEmail: "info@propertiespak.com",
   companyPhone: "+92 325 1888841",
   companyPhoneUs: "+1 (929) 619-7699",
+  /**
+   * Public-facing location for the company. Only the city and country are
+   * published — the street/office address is deliberately not displayed.
+   */
   companyAddress: {
-    street: "Office #306, Taj Heights, Johar Town",
     city: "Lahore",
     country: "Pakistan",
   },
-  /** Company (not site) address for the vendor credit line. */
-  companyAddressLine: "Office #306, Taj Heights, Johar Town, Lahore, Pakistan",
+  /** Company (not site) location for the vendor credit line. */
+  companyAddressLine: "Lahore, Pakistan",
   locale: "en_PK",
   language: "en-PK",
-  demoLabel: "Official real estate platform by WordbitX Software Company",
+  platformLabel: "Official real estate platform by WordbitX Software Company",
   social: {
     facebook: "https://www.facebook.com/propertiespak",
     instagram: "https://www.instagram.com/propertiespak",
@@ -30,19 +33,44 @@ export const SITE = {
     youtube: "https://www.youtube.com/@propertiespak",
     x: "https://x.com/propertiespak",
   },
+  /**
+   * Social profiles for the parent company, WordbitX. The footer renders a
+   * "Follow WordbitX" row containing whichever platforms have a URL below
+   * (see SITE.companySocialLinks); leave a value empty to hide that platform.
+   * Handles verified against the company's own GitHub organisation
+   * (github.com/wordbitx) and X profile.
+   */
+  companySocial: {
+    facebook: "",
+    instagram: "https://www.instagram.com/wordbitx",
+    linkedin: "https://www.linkedin.com/company/wordbitx",
+    youtube: "https://www.youtube.com/@wordbitx",
+    x: "https://x.com/wordbitx",
+    tiktok: "https://www.tiktok.com/@wordbitx",
+  },
   backlinks: {
     wordbitxHome: "https://wordbitxtech.com/",
     wordbitxServices: "https://wordbitxtech.com/",
     wordbitxContact: "https://wordbitxtech.com/",
-    officialDemo: "https://propertiespak.com",
+    officialPlatform: "https://propertiespak.com",
   },
 };
+
+/**
+ * Published WordbitX profile URLs — platforms without a link are omitted, so
+ * the footer row and structured data only ever reference live accounts.
+ */
+export const COMPANY_SOCIAL_LINKS: string[] = Object.values(SITE.companySocial).filter(
+  (url) => url.trim().length > 0,
+);
 
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Buy", href: "/properties/for-sale" },
   { label: "Rent", href: "/properties/for-rent" },
   { label: "New Projects", href: "/projects" },
+  { label: "Towns", href: "/towns" },
+  { label: "Dealers", href: "/dealers" },
   { label: "Commercial", href: "/commercial" },
   { label: "Insights", href: "/blog" },
   { label: "About", href: "/about" },

@@ -6,6 +6,8 @@ import { Section, SectionHeading } from "@/components/section";
 import { SITE } from "@/lib/constants";
 import { getAllLandingSlugs, getAllSocietySlugs, SOCIETY_BY_SLUG, CITY_MARKETS } from "@/lib/landing-pages";
 import { getAllKeywordLandingSlugs } from "@/lib/keyword-landings";
+import { TOWNS } from "@/lib/towns";
+import { getAllDealerSlugs } from "@/lib/queries";
 import { getSitemapRegistry } from "@/lib/sitemap-registry";
 import { getAllPropertySlugs, getAllProjectSlugs, getAllPostSlugs } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
@@ -20,14 +22,18 @@ export const metadata: Metadata = buildMetadata({
 export const dynamic = "force-dynamic";
 
 export default async function HtmlSitemapPage() {
-  const [properties, projects, posts] = await Promise.all([
+  const [properties, projects, posts, dealers] = await Promise.all([
     getAllPropertySlugs(),
     getAllProjectSlugs(),
     getAllPostSlugs(),
+    getAllDealerSlugs(),
   ]);
 
   const landingSlugs = [...getAllLandingSlugs(), ...getAllKeywordLandingSlugs()];
   const societySlugs = getAllSocietySlugs();
+  const townSlugs = TOWNS.map((town) => town.slug);
+  const dealerSlugs = dealers.filter((dealer) => dealer.slug).map((dealer) => dealer.slug);
+  const townCities = Array.from(new Set(TOWNS.map((town) => ({ slug: town.citySlug, name: town.cityName })).map((item) => `${item.slug}|${item.name}`)));
 
   return (
     <>
@@ -50,7 +56,7 @@ export default async function HtmlSitemapPage() {
             <h2 className="display-3 mt-3 text-navy-900">Pakistan Property Search Directory</h2>
             <p className="mt-3 max-w-3xl text-[0.875rem] leading-relaxed text-ink-muted">
               Start with a broad Pakistan market, then narrow by city, property type, size or society. Every link below
-              points to a canonical page with useful content and relevant sample inventory.
+              points to a canonical page with useful content and relevant listings.
             </p>
             <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-xl border border-soft bg-white p-4">
@@ -150,6 +156,50 @@ export default async function HtmlSitemapPage() {
                     </li>
                   );
                 })}
+              </ul>
+
+              <h2 className="mt-8 font-sans text-[1.125rem] font-bold text-navy-900">
+                Towns &amp; Housing Societies ({TOWNS.length})
+              </h2>
+              <ul className="mt-4 grid gap-2 text-[0.875rem] sm:grid-cols-2">
+                {townCities.map((entry) => {
+                  const [slug, name] = entry.split("|");
+                  return (
+                    <li key={slug}>
+                      <Link href={`/towns/${slug}`} className="font-medium text-navy-800 hover:text-forest-700">
+                        {name} towns
+                      </Link>
+                    </li>
+                  );
+                })}
+                {townSlugs.map((slug) => {
+                  const town = TOWNS.find((item) => item.slug === slug);
+                  return (
+                    <li key={slug}>
+                      <Link href={`/property-for-sale/${slug}`} className="hover:text-forest-700">
+                        {town?.name ?? slug}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <h2 className="mt-8 font-sans text-[1.125rem] font-bold text-navy-900">
+                Verified Dealers ({dealerSlugs.length})
+              </h2>
+              <ul className="mt-4 grid gap-2 text-[0.875rem] sm:grid-cols-2">
+                <li>
+                  <Link href="/dealers" className="font-semibold text-forest-700">
+                    Dealer directory
+                  </Link>
+                </li>
+                {dealerSlugs.map((slug) => (
+                  <li key={slug}>
+                    <Link href={`/dealers/${slug}`} className="hover:text-forest-700">
+                      {slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </Link>
+                  </li>
+                ))}
               </ul>
 
               <h2 className="mt-8 font-sans text-[1.125rem] font-bold text-navy-900">

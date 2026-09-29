@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { IconArrowRight, IconCheck, IconPin } from "@/components/icons";
 import { LocationPicker } from "@/components/location-picker";
 import { ListingImageUploader, type UploadedImage } from "@/components/listing-image-uploader";
@@ -49,6 +50,9 @@ export function ListingForm() {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const [referenceId, setReferenceId] = useState<number | null>(null);
+  const [accountCreated, setAccountCreated] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,6 +62,12 @@ export function ListingForm() {
   const [propertyType, setPropertyType] = useState("House");
   const [citySlug, setCitySlug] = useState("lahore");
   const [locationArea, setLocationArea] = useState("");
+  /**
+   * Area name that came from the map pin rather than from typing. It is passed
+   * to the autocomplete as `skipQuery` so writing it into the field does not
+   * reopen the suggestion list, and cleared as soon as the user types.
+   */
+  const [mapAreaLabel, setMapAreaLabel] = useState("");
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState(CITY_CENTERS.lahore.lat);
   const [lng, setLng] = useState(CITY_CENTERS.lahore.lng);
@@ -74,6 +84,8 @@ export function ListingForm() {
   const [features, setFeatures] = useState("");
   const [amenities, setAmenities] = useState("");
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [createAccount, setCreateAccount] = useState(true);
+  const [password, setPassword] = useState("");
 
   const cityName = CITIES.find((c) => c.slug === citySlug)?.name ?? "Lahore";
   const typeOptions = CATEGORIES.find((c) => c.value === category)?.types ?? ["House"];
@@ -130,15 +142,27 @@ export function ListingForm() {
           features,
           amenities,
           imageUrls: uploadedImages.map((image) => image.url),
+          createAccount,
+          password,
         }),
       });
-      const payload = (await response.json()) as { ok?: boolean; error?: string; id?: number };
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        id?: number;
+        accountCreated?: boolean;
+        signedIn?: boolean;
+        emailAlreadyRegistered?: boolean;
+      };
       if (!response.ok || !payload.ok) {
         setError(payload.error ?? "We could not send your listing. Please try again.");
         setState("error");
         return;
       }
       setReferenceId(payload.id ?? null);
+      setAccountCreated(Boolean(payload.accountCreated));
+      setSignedIn(Boolean(payload.signedIn));
+      setEmailTaken(Boolean(payload.emailAlreadyRegistered));
       setState("done");
     } catch {
       setError("Network error. Please check your connection and try again.");
@@ -153,6 +177,24 @@ export function ListingForm() {
           <IconCheck className="h-5 w-5" />
         </span>
         <h3 className="mt-4 font-sans text-[1.25rem] font-bold text-navy-900">Listing sent for admin review</h3>
+        {accountCreated && (
+          <p className="mt-3 rounded-xl border border-forest-600/25 bg-white px-4 py-3 text-[0.85rem] leading-relaxed text-forest-700">
+            Your Properties Pak account is ready and you are signed in as {email}. This listing is already tracked in your
+            dashboard — verified accounts get the blue tick on their dealer profile and listings.
+          </p>
+        )}
+        {!accountCreated && signedIn && (
+          <p className="mt-3 rounded-xl border border-forest-600/25 bg-white px-4 py-3 text-[0.85rem] leading-relaxed text-forest-700">
+            Submitted from your account, so it is already listed in your dashboard under <strong>Your listings</strong> while
+            our team reviews it.
+          </p>
+        )}
+        {emailTaken && (
+          <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.85rem] leading-relaxed text-amber-800">
+            An account already exists for {email}, so this listing was sent to the review queue without being attached to it.{" "}
+            <Link href="/login" className="font-semibold underline">Sign in</Link> and submit again to publish it under your profile.
+          </p>
+        )}
         <p className="mt-2 text-[0.9rem] leading-relaxed text-ink-muted">
           Thank you, {name.split(" ")[0] || "owner"}. Your property has been submitted
           {referenceId ? (
@@ -164,20 +206,32 @@ export function ListingForm() {
           the details and publish it live — usually within 24 hours. We will contact you on {phone || "your number"} if
           anything is needed.
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            setState("idle");
-            setLocationArea("");
-            setAddress("");
-            setPrice("");
-            setDescription("");
-            setUploadedImages([]);
-          }}
-          className="btn btn-outline mt-6"
-        >
-          Submit another property
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {signedIn && (
+            <Link href="/account#your-listings" className="btn btn-primary">
+              View it in your dashboard
+            </Link>
+          )}
+          {!signedIn && (
+            <Link href="/login" className="btn btn-primary">
+              Sign in to track it
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setState("idle");
+              setLocationArea("");
+              setAddress("");
+              setPrice("");
+              setDescription("");
+              setUploadedImages([]);
+            }}
+            className="btn btn-outline"
+          >
+            Submit another property
+          </button>
+        </div>
       </div>
     );
   }
@@ -216,6 +270,50 @@ export function ListingForm() {
             <label className={label} htmlFor="listing-email">Email *</label>
             <input id="listing-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="field mt-2" placeholder="you@email.com" />
           </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-soft bg-mist p-4">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={createAccount}
+              onChange={(e) => setCreateAccount(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 accent-forest-600"
+            />
+            <span>
+              <span className="font-sans text-[0.875rem] font-semibold text-navy-900">
+                Create my Properties Pak account (recommended)
+              </span>
+              <span className="mt-1 block text-[0.8125rem] leading-relaxed text-ink-muted">
+                Your listing, enquiries and a public dealer profile stay under one account. Once our team verifies the
+                account, the blue tick appears on your profile and on every property you publish.
+              </span>
+            </span>
+          </label>
+          {createAccount && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label} htmlFor="listing-password">Account password *</label>
+                <input
+                  id="listing-password"
+                  type="password"
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="field mt-2"
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                />
+              </div>
+              <p className="self-end text-[0.75rem] leading-relaxed text-ink-muted">
+                Already registered? Leave the password blank and{" "}
+                <Link href="/login" className="font-semibold text-forest-700 hover:underline">
+                  sign in
+                </Link>{" "}
+                instead — the listing is attached to your existing account.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -292,7 +390,11 @@ export function ListingForm() {
               required
               className="mt-2"
               value={locationArea}
-              onChange={setLocationArea}
+              skipQuery={mapAreaLabel}
+              onChange={(next) => {
+                if (next !== mapAreaLabel) setMapAreaLabel("");
+                setLocationArea(next);
+              }}
               citySlug={citySlug}
               cityName={cityName}
               onSelect={(s) => {
@@ -332,6 +434,11 @@ export function ListingForm() {
             onChange={(pickedLat, pickedLng) => {
               setLat(pickedLat);
               setLng(pickedLng);
+            }}
+            onLocationLabel={(label) => {
+              // The pin moved, so the area name follows it — no stale society left behind.
+              setMapAreaLabel(label);
+              setLocationArea(label);
             }}
             autoLocate
           />

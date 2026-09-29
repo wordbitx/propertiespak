@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 const NAVY = "#061C33";
 const NAVY_SOFT = "#0B355C";
 const GREEN = "#16B364";
+const GREEN_DEEP = "#0D8A4C";
 
 function clamp(value: string, max: number) {
   return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
@@ -28,10 +29,17 @@ export async function GET(request: Request) {
 
   const logo = (
     <svg width="86" height="86" viewBox="0 0 48 48">
-      <rect width="48" height="48" rx="13" fill="#FFFFFF" fillOpacity="0.1" />
-      <path d="M24 12.4 9.9 24.9a1.95 1.95 0 0 0 1.29 3.38h25.62a1.95 1.95 0 0 0 1.29-3.38Z" fill={GREEN} />
-      <path d="M15.3 27.3h17.4v8.1a1.95 1.95 0 0 1-1.95 1.95H17.25A1.95 1.95 0 0 1 15.3 35.4Z" fill="#FFFFFF" />
-      <path d="M21.2 37.35v-5.5a1.55 1.55 0 0 1 1.55-1.55h2.5a1.55 1.55 0 0 1 1.55 1.55v5.5Z" fill={NAVY_SOFT} />
+      <defs>
+        <linearGradient id="ogRoof" x1="0.15" y1="0" x2="0.85" y2="1">
+          <stop offset="0" stopColor={GREEN_DEEP} />
+          <stop offset="1" stopColor={GREEN} />
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="13.5" fill="#FFFFFF" fillOpacity="0.1" />
+      <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#ogRoof)" />
+      <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF" />
+      <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill={NAVY} opacity="0.16" />
+      <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill={NAVY_SOFT} />
     </svg>
   );
 

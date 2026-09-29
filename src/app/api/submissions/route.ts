@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
-import { listingSubmissions } from "@/db/schema";
+import { listingSubmissions, users } from "@/db/schema";
+import { createSession, getSessionUserId } from "@/lib/auth";
+import { buildProfileSlug, hashPassword, verifyPassword } from "@/lib/password";
 
 export const dynamic = "force-dynamic";
 
@@ -85,9 +88,67 @@ export async function POST(request: Request) {
 
     await ensureSeeded();
 
+    /**
+     * Account linking. A signed-in owner is attached to the submission, and a
+     * signed-out owner can create an account in the same step so the listing,
+     * its enquiries and — after admin verification — the public dealer profile
+     * all live under one account.
+     */
+    let userId = await getSessionUserId();
+    const wantsAccount = Boolean(body.createAccount);
+    const password = String(body.password ?? "");
+    let accountCreated = false;
+    /** True when the email already has an account the caller could not prove ownership of. */
+    let emailAlreadyRegistered = false;
+
+    if (!userId && wantsAccount && password.length >= 6) {
+      const existing = await db
+        .select({ id: users.id, passwordHash: users.passwordHash })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
+        .limit(1);
+      if (existing[0]) {
+        // Never attach a listing — or a session — to an account whose password
+        // the submitter cannot produce.
+        if (existing[0].passwordHash && verifyPassword(password, existing[0].passwordHash)) {
+          userId = existing[0].id;
+        } else {
+          emailAlreadyRegistered = true;
+        }
+      } else {
+        const account = await db
+          .insert(users)
+          .values({
+            name,
+            email: email.toLowerCase(),
+            phone,
+            passwordHash: hashPassword(password),
+            slug: buildProfileSlug(name),
+            role: "dealer",
+            citySlug,
+            cityName,
+            whatsapp: phone.replace(/[^0-9]/g, ""),
+          })
+          .returning({ id: users.id });
+        userId = account[0]?.id ?? null;
+        accountCreated = Boolean(userId);
+      }
+    }
+
+    // A freshly created owner is signed in straight away so the listing they
+    // just submitted is already waiting in their dashboard.
+    if (accountCreated && userId) {
+      try {
+        await createSession(userId);
+      } catch {
+        /* the listing is saved either way; the owner can sign in manually */
+      }
+    }
+
     const inserted = await db
       .insert(listingSubmissions)
       .values({
+        userId: userId ?? null,
         name,
         email,
         phone,
@@ -119,7 +180,13 @@ export async function POST(request: Request) {
       })
       .returning({ id: listingSubmissions.id });
 
-    return NextResponse.json({ ok: true, id: inserted[0]?.id ?? null });
+    return NextResponse.json({
+      ok: true,
+      id: inserted[0]?.id ?? null,
+      accountCreated,
+      signedIn: Boolean(userId),
+      emailAlreadyRegistered,
+    });
   } catch (error) {
     console.error("submission failed", error);
     return NextResponse.json({ ok: false, error: "Could not save your listing. Please try again." }, { status: 500 });

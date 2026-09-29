@@ -10,9 +10,9 @@ type Stats = { listings: number; cities: number; verified: number; projects: num
 /** Architectural hero only: individual listings belong in the marketplace below. */
 export function Hero({ stats }: { stats: Stats }) {
   const statsItems = [
-    { value: formatNumber(stats.listings), label: "Demo properties" },
+    { value: formatNumber(stats.listings), label: "Live properties" },
     { value: String(stats.cities), label: "Cities to explore" },
-    { value: String(stats.projects), label: "Sample projects" },
+    { value: String(stats.projects), label: "New projects" },
     { value: "8", label: "Property tools" },
   ];
   return (
@@ -52,7 +52,7 @@ export function Hero({ stats }: { stats: Stats }) {
             <Link href="/list-property" className="btn btn-ghost-light">List Your Property</Link>
           </div>
           <p className="hero-signature">Better Homes. Bigger Dreams.</p>
-          <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="hero-credit">A WordbitX Software Company demo</a>
+          <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="hero-credit">Official platform by WordbitX Software Company</a>
         </div>
       </section>
 
@@ -66,7 +66,7 @@ export function Hero({ stats }: { stats: Stats }) {
             {POPULAR_SEARCHES.map((search) => <Link key={search.href} href={search.href} className="hero-popular-link">{search.label}<IconArrowRight className="h-3.5 w-3.5 shrink-0 text-forest-700" /></Link>)}
           </div>
         </div>
-        <dl className="hero-stats" aria-label="Platform demo snapshot">
+        <dl className="hero-stats" aria-label="Marketplace snapshot">
           {statsItems.map((item) => <div key={item.label}><dt className="text-[0.6875rem] leading-5 text-ink-muted">{item.label}</dt><dd className="mt-1 font-sans text-[1.45rem] font-bold leading-none tracking-[-0.035em] text-navy-900 sm:text-[1.75rem]">{item.value}</dd></div>)}
         </dl>
       </div>

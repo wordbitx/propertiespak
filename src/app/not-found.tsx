@@ -22,7 +22,7 @@ export default function NotFound() {
           This page has moved, or the listing is no longer available.
         </h1>
         <p className="lede mt-4 max-w-xl text-white/70">
-          Properties move quickly in Pakistan&rsquo;s market. Search the sample inventory again, or browse by city to see what is
+          Properties move quickly in Pakistan&rsquo;s market. Search the listings again, or browse by city to see what is
           available right now.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">

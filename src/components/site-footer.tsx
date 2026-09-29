@@ -1,9 +1,28 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand-lockup";
-import { IconArrowRight, IconMail } from "@/components/icons";
+import {
+  IconArrowRight,
+  IconFacebook,
+  IconInstagram,
+  IconLinkedIn,
+  IconMail,
+  IconTikTok,
+  IconX,
+  IconYouTube,
+} from "@/components/icons";
 import { WordbitxContacts } from "@/components/wordbitx-section";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { SITE } from "@/lib/constants";
+
+/** Parent-company profiles are opt-in: only platforms with a URL are rendered. */
+const COMPANY_SOCIAL = [
+  { platform: "Facebook", href: SITE.companySocial.facebook, Icon: IconFacebook },
+  { platform: "Instagram", href: SITE.companySocial.instagram, Icon: IconInstagram },
+  { platform: "LinkedIn", href: SITE.companySocial.linkedin, Icon: IconLinkedIn },
+  { platform: "YouTube", href: SITE.companySocial.youtube, Icon: IconYouTube },
+  { platform: "X", href: SITE.companySocial.x, Icon: IconX },
+  { platform: "TikTok", href: SITE.companySocial.tiktok, Icon: IconTikTok },
+].filter((entry) => entry.href.trim().length > 0);
 
 const COLUMNS = [
   {
@@ -14,6 +33,8 @@ const COLUMNS = [
       { label: "New projects", href: "/projects" },
       { label: "Commercial", href: "/commercial" },
       { label: "All properties", href: "/properties" },
+      { label: "Towns & societies", href: "/towns" },
+      { label: "Verified dealers", href: "/dealers" },
       { label: "Compare properties", href: "/compare" },
     ],
   },
@@ -26,6 +47,9 @@ const COLUMNS = [
       { label: "Lahore rentals", href: "/property-for-rent-in-lahore" },
       { label: "Rawalpindi property", href: "/property-for-sale-in-rawalpindi" },
       { label: "Multan property", href: "/property-for-sale-in-multan" },
+      { label: "Lake City Lahore", href: "/property-for-sale/lake-city-lahore" },
+      { label: "Etihad Town Lahore", href: "/property-for-sale/etihad-town-lahore" },
+      { label: "Valencia Town Lahore", href: "/property-for-sale/valencia-town-lahore" },
     ],
   },
   {
@@ -99,14 +123,35 @@ export function SiteFooter() {
             <p className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">A WordbitX Product</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400">WordbitX Software Company</a>
             <a href={`mailto:${SITE.companyEmail}`} className="mt-2 flex items-center gap-2 text-[0.75rem] text-white/60 hover:text-white"><IconMail className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{SITE.companyEmail}</span></a>
+            {COMPANY_SOCIAL.length > 0 && (
+              <div className="mt-5">
+                <h2 className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">Follow WordbitX</h2>
+                <ul className="mt-3 flex flex-wrap items-center gap-2.5">
+                  {COMPANY_SOCIAL.map(({ platform, href, Icon }) => (
+                    <li key={platform}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${SITE.company} on ${platform}`}
+                        title={`${SITE.company} on ${platform}`}
+                        className="grid h-9 w-9 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-forest-400 hover:text-forest-400"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <WordbitxContacts light />
         </div>
 
         <p className="mt-5 max-w-5xl text-[0.6875rem] leading-5 text-white/45">
-          Sample listings, market figures and property scores are illustrative, not independently verified transactions
-          or valuations. Owner-submitted listings are identified on their detail pages. Verify information independently
-          before making a property decision.
+          Asking prices, market figures and property scores are published indicators — verify title, dues and possession before
+          any transaction. Owner-submitted listings are identified on their detail pages, and verified dealer profiles carry a blue
+          tick. Verify information independently before making a property decision.
         </p>
         <div className="mt-6 flex min-w-0 flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:flex-wrap md:items-center md:justify-between">
           <p className="text-[0.75rem] text-white/50">© {new Date().getFullYear()} {SITE.name}. A WordbitX Product.</p>
@@ -115,7 +160,7 @@ export function SiteFooter() {
             <Link href="/sitemap" className="hover:text-white">Directory</Link>
             <Link href="/sitemap-index.xml" className="hover:text-white">Sitemap index</Link>
             <Link href="/sitemap.xml" className="hover:text-white">XML sitemap</Link>
-            <a href={SITE.url} className="hover:text-white">Official demo</a>
+            <a href={SITE.url} className="hover:text-white">Official platform</a>
             <Link href="/admin" className="hover:text-white">Admin</Link>
           </div>
         </div>

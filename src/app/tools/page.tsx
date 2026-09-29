@@ -75,7 +75,7 @@ const TOOLS = [
   {
     href: "/tools/property-tax-calculator",
     title: "Property Tax Calculator",
-    copy: "Illustrative transaction, holding and disposal charges to include in your total cost of ownership.",
+    copy: "Estimated transaction, holding and disposal charges to include in your total cost of ownership.",
     icon: IconAreaIcon,
   },
 ];

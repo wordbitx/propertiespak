@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
         </form>
 
         <p className="mt-6 border-t border-soft pt-4 text-[0.75rem] leading-relaxed text-ink-muted">
-          {SITE.demoLabel}. Set the <code className="rounded bg-mist px-1 font-mono">ADMIN_PASSWORD</code> environment
+          {SITE.platformLabel}. Set the <code className="rounded bg-mist px-1 font-mono">ADMIN_PASSWORD</code> environment
           variable to change the admin password in production.
         </p>
       </div>

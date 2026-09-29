@@ -132,7 +132,7 @@ export function CityDiscovery({ cities, counts }: { cities: City[]; counts: Map<
                       {city.name}
                     </span>
                     <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-white/70">
-                      <span>{count > 0 ? `${count} demo listings` : "New demo listings weekly"}</span>
+                      <span>{count > 0 ? `${count} live listings` : "New listings added weekly"}</span>
                       {isHero && <span className="hidden lg:inline">· {city.tagline}</span>}
                     </span>
                     <span className="mt-3 hidden items-center gap-1.5 text-[0.8125rem] font-semibold text-forest-400 group-hover:flex">
@@ -263,7 +263,7 @@ export function FeaturedProperties({ properties }: { properties: Property[] }) {
         <SectionHeading
           eyebrow="Featured inventory"
           title="Featured properties, hand-picked this week"
-          description="Curated demo listings across premium Lahore, Islamabad and Karachi addresses."
+          description="Curated listings across premium Lahore, Islamabad and Karachi addresses."
           action={{ label: "See all featured", href: "/properties?featured=1" }}
         />
         <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
