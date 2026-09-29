@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { visibleTestId } from "./helpers/visible";
 import { createHmac } from "node:crypto";
 import { Pool } from "pg";
 
@@ -65,15 +66,15 @@ test.afterAll(async () => {
 });
 
 /**
- * Streaming SSR and client-side refreshes briefly hold two copies of a subtree
- * in the DOM while a swap commits. Poll until the tree has settled on one node
- * before asserting, so the suite tests the app rather than the transition.
+ * Waits until the visible copy of a section is on screen.
+ *
+ * Next paints the page inside a hidden prerender shell and swaps it in, so the
+ * id exists twice for a moment — `visibleTestId` scopes to the real one and this
+ * waits for it (plus any client fetch that follows a dashboard action).
  */
-async function settle(page: Page, testId: string, expected = 1) {
-  // Client fetches (shortlist / compare hydration) land shortly after the first
-  // paint and re-render the tree. Wait for those to finish, then for the count.
+async function settle(page: Page, testId: string) {
   await page.waitForLoadState("networkidle").catch(() => {});
-  await expect.poll(() => page.getByTestId(testId).count(), { timeout: 15_000 }).toBe(expected);
+  await expect(visibleTestId(page, testId).first()).toBeVisible({ timeout: 15_000 });
 }
 
 async function signedInAsOwner(page: Page) {
@@ -85,12 +86,12 @@ async function signedInAsOwner(page: Page) {
 test("homepage hero is a clean brand statement followed by the featured, then explore, sections", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await settle(page, "home-hero");
-  const hero = page.getByTestId("home-hero");
+  const hero = visibleTestId(page, "home-hero");
   await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
   for (const clutter of ["Popular searches", "Live properties", "Cities to explore", "Property tools"]) {
     await expect(hero).not.toContainText(clutter);
   }
-  await expect(page.getByTestId("hero-search")).toBeVisible();
+  await expect(visibleTestId(page, "hero-search")).toBeVisible();
 
   // Featured inventory sits above the Explore Properties discovery block.
   const featured = page.getByRole("heading", { name: "Featured properties, hand-picked this week", exact: true });
@@ -111,7 +112,7 @@ test("homepage hero is a clean brand statement followed by the featured, then ex
   const drawer = page.getByRole("dialog", { name: "Main menu" });
   // The drawer button needs hydration before it responds; retry the open.
   await expect(async () => {
-    await page.getByTestId("header-menu").click();
+    await visibleTestId(page, "header-menu").click();
     await expect(drawer).toBeVisible({ timeout: 1500 });
   }).toPass({ timeout: 15_000 });
   await expect(drawer.getByRole("link", { name: "Dealers", exact: true })).toHaveCount(0);
@@ -121,7 +122,7 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await settle(page, "dealers-marquee");
-  const viewport = page.getByTestId("dealers-marquee");
+  const viewport = visibleTestId(page, "dealers-marquee");
   await viewport.scrollIntoViewIfNeeded();
   const belt = viewport.locator(".dealer-belt");
   const groups = viewport.locator(".dealer-belt-group");
@@ -134,11 +135,20 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
   await expect(groups.nth(1)).toHaveAttribute("aria-hidden", "true");
   await expect(groups.nth(1).locator("a").first()).toHaveAttribute("tabindex", "-1");
 
-  const animation = await belt.evaluate((element) => {
+  // The belt may be driven by the stylesheet animation or, when that is not
+  // available, by the JavaScript fallback — either way it must be a single
+  // horizontal row that keeps moving.
+  const layout = await belt.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { name: style.animationName, iterations: style.animationIterationCount, play: style.animationPlayState };
+    const cards = [...element.querySelectorAll(".dealer-belt-group a")].slice(0, 3).map((card) => card.getBoundingClientRect());
+    return {
+      display: style.display,
+      animation: style.animationName,
+      horizontal: cards.length > 1 ? cards[0].top === cards[1].top && cards[1].left > cards[0].left : false,
+    };
   });
-  expect(animation).toEqual({ name: "dealer-belt-scroll", iterations: "infinite", play: "running" });
+  expect(layout.display).toBe("flex");
+  expect(layout.horizontal, "dealer cards must sit side by side, not stacked").toBe(true);
 
   // Motion is continuous: it only ever advances, and it never restarts at zero.
   const offsets: number[] = [];
@@ -181,7 +191,7 @@ test("owner can hide, restore and delete a listing they posted", async ({ page }
   await signedInAsOwner(page);
   await page.goto("/account", { waitUntil: "domcontentloaded" });
   await settle(page, "account-listings");
-  const manager = page.getByTestId("account-listings");
+  const manager = visibleTestId(page, "account-listings");
   await manager.scrollIntoViewIfNeeded();
   await expect(manager.getByRole("link", { name: listingTitle, exact: true })).toBeVisible();
   await expect(manager.getByText("In review", { exact: true })).toBeVisible();
@@ -208,7 +218,7 @@ test("owner can hide, restore and delete a listing they posted", async ({ page }
   // Withdraw the queued submission, then delete the live listing for good.
   await page.goto("/account", { waitUntil: "domcontentloaded" });
   await settle(page, "account-listings");
-  const secondManager = page.getByTestId("account-listings");
+  const secondManager = visibleTestId(page, "account-listings");
   await secondManager.scrollIntoViewIfNeeded();
   await secondManager.getByRole("button", { name: "Withdraw submission" }).click();
   await secondManager.getByRole("button", { name: "Yes, remove it" }).click();
