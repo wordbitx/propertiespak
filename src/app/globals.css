@@ -604,6 +604,12 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
      even before/without hydration. */
   .site-header--overlay { background: transparent; color: #fff; box-shadow: none; --brand-name: #fff; --brand-accent: var(--color-forest-400); --brand-tagline: rgba(255,255,255,.7); }
   .site-header--solid, html[data-header-solid] .site-header { background: #fff; color: var(--color-navy-900); box-shadow: 0 6px 24px -18px rgba(6, 28, 51, .45); --brand-name: var(--color-navy-900); --brand-accent: var(--color-forest-700); --brand-tagline: var(--color-ink-muted); }
+  /* Transparent logo over the hero, tiled logo once the header is solid. */
+  .brand-lockup--adaptive .brand-lockup-mark--tile { display: none; }
+  .site-header--solid .brand-lockup--adaptive .brand-lockup-mark--bare,
+  html[data-header-solid] .site-header .brand-lockup--adaptive .brand-lockup-mark--bare { display: none; }
+  .site-header--solid .brand-lockup--adaptive .brand-lockup-mark--tile,
+  html[data-header-solid] .site-header .brand-lockup--adaptive .brand-lockup-mark--tile { display: block; }
   .brand-lockup--adaptive .brand-lockup-name { color: var(--brand-name, var(--color-navy-900)); transition: color .2s ease; }
   .brand-lockup--adaptive .brand-lockup-accent { color: var(--brand-accent, var(--color-forest-700)); transition: color .2s ease; }
   .brand-lockup--adaptive .brand-lockup-tagline { color: var(--brand-tagline, var(--color-ink-muted)); transition: color .2s ease; }

@@ -379,6 +379,31 @@ export function IconX(props: IconProps) {
  * (--color-brand, #10A456) used across the whole site. Drawn as a vector on the brand's
  * deep-navy tile so it stays crisp from 16px favicons up to the 512px app icon.
  */
+/** The mark itself, in the logo's original 1568×627 artwork space. */
+function LogoMarkShapes({ white }: { white: string }) {
+  return (
+    <>
+      <path d="M560 246 L596 219 L596 376 L560 405 Z" fill={white} />
+      <path d="M609 197 L637 175 L637 340 L609 363 Z" fill={white} />
+      <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="#10A456" />
+      <path
+        d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
+        fill={white}
+      />
+      <path
+        d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
+        fill="#10A456"
+      />
+      <g fill="#FFFFFF">
+        <rect x="759" y="354" width="28" height="29" />
+        <rect x="796" y="354" width="28" height="29" />
+        <rect x="759" y="392" width="28" height="29" />
+        <rect x="796" y="392" width="28" height="29" />
+      </g>
+    </>
+  );
+}
+
 export function IconLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
@@ -395,24 +420,28 @@ export function IconLogo({ className }: { className?: string }) {
       <rect width="48" height="48" rx="13.5" fill="url(#ppMarkTile)" />
       <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" strokeOpacity="0.09" strokeWidth="1.2" />
       <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
-        <path d="M560 246 L596 219 L596 376 L560 405 Z" fill="url(#ppMarkWhite)" />
-        <path d="M609 197 L637 175 L637 340 L609 363 Z" fill="url(#ppMarkWhite)" />
-        <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="#10A456" />
-        <path
-          d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
-          fill="url(#ppMarkWhite)"
-        />
-        <path
-          d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
-          fill="#10A456"
-        />
-        <g fill="#FFFFFF">
-          <rect x="759" y="354" width="28" height="29" />
-          <rect x="796" y="354" width="28" height="29" />
-          <rect x="759" y="392" width="28" height="29" />
-          <rect x="796" y="392" width="28" height="29" />
-        </g>
+        <LogoMarkShapes white="url(#ppMarkWhite)" />
       </g>
+    </svg>
+  );
+}
+
+/**
+ * The same mark with no tile — the transparent logo, for dark surfaces such as
+ * the header while it floats over the hero photograph. The viewBox is a square
+ * around the mark so it occupies exactly the tile's box and swapping between
+ * the two never shifts the wordmark.
+ */
+export function IconLogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="553.5 48 460 460" aria-hidden="true" className={className}>
+      <defs>
+        <linearGradient id="ppBareWhite" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset="1" stopColor="#E4E8EE" />
+        </linearGradient>
+      </defs>
+      <LogoMarkShapes white="url(#ppBareWhite)" />
     </svg>
   );
 }
