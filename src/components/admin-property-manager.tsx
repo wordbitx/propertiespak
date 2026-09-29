@@ -412,7 +412,7 @@ export function AdminPropertyManager() {
               <div><label className={label} htmlFor="ap-lwa">WhatsApp</label><input id="ap-lwa" value={form.listedByWhatsapp} onChange={(e) => set("listedByWhatsapp", e.target.value)} className="field mt-2" placeholder="defaults to phone" /></div>
               <div><label className={label} htmlFor="ap-lemail">Email</label><input id="ap-lemail" type="email" value={form.listedByEmail} onChange={(e) => set("listedByEmail", e.target.value)} className="field mt-2" /></div>
             </div>
-            <p className="mt-2 text-[0.75rem] text-ink-muted">Leave blank to show the demo consultant for this city instead.</p>
+            <p className="mt-2 text-[0.75rem] text-ink-muted">Leave blank to assign the Properties Pak desk consultant for this city.</p>
           </div>
 
           <div className="mt-5">

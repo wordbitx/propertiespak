@@ -19,13 +19,14 @@ Profile, content, backlinks) — that is where the ranking actually comes from.
 | Meta description | Unique per page, written for click-through, 150–160 chars | every page's `buildMetadata({ description })` |
 | Robots meta | Indexable pages `index, follow` + `max-image-preview:large`, `max-snippet:-1`; filtered listing URLs `noindex, follow` | `src/lib/seo.ts` → `listingRobots()` |
 | robots.txt | Allows public pages and `/api/og`; blocks `/api/`, `/admin`, `/account`, `/login`, `/favorites`, `/compare`, filtered query patterns, aggressive SEO bots; lists both primary sitemaps; `host` directive | `src/app/robots.ts` |
-| Sitemaps | `/sitemap-index.xml` → 8 topical sitemaps + one per city; `/sitemap.xml` master; real `lastmod` from listing/post timestamps | `src/app/sitemap*.ts`, `src/app/sitemaps/**` |
+| Sitemaps | `/sitemap-index.xml` → 10 topical sitemaps (properties, projects, blog, cities, societies + towns, dealers, pages, tools, keywords, Pakistan) + one per city; `/sitemap.xml` master; real `lastmod` from listing/post timestamps | `src/app/sitemap*.ts`, `src/app/sitemaps/**` |
+| Dealer verification | Public dealer profiles at `/dealers`, admin-controlled blue tick (`/admin?tab=users`), verification surfaced on listing cards and property pages, `sitemaps/dealers.xml` | `src/app/dealers/**`, `src/app/api/admin/users/**` |
 | Structured data | `RealEstateAgent` + `WebSite` (global), `CollectionPage` + `ItemList` (hubs), `RealEstateListing` with `Offer`/`LeaseOut` and `additionalProperty` (listings), `ApartmentComplex` (projects), `Article` (blog), `FAQPage` + `BreadcrumbList` (guides), `WebPage` (landing pages) | `src/lib/seo.ts`, wired per page |
 | Social cards | Branded 1200×630 OG image generated per page from its own title (`/api/og?title=…`), plus the static hero card | `src/app/api/og/route.tsx`, `src/lib/images.ts` → `ogCard()` |
 | Icons & PWA | SVG mark, 512px app icon, 180px Apple icon, 16/32/48 favicon, web manifest with shortcuts | `src/app/icon.svg`, `public/`, `src/app/manifest.ts` |
 | Performance | `next/font` self-hosting (no render-blocking Google CSS), AVIF/WebP hero with `srcset` + `fetchpriority=high`, sized images, no image optimizer in the hot path | `src/app/layout.tsx`, `src/components/hero.tsx` |
 | Security/quality headers | `X-Content-Type-Options`, `Referrer-Policy`, `X-DNS-Prefetch-Control`, `Permissions-Policy`; long cache for icons, short shared cache for sitemaps | `next.config.ts` → `headers()` |
-| Internal linking | Intent landing pages, city hubs, society guides, keyword hub, popular searches, breadcrumbs on every deep page | `src/lib/landing-pages.ts`, `src/lib/keyword-landings.ts`, components |
+| Internal linking | Intent landing pages, city hubs, society + town guides, dealer directory, keyword hub, popular searches, breadcrumbs on every deep page | `src/lib/landing-pages.ts`, `src/lib/keyword-landings.ts`, components |
 | Search Console hooks | Verification meta tags read from env for Google, Bing, Yandex | `src/app/layout.tsx`, `.env.example` |
 
 ### Verify it yourself
@@ -93,9 +94,11 @@ Guidelines:
   one tool page; every listing links back to its city and society page.
 - **Annual refresh:** update price bands and 2026/2027 figures each year and keep
   the same URL (update `lastmod` automatically — done).
-- **E-E-A-T:** replace the sample inventory with real, verified listings and add
-  author bios with credentials to blog posts. Demo content ranks poorly in the
-  real estate vertical, where trust matters most.
+- **E-E-A-T:** keep every listing tied to a named publisher — the account, dealer
+  or desk behind it — and verify dealer accounts in the admin workspace so the
+  blue tick stays meaningful. Add author bios with credentials to blog posts.
+  Anonymous inventory ranks poorly in the real estate vertical, where trust
+  matters most.
 
 ## Part 4 — Off-page / authority (months 1–6)
 

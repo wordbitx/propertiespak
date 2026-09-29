@@ -123,7 +123,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <p className="font-sans text-[1rem] font-semibold text-navy-900">Continue your research</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link href="/properties" className="btn btn-primary">
-                  Browse demo listings
+                  Browse live listings
                 </Link>
                 <Link href="/tools" className="btn btn-outline">
                   Run the numbers

@@ -6,6 +6,8 @@ import type { Property } from "@/db/schema";
 import { formatArea, formatNumber, formatPrice } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { computePropertyScore, pricePerSqft } from "@/lib/score";
+import { BlueTick } from "@/components/verified-badge";
+import type { PropertyWithDealer } from "@/lib/queries";
 
 export function purposeBadge(property: Pick<Property, "purpose" | "isNewProject">) {
   if (property.isNewProject) return { label: "New Project", className: "bg-navy-800 text-white" };
@@ -18,10 +20,11 @@ export function PropertyCard({
   priority = false,
   className = "",
 }: {
-  property: Property;
+  property: Property | PropertyWithDealer;
   priority?: boolean;
   className?: string;
 }) {
+  const dealerVerified = Boolean((property as PropertyWithDealer).dealerVerified);
   const badge = purposeBadge(property);
   const score = computePropertyScore(property);
   const pps = pricePerSqft(property);
@@ -52,9 +55,15 @@ export function PropertyCard({
         >
           {badge.label}
         </span>
-        <span className="rounded-md bg-navy-950/70 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
-          Demo listing
-        </span>
+        {dealerVerified ? (
+          <span className="inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-[#0b6fb8] shadow-soft">
+            <BlueTick className="h-3.5 w-3.5" /> Verified dealer
+          </span>
+        ) : (
+          <span className="rounded-md bg-navy-950/70 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+            {property.verified ? "Checked listing" : "Owner listing"}
+          </span>
+        )}
       </div>
 
       <div className="absolute right-4 top-4 flex flex-col gap-2">
@@ -75,7 +84,7 @@ export function PropertyCard({
         <p className="mt-2 text-[0.75rem] text-ink-muted">
           {pps > 0 ? `≈ PKR ${pps.toLocaleString("en-PK")} / sq ft` : CATEGORY_LABELS[property.category] ?? property.propertyType}
           {" · "}
-          <span className="font-semibold text-forest-700">Score {score.overall}/10 (demo)</span>
+          <span className="font-semibold text-forest-700">Score {score.overall}/10</span>
         </p>
 
         <h3 className="mt-2.5 line-clamp-2 font-sans text-[1.0625rem] font-semibold leading-snug text-navy-900">

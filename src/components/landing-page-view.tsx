@@ -78,7 +78,7 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
               </dl>
               <p className="mt-4 flex items-start gap-2 text-[0.75rem] leading-relaxed text-white/45">
                 <IconShield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-forest-500" />
-                Illustrative demo reference values, not verified market transactions.
+                Indicative reference values based on current asking prices on Properties Pak.
               </p>
             </div>
           </div>
@@ -92,11 +92,11 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
             <div>
               <p className="eyebrow text-forest-700">
                 <span className="h-[1px] w-6 bg-current opacity-70" />
-                Demo listings
+                Live listings
               </p>
               <h2 className="display-3 mt-3 text-navy-900">
                 {exact.total} matching {exact.total === 1 ? "property" : "properties"}
-                {content.kind !== "guide" && " in our sample inventory"}
+                {content.kind !== "guide" && " in our live inventory"}
               </h2>
             </div>
             <Link href="/properties" className="btn btn-outline">
@@ -106,16 +106,16 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
 
           {showFallback && (
             <p className="mt-5 rounded-panel border border-soft bg-mist px-5 py-4 text-[0.875rem] leading-relaxed text-ink-muted">
-              We do not have live demo inventory matching every filter on this page yet, so the listings below show the
-              closest comparable sample properties. Use the search filters to explore the full demo dataset.
+              No listing currently matches every filter on this page, so the results below show the closest comparable
+              properties from the same market. Use the search filters to widen the search across the full marketplace.
             </p>
           )}
 
           {listings.length === 0 ? (
             <p className="mt-6 rounded-panel border border-soft bg-mist px-5 py-6 text-[0.9375rem] text-ink-muted">
-              No sample listings are available for this combination yet.{" "}
+              No listings are available for this combination yet.{" "}
               <Link href="/properties" className="font-semibold text-navy-900 hover:text-forest-700">
-                Browse all demo properties
+                Browse all properties
               </Link>
               .
             </p>

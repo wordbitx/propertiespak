@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
-import { listingSubmissions, properties } from "@/db/schema";
+import { listingSubmissions, properties, users } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { photo } from "@/lib/images";
 
@@ -132,9 +132,29 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         listedByEmail: submission.email,
         listedByPhone: submission.phone,
         listedByWhatsapp: submission.phone,
+        listedByUserId: submission.userId ?? null,
         views: 0,
       })
       .returning({ id: properties.id, slug: properties.slug });
+
+    // Publishing under an account promotes it to a dealer profile so the
+    // public page at /dealers/<slug> lists the new property immediately.
+    if (submission.userId) {
+      const owner = await db
+        .select({ id: users.id, slug: users.slug, role: users.role })
+        .from(users)
+        .where(eq(users.id, submission.userId))
+        .limit(1);
+      if (owner[0]) {
+        await db
+          .update(users)
+          .set({
+            role: owner[0].role === "member" ? "dealer" : owner[0].role,
+            slug: owner[0].slug || slugify(submission.name),
+          })
+          .where(eq(users.id, owner[0].id));
+      }
+    }
 
     await db
       .update(listingSubmissions)

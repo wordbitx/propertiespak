@@ -2,7 +2,7 @@ import { IconChart, IconLayers, IconPin, IconShield } from "@/components/icons";
 import type { Property } from "@/db/schema";
 import { computePropertyScore } from "@/lib/score";
 
-/** Properties Pak Score panel — always presented with its demo disclaimer. */
+/** Properties Pak Score panel — always presented with its methodology note. */
 export function PropertyScorePanel({ property, variant = "full" }: { property: Property; variant?: "full" | "compact" }) {
   const score = computePropertyScore(property);
 
@@ -11,7 +11,7 @@ export function PropertyScorePanel({ property, variant = "full" }: { property: P
       <span className="inline-flex items-center gap-2 rounded-lg border border-soft bg-white px-3 py-2">
         <IconChart className="h-4 w-4 text-forest-600" />
         <span className="font-sans text-[0.8125rem] font-semibold text-navy-900">Score {score.overall}/10</span>
-        <span className="text-[0.6875rem] text-ink-muted">demo</span>
+        <span className="text-[0.6875rem] text-ink-muted">indicator</span>
       </span>
     );
   }

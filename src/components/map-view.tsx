@@ -65,7 +65,7 @@ export function MapView({
         <div className="flex items-center justify-between gap-2 px-3 py-3">
           <p className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-navy-900">
             <IconMap className="h-4 w-4 shrink-0 text-forest-600" />
-            {properties.length} {nearby ? "nearby listings" : "Demo Properties Mapped"}
+            {properties.length} {nearby ? "nearby listings" : "Properties mapped"}
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>

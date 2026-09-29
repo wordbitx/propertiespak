@@ -1452,7 +1452,7 @@ export const testimonialSeed = [
     role: "Overseas buyer, Dubai",
     city: "Lahore",
     quote:
-      "An overseas buyer compares three sample DHA Phase 5 houses using area briefs and the mortgage calculator, narrowing the decision down to a single viewing trip.",
+      "An overseas buyer compares three DHA Phase 5 houses using area briefs and the mortgage calculator, narrowing the decision down to a single viewing trip.",
     rating: 5,
     initials: "KT",
     sortOrder: 1,
@@ -1462,7 +1462,7 @@ export const testimonialSeed = [
     role: "First-time buyer",
     city: "Islamabad",
     quote:
-      "A first-time buyer filters sample listings by budget and size, then follows the documentation checklist to understand what a real purchase would require.",
+      "A first-time buyer filters listings by budget and size, then follows the documentation checklist to understand what a real purchase would require.",
     rating: 5,
     initials: "FS",
     sortOrder: 2,
@@ -1472,7 +1472,7 @@ export const testimonialSeed = [
     role: "Retail chain expansion lead",
     city: "Karachi",
     quote:
-      "A retail expansion lead lines up three sample commercial units by frontage, footfall notes and rent to prepare a shortlist review.",
+      "A retail expansion lead lines up three commercial units by frontage, footfall notes and rent to prepare a shortlist review.",
     rating: 5,
     initials: "IY",
     sortOrder: 3,
@@ -1482,7 +1482,7 @@ export const testimonialSeed = [
     role: "Landlord, 4 rental units",
     city: "Lahore",
     quote:
-      "A landlord models post-renovation rent for four sample Johar Town units with the rental-yield calculator before setting asking prices.",
+      "A landlord models post-renovation rent for four Johar Town units with the rental-yield calculator before setting asking prices.",
     rating: 4,
     initials: "HB",
     sortOrder: 4,
@@ -1492,7 +1492,7 @@ export const testimonialSeed = [
     role: "Investor",
     city: "Multan",
     quote:
-      "An investor compares sample DHA Multan and Buch Villas options side by side using the same filters and payment figures.",
+      "An investor compares DHA Multan and Buch Villas options side by side using the same filters and payment figures.",
     rating: 5,
     initials: "AQ",
     sortOrder: 5,
@@ -1502,7 +1502,7 @@ export const testimonialSeed = [
     role: "Family relocation",
     city: "Rawalpindi",
     quote:
-      "A relocating family shortlists sample areas by school, hospital and park proximity before planning any visits.",
+      "A relocating family shortlists areas by school, hospital and park proximity before planning any visits.",
     rating: 5,
     initials: "SR",
     sortOrder: 6,

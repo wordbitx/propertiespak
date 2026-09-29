@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FiltersBar } from "@/components/filters-bar";
+import { FiltersBar, type TownGroup } from "@/components/filters-bar";
 import { MapView, type MapProperty } from "@/components/map-view";
 import { Pagination } from "@/components/pagination";
 import { PageHero } from "@/components/page-hero";
@@ -7,7 +7,8 @@ import { PropertyCard } from "@/components/property-card";
 import { Reveal } from "@/components/reveal";
 import type { Crumb } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
-import { getCities, getMapProperties, searchProperties, type PropertyFilters } from "@/lib/queries";
+import { getCities, getListingAreasByCity, getMapProperties, searchProperties, type PropertyFilters } from "@/lib/queries";
+import { townFilterOptions, townMatchFor } from "@/lib/towns";
 import { collectionPageJsonLd, itemListJsonLd } from "@/lib/seo";
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
@@ -25,13 +26,19 @@ function numeric(value: string | string[] | undefined): number | undefined {
 }
 
 export function parseListingFilters(raw: RawSearchParams, fixed: PropertyFilters = {}): PropertyFilters {
+  const townParam = first(raw.town);
   return {
     ...fixed,
     city: first(raw.city) ?? fixed.city,
+    // A town slug (lake-city-lahore) or a raw society name both resolve to the
+    // text fragment matched against the listing's area.
+    town: townParam ? townMatchFor(townParam) : fixed.town,
     type: first(raw.type) ?? fixed.type,
     category: first(raw.category) ?? fixed.category,
     q: first(raw.q) ?? undefined,
     beds: numeric(raw.beds),
+    baths: numeric(raw.baths),
+    purpose: first(raw.purpose) ?? fixed.purpose,
     minPrice: numeric(raw.minPrice),
     maxPrice: numeric(raw.maxPrice),
     minArea: numeric(raw.minArea),
@@ -69,13 +76,32 @@ export async function ListingView({
   showHero?: boolean;
 }) {
   const filters = parseListingFilters(raw, fixed);
-  const [result, cities, mapRows] = await Promise.all([
+  const [result, cities, mapRows, areasByCity] = await Promise.all([
     searchProperties(filters),
     getCities(),
     withMap ? getMapProperties({ ...filters, page: 1 }, 16) : Promise.resolve([]),
+    getListingAreasByCity(),
   ]);
 
   const cityOptions = cities.map((city) => ({ label: city.name, value: city.slug }));
+
+  // Registry towns first (full coverage), then any live area names that are not
+  // in the registry yet, so the cascade always reflects real inventory.
+  const cityNameBySlug = new Map(cities.map((city) => [city.slug, city.name]));
+  const townGroups: TownGroup[] = townFilterOptions().map((group) => ({
+    citySlug: group.citySlug,
+    cityName: cityNameBySlug.get(group.citySlug) ?? group.citySlug,
+    towns: [...group.towns],
+  }));
+  for (const row of areasByCity) {
+    if (!row.area) continue;
+    const group = townGroups.find((item) => item.citySlug === row.citySlug);
+    if (!group) continue;
+    const alreadyListed = group.towns.some(
+      (town) => town.value.toLowerCase() === row.area.toLowerCase() || row.area.toLowerCase().includes(town.label.toLowerCase()),
+    );
+    if (!alreadyListed) group.towns.push({ label: row.area, value: row.area });
+  }
   const mapProperties: MapProperty[] = mapRows.map((property) => ({
     id: property.id,
     slug: property.slug,
@@ -100,14 +126,28 @@ export async function ListingView({
   const hasActiveFilters =
     filters.page !== 1 ||
     Boolean(first(raw.sort)) ||
-    Boolean(filters.q || filters.beds || filters.minPrice || filters.maxPrice || filters.minArea || filters.type || filters.category) ||
+    Boolean(first(raw.town)) ||
+    Boolean(
+      filters.q ||
+        filters.beds ||
+        filters.baths ||
+        filters.purpose ||
+        filters.minPrice ||
+        filters.maxPrice ||
+        filters.minArea ||
+        filters.type ||
+        filters.category,
+    ) ||
     (Boolean(filters.city) && filters.city !== fixed?.city) ||
     Boolean(filters.featured) !== Boolean(fixed?.featured) ||
     Boolean(filters.isNewProject) !== Boolean(fixed?.isNewProject);
 
   const paramRecord: Record<string, string | undefined> = {
     city: first(raw.city),
+    town: first(raw.town),
     type: first(raw.type),
+    baths: first(raw.baths),
+    purpose: first(raw.purpose),
     category: first(raw.category),
     q: first(raw.q),
     beds: first(raw.beds),
@@ -160,6 +200,7 @@ export async function ListingView({
           <FiltersBar
             basePath={basePath}
             cityOptions={cityOptions}
+            townGroups={townGroups}
             typeOptions={typeOptions}
             total={result.total}
             purposeKind={purposeKind}

@@ -17,9 +17,11 @@ import {
 } from "@/components/sections-discovery";
 
 import { CtaSection, InvestmentSection, TestimonialsSection, WhyEstateWx } from "@/components/sections-editorial";
+import { VerifiedDealersSection } from "@/components/dealers-section";
 import {
   getCities,
   getCityListingCounts,
+  getDealers,
   getFeaturedProperties,
   getMapProperties,
   getPlatformStats,
@@ -70,6 +72,8 @@ export default async function HomePage() {
     mapRows,
     posts,
     testimonials,
+    verifiedDealers,
+    allDealers,
   ] = await Promise.all([
     getPlatformStats(),
     getFeaturedProperties(6),
@@ -83,6 +87,8 @@ export default async function HomePage() {
     getMapProperties({}, 100),
     getPosts(3),
     getTestimonials(),
+    getDealers({ verifiedOnly: true, limit: 4 }),
+    getDealers({ limit: 60 }),
   ]);
 
   const mapProperties: MapProperty[] = mapRows.map((property) => ({
@@ -145,6 +151,7 @@ export default async function HomePage() {
       <NewProjectsSection projects={projects} />
       <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
+      <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
       {/* Smart calculators */}
       <Section tone="light" id="tools">

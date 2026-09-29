@@ -22,7 +22,7 @@ export const SITE = {
   companyAddressLine: "Office #306, Taj Heights, Johar Town, Lahore, Pakistan",
   locale: "en_PK",
   language: "en-PK",
-  demoLabel: "Official real estate platform by WordbitX Software Company",
+  platformLabel: "Official real estate platform by WordbitX Software Company",
   social: {
     facebook: "https://www.facebook.com/propertiespak",
     instagram: "https://www.instagram.com/propertiespak",
@@ -34,7 +34,7 @@ export const SITE = {
     wordbitxHome: "https://wordbitxtech.com/",
     wordbitxServices: "https://wordbitxtech.com/",
     wordbitxContact: "https://wordbitxtech.com/",
-    officialDemo: "https://propertiespak.com",
+    officialPlatform: "https://propertiespak.com",
   },
 };
 
@@ -43,6 +43,8 @@ export const NAV_LINKS = [
   { label: "Buy", href: "/properties/for-sale" },
   { label: "Rent", href: "/properties/for-rent" },
   { label: "New Projects", href: "/projects" },
+  { label: "Towns", href: "/towns" },
+  { label: "Dealers", href: "/dealers" },
   { label: "Commercial", href: "/commercial" },
   { label: "Insights", href: "/blog" },
   { label: "About", href: "/about" },

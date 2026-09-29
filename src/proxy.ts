@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAllLandingSlugs } from "@/lib/landing-pages";
 import { getAllKeywordLandingSlugs } from "@/lib/keyword-landings";
+import { getAllTownSlugs } from "@/lib/towns";
 
 /**
  * Guarantees a real 404 status for unknown top-level URLs. Streamed dynamic
@@ -17,6 +18,8 @@ const STATIC_TOP_LEVEL = new Set([
   "favorites",
   "list-property",
   "tools",
+  "towns",
+  "dealers",
   "login",
   "account",
   "compare",
@@ -46,9 +49,15 @@ const KNOWN_PREFIXES = [
   "/api",
   "/images",
   "/sitemaps",
+  "/dealers",
+  "/towns",
 ];
 
-const LANDING_SLUGS = new Set([...getAllLandingSlugs(), ...getAllKeywordLandingSlugs()]);
+const LANDING_SLUGS = new Set([
+  ...getAllLandingSlugs(),
+  ...getAllKeywordLandingSlugs(),
+  ...getAllTownSlugs(),
+]);
 
 const NOT_FOUND_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -71,13 +80,13 @@ a.ghost{border:1px solid #E8EEF3;color:#061C33}
 </style></head><body><div class="wrap"><main class="card">
 <p class="eyebrow">Error 404</p>
 <h1>We couldn&rsquo;t find that page on Properties Pak.</h1>
-<p>The link may be broken or the listing may have been removed. Search the sample inventory, or start from one of the market pages below.</p>
+<p>The link may be broken or the listing may have been removed. Search the live listings, or start from one of the market pages below.</p>
 <div class="row">
 <a class="btn primary" href="/properties">Browse properties</a>
 <a class="btn ghost" href="/property-for-sale-in-lahore">Property in Lahore</a>
 <a class="btn ghost" href="/">Back to home</a>
 </div>
-<p class="credit">Properties Pak &mdash; Pakistan Real Estate. A real-estate demo product developed by
+<p class="credit">Properties Pak &mdash; Pakistan Real Estate. Official platform developed by
 <a href="https://wordbitxtech.com/" rel="noopener">WordbitX Software Company</a>.</p>
 </main></div></body></html>`;
 

@@ -1,28 +1,16 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import { users, type User } from "@/db/schema";
+import { buildProfileSlug, hashPassword, verifyPassword } from "@/lib/password";
 import { sessionCookieOptions } from "@/lib/session-cookie";
 
 const COOKIE_NAME = "estatewx_session";
 const SECRET = process.env.SESSION_SECRET ?? "estatewx-dev-session-secret";
 
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const candidate = scryptSync(password, salt, 64);
-  const expected = Buffer.from(hash, "hex");
-  if (candidate.length !== expected.length) return false;
-  return timingSafeEqual(candidate, expected);
-}
+export { hashPassword, verifyPassword };
 
 function sign(value: string): string {
   return createHmac("sha256", SECRET).update(value).digest("hex").slice(0, 32);
@@ -65,19 +53,29 @@ export async function registerUser(input: {
   email: string;
   phone: string;
   password: string;
+  citySlug?: string;
+  cityName?: string;
+  agency?: string;
 }): Promise<AuthResult> {
   await ensureSeeded();
   const email = input.email.trim().toLowerCase();
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
   if (existing.length > 0) return { ok: false, error: "An account with this email already exists. Please sign in." };
   if (input.password.length < 6) return { ok: false, error: "Password must be at least 6 characters." };
+  const name = input.name.trim() || "Properties Pak Member";
   const inserted = await db
     .insert(users)
     .values({
-      name: input.name.trim() || "Properties Pak Member",
+      name,
       email,
       phone: input.phone.trim(),
       passwordHash: hashPassword(input.password),
+      slug: buildProfileSlug(name),
+      role: "member",
+      citySlug: input.citySlug ?? "",
+      cityName: input.cityName ?? "",
+      agency: input.agency ?? "",
+      whatsapp: input.phone.trim(),
     })
     .returning({ id: users.id });
   const userId = inserted[0]?.id;

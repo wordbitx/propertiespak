@@ -17,8 +17,8 @@ import { investmentImage, photo } from "@/lib/images";
 const BENEFITS = [
   {
     icon: IconShield,
-    title: "Demo Property Discovery",
-    copy: "Explore a curated sample catalogue with structured prices, sizes and locations, so your shortlist starts clean.",
+    title: "Property Discovery",
+    copy: "Explore a curated catalogue with structured prices, sizes and locations, so your shortlist starts clean.",
   },
   {
     icon: IconCompass,
@@ -74,7 +74,7 @@ export function WhyEstateWx({ listings, cities }: { listings: number; cities: nu
               <div>
                 <p className="font-sans text-[1.5rem] font-bold leading-none text-navy-900">{listings}+</p>
                 <p className="mt-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
-                  Demo Listings
+                  Live Listings
                 </p>
               </div>
               <div>
@@ -131,7 +131,7 @@ export function InvestmentSection({
     { title: "High-potential locations", copy: "Areas where infrastructure delivery and demand are moving together." },
     { title: "New developments", copy: "Launch pricing, payment plans and handover timelines side by side." },
     { title: "Commercial opportunities", copy: "Income-producing office, retail and warehouse assets." },
-    { title: "Rental opportunities", copy: "Units and areas with illustrative tenant-demand signals." },
+    { title: "Rental opportunities", copy: "Units and areas with strong tenant-demand signals." },
   ];
 
   return (
@@ -239,15 +239,15 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
         <div className="max-w-2xl">
           <p className="eyebrow text-forest-700">
             <span className="h-[1px] w-6 bg-current opacity-70" />
-            Illustrative user scenarios
+            Buyer scenarios
           </p>
           <h2 className="display-2 mt-4 text-navy-900">How different buyers would use Properties Pak</h2>
           <p className="lede mt-4">
-            Composite scenarios written for this demo to show how the platform&rsquo;s search, comparison and calculator
+            Composite scenarios that show how the platform&rsquo;s search, comparison and calculator
             tools support different property decisions in Pakistan.
           </p>
           <p className="mt-4 inline-flex items-center gap-2 rounded-lg border border-soft bg-white px-3 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-ink-muted">
-            <IconShield className="h-3.5 w-3.5 text-forest-600" /> Demo content — not client testimonials
+            <IconShield className="h-3.5 w-3.5 text-forest-600" /> Scenario example — not a client testimonial
           </p>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -256,7 +256,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
               <article className="flex h-full flex-col rounded-panel border border-soft bg-white p-6 shadow-soft">
                 <p>
                   <span className="inline-flex items-center gap-1.5 rounded-md bg-forest-50 px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest-700">
-                    <IconCompass className="h-3.5 w-3.5" /> Illustrative Buyer Scenario
+                    <IconCompass className="h-3.5 w-3.5" /> Buyer scenario
                   </span>
                 </p>
                 <h3 className="mt-4 font-sans text-[1.0625rem] font-semibold leading-snug text-navy-900">
@@ -267,7 +267,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                 </p>
                 <p className="mt-4 flex-1 text-[0.9375rem] leading-relaxed text-ink">{item.quote}</p>
                 <p className="mt-5 border-t border-soft pt-4 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-ink-muted">
-                  Demo persona — not a client testimonial
+                  Persona example — not a client testimonial
                 </p>
               </article>
             </Reveal>

@@ -18,7 +18,7 @@ type PageProps = {
   searchParams: Promise<RawSearchParams>;
 };
 
-const FILTER_KEYS = ["q", "type", "category", "beds", "minPrice", "maxPrice", "minArea", "sort", "page"];
+const FILTER_KEYS = ["q", "town", "type", "category", "beds", "baths", "minPrice", "maxPrice", "minArea", "sort", "page"];
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ slug }, raw] = await Promise.all([params, searchParams]);
@@ -175,7 +175,7 @@ export default async function CityPage({ params, searchParams }: PageProps) {
 
       <ListingView
         eyebrow={`${city.name} listings`}
-        title={`Sample property listings in ${city.name}`}
+        title={`Property listings in ${city.name}`}
         description={`Filter ${city.name} inventory by society, property type, budget and size. Compare rentals and sale prices across the city's active sectors.`}
         crumbs={[
           { name: "Home", href: "/" },

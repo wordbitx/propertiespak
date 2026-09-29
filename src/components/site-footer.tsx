@@ -14,6 +14,8 @@ const COLUMNS = [
       { label: "New projects", href: "/projects" },
       { label: "Commercial", href: "/commercial" },
       { label: "All properties", href: "/properties" },
+      { label: "Towns & societies", href: "/towns" },
+      { label: "Verified dealers", href: "/dealers" },
       { label: "Compare properties", href: "/compare" },
     ],
   },
@@ -26,6 +28,9 @@ const COLUMNS = [
       { label: "Lahore rentals", href: "/property-for-rent-in-lahore" },
       { label: "Rawalpindi property", href: "/property-for-sale-in-rawalpindi" },
       { label: "Multan property", href: "/property-for-sale-in-multan" },
+      { label: "Lake City Lahore", href: "/property-for-sale/lake-city-lahore" },
+      { label: "Etihad Town Lahore", href: "/property-for-sale/etihad-town-lahore" },
+      { label: "Valencia Town Lahore", href: "/property-for-sale/valencia-town-lahore" },
     ],
   },
   {
@@ -104,9 +109,9 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-5 max-w-5xl text-[0.6875rem] leading-5 text-white/45">
-          Sample listings, market figures and property scores are illustrative, not independently verified transactions
-          or valuations. Owner-submitted listings are identified on their detail pages. Verify information independently
-          before making a property decision.
+          Asking prices, market figures and property scores are published indicators — verify title, dues and possession before
+          any transaction. Owner-submitted listings are identified on their detail pages, and verified dealer profiles carry a blue
+          tick. Verify information independently before making a property decision.
         </p>
         <div className="mt-6 flex min-w-0 flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:flex-wrap md:items-center md:justify-between">
           <p className="text-[0.75rem] text-white/50">© {new Date().getFullYear()} {SITE.name}. A WordbitX Product.</p>
@@ -115,7 +120,7 @@ export function SiteFooter() {
             <Link href="/sitemap" className="hover:text-white">Directory</Link>
             <Link href="/sitemap-index.xml" className="hover:text-white">Sitemap index</Link>
             <Link href="/sitemap.xml" className="hover:text-white">XML sitemap</Link>
-            <a href={SITE.url} className="hover:text-white">Official demo</a>
+            <a href={SITE.url} className="hover:text-white">Official platform</a>
             <Link href="/admin" className="hover:text-white">Admin</Link>
           </div>
         </div>

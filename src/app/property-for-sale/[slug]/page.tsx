@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { LandingPageView } from "@/components/landing-page-view";
 import { buildSocietyLanding, getAllSocietySlugs } from "@/lib/landing-pages";
+import { buildTownLanding, getAllTownSlugs } from "@/lib/towns";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, itemListJsonLd, webPageJsonLd } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -10,12 +11,17 @@ type PageProps = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getAllSocietySlugs().map((slug) => ({ slug }));
+  return [...getAllSocietySlugs(), ...getAllTownSlugs()].map((slug) => ({ slug }));
+}
+
+/** Society guides first, then the town registry for township-level pages. */
+function resolveAreaGuide(slug: string) {
+  return buildSocietyLanding(slug) ?? buildTownLanding(slug);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const content = buildSocietyLanding(slug);
+  const content = resolveAreaGuide(slug);
   if (!content) {
     return buildMetadata({
       title: "Location not found",
@@ -38,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SocietyPage({ params }: PageProps) {
   const { slug } = await params;
-  const content = buildSocietyLanding(slug);
+  const content = resolveAreaGuide(slug);
   if (!content) notFound();
 
   return (

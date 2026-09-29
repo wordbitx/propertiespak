@@ -129,7 +129,7 @@ const TOOL_CONFIG: Record<string, ToolConfig> = {
     eyebrow: "Property tax",
     title: "Property Tax & Charges Calculator",
     description:
-      "Illustrative estimate of the transaction, holding and disposal charges that apply when buying, holding and selling property in Pakistan.",
+      "Estimate of the transaction, holding and disposal charges that apply when buying, holding and selling property in Pakistan.",
     notes: [
       "Tax rules change with each Finance Act — verify current rates with FBR or a provincial authority.",
       "Treatment depends on filer status, holding period and the nature of the transaction.",

@@ -562,3 +562,87 @@ export function expandSubAreas(query: string, citySlug?: string, limit = 40): So
   }
   return out.slice(0, limit);
 }
+
+/* ------------------------------------------------------------------ */
+/*  Reverse lookup: coordinates → nearest known area                   */
+/* ------------------------------------------------------------------ */
+
+/** Great-circle distance in metres. */
+function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6_371_000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+export type NearestPlaceResult = {
+  /** Society / city level label — what belongs in the address field. */
+  area: SocietyPlace;
+  /** Phase, sector or block the pin actually sits in, when close enough. */
+  detail?: SocietyPlace;
+  /** Distance from the pin to the matched society centroid, in metres. */
+  distanceM: number;
+};
+
+/**
+ * Resolves dropped-pin coordinates back to a named area so the map label never
+ * keeps showing the previously chosen society. Prefers the nearest society or
+ * city (the level users type into the address field) and reports the sub-area
+ * separately. Sub-area matching is stricter than the society radius, so a pin
+ * on the edge of a scheme resolves to the scheme and not to a distant phase.
+ */
+export function nearestSocietyPlace(
+  lat: number,
+  lng: number,
+  citySlug?: string,
+  maxKm = 5,
+): NearestPlaceResult | null {
+  const index = getSocietyIndex();
+  const maxM = maxKm * 1000;
+
+  /** Nearest society or city — the level the address field is written at. */
+  function nearestArea(city?: string): { place: SocietyPlace; distance: number } | null {
+    let best: SocietyPlace | null = null;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (const place of index) {
+      if (place.kind !== "society" && place.kind !== "city") continue;
+      if (city && place.citySlug !== city) continue;
+      const distance = haversineM(lat, lng, place.lat, place.lng);
+      if (distance < bestDistance) {
+        best = place;
+        bestDistance = distance;
+      }
+    }
+    if (!best || bestDistance > maxM) return null;
+    return { place: best, distance: bestDistance };
+  }
+
+  // Search your own city first, then fall back to anywhere in the country.
+  const match = (citySlug ? nearestArea(citySlug) : null) ?? nearestArea();
+  if (!match) return null;
+
+  /**
+   * Nearest phase / sector / block, but only inside the matched society.
+   * CDA sectors are spread around one synthetic centroid, so naming a single
+   * sector from coordinates there would be guesswork — the city label is used
+   * instead and the user types the sector in the address field.
+   */
+  let detail: SocietyPlace | undefined;
+  if (match.place.kind === "society" && match.place.label !== "Islamabad Sectors") {
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (const place of index) {
+      if (place.parent !== match.place.label) continue;
+      const distance = haversineM(lat, lng, place.lat, place.lng);
+      if (distance < bestDistance && distance <= 1800) {
+        detail = place;
+        bestDistance = distance;
+      }
+    }
+  }
+
+  return { area: match.place, detail, distanceM: Math.round(match.distance) };
+}

@@ -12,7 +12,7 @@ const baseMetadata: Metadata = buildMetadata({
   keywords: ["commercial property Pakistan", "office for rent Lahore", "shop for sale Islamabad", "warehouse Karachi"],
 });
 
-const FILTER_KEYS = ["q", "city", "type", "category", "beds", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
+const FILTER_KEYS = ["q", "city", "town", "type", "category", "beds", "baths", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
 
 export async function generateMetadata({
   searchParams,

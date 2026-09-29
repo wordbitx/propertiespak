@@ -11,7 +11,7 @@ const baseMetadata: Metadata = buildMetadata({
   keywords: ["houses for sale Lahore", "property for sale Pakistan", "apartments for sale Islamabad", "plots for sale"],
 });
 
-const FILTER_KEYS = ["q", "city", "type", "category", "beds", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
+const FILTER_KEYS = ["q", "city", "town", "type", "category", "beds", "baths", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
 
 export async function generateMetadata({
   searchParams,
@@ -32,7 +32,7 @@ export default async function ForSalePage({ searchParams }: { searchParams: Prom
     <ListingView
       eyebrow="For sale"
       title="Property for Sale in Pakistan"
-      description="From DHA and Bahria Town addresses to family houses in Johar Town and investment plots in new societies — compare sample sale listings in one place."
+      description="From DHA and Bahria Town addresses to family houses in Johar Town and investment plots in new societies — compare properte sale listings in one place."
       crumbs={[
         { name: "Home", href: "/" },
         { name: "Properties", href: "/properties" },

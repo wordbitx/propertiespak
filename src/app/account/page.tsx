@@ -8,7 +8,9 @@ import { PageHero } from "@/components/page-hero";
 import { PropertyRow } from "@/components/property-card";
 import { Section } from "@/components/section";
 import { getSessionUser } from "@/lib/auth";
-import { formatDate } from "@/lib/format";
+import { getDealerByEmail, getOwnedProperties, getUserSubmissions } from "@/lib/queries";
+import { BlueTick, UnverifiedChip } from "@/components/verified-badge";
+import { formatDate, formatPrice } from "@/lib/format";
 import { getFavoritePropertiesForUser, getInquiriesForEmail, searchProperties } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
 
@@ -34,11 +36,19 @@ export default async function AccountPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const [saved, inquiries, suggestions] = await Promise.all([
+  const [saved, inquiries, suggestions, dealer, liveListings, submissions] = await Promise.all([
     getFavoritePropertiesForUser(user.id),
     getInquiriesForEmail(user.email),
     searchProperties({ verified: true, pageSize: 3, sort: "newest" }),
+    getDealerByEmail(user.email),
+    getOwnedProperties(user.id, 60),
+    getUserSubmissions(user),
   ]);
+  // Approved submissions already appear as published listings, so only the ones
+  // still in the admin queue (or sent back) need their own rows here.
+  const openSubmissions = submissions.filter((item) => item.status !== "approved");
+  const pendingCount = openSubmissions.filter((item) => item.status === "pending").length;
+  const rejectedCount = openSubmissions.filter((item) => item.status === "rejected").length;
 
   return (
     <>
@@ -84,6 +94,35 @@ export default async function AccountPage() {
                 </form>
               </div>
 
+              <div
+                className={`mt-5 rounded-panel border p-5 ${
+                  dealer?.isVerified ? "border-[#1D9BF0]/35 bg-[#1D9BF0]/5" : "border-soft bg-white"
+                }`}
+              >
+                <p className="flex flex-wrap items-center gap-2 font-sans text-[0.9375rem] font-semibold text-navy-900">
+                  {dealer?.isVerified ? <BlueTick className="h-4 w-4" /> : <IconShield className="h-4 w-4 text-forest-600" />}
+                  Dealer profile
+                  {dealer && !dealer.isVerified && <UnverifiedChip />}
+                </p>
+                <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-muted">
+                  {dealer?.isVerified
+                    ? `Verified by the Properties Pak team${dealer.verifiedAt ? ` on ${formatDate(dealer.verifiedAt)}` : ""}. Your blue tick appears on your public profile and on every property you publish.`
+                    : dealer
+                      ? `Your account has ${dealer.listings} published ${dealer.listings === 1 ? "listing" : "listings"}. Our team verifies accounts after a contact check — ask us and we will review it for the blue tick.`
+                      : "List a property from this account and a public dealer profile is created for you. Verified accounts carry the blue tick across the marketplace."}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {dealer?.slug && (
+                    <Link href={`/dealers/${dealer.slug}`} className="btn btn-outline px-3.5 py-2 text-[0.8125rem]">
+                      View public profile
+                    </Link>
+                  )}
+                  <Link href="/list-property" className="btn btn-primary px-3.5 py-2 text-[0.8125rem]">
+                    {dealer ? "Add a listing" : "List a property"}
+                  </Link>
+                </div>
+              </div>
+
               <div className="mt-5 rounded-panel border border-soft bg-mist p-5">
                 <p className="flex items-center gap-2 font-sans text-[0.9375rem] font-semibold text-navy-900">
                   <IconShield className="h-4 w-4 text-forest-600" /> Data &amp; privacy
@@ -107,7 +146,108 @@ export default async function AccountPage() {
             <div>
               <FavoritesSync />
 
-              <h2 className="mt-2 font-sans text-[1.15rem] font-bold text-navy-900">
+              <h2 id="your-listings" className="mt-2 scroll-mt-28 font-sans text-[1.15rem] font-bold text-navy-900">
+                Your listings{" "}
+                <span className="font-normal text-ink-muted">
+                  ({liveListings.length} live
+                  {pendingCount > 0 ? ` · ${pendingCount} in review` : ""}
+                  {rejectedCount > 0 ? ` · ${rejectedCount} not approved` : ""})
+                </span>
+              </h2>
+
+              {liveListings.length === 0 && openSubmissions.length === 0 ? (
+                <div className="mt-4 rounded-panel border border-soft bg-mist p-6">
+                  <p className="text-[0.9rem] leading-relaxed text-ink-muted">
+                    You have not listed a property from this account yet. Everything you publish appears here with its
+                    live link, views and review status.
+                  </p>
+                  <Link href="/list-property" className="btn btn-primary mt-4">
+                    List a property <IconArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-3.5">
+                  {liveListings.map((item) => (
+                    <Link key={`live-${item.id}`} href={`/property/${item.slug}`} className="block">
+                      <div className="flex items-center gap-4 rounded-xl border border-soft bg-white p-3 transition-all hover:-translate-y-0.5 hover:shadow-card">
+                        <img
+                          src={item.coverImage}
+                          alt={`${item.title}, ${item.locationArea}`}
+                          width={280}
+                          height={210}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-[74px] w-[104px] shrink-0 rounded-lg object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-sans text-[0.9375rem] font-semibold text-navy-900">{item.title}</p>
+                          <p className="mt-0.5 truncate text-[0.8125rem] text-ink-muted">
+                            {item.locationArea}, {item.cityName} · {item.propertyType}
+                          </p>
+                          <p className="mt-1 text-[0.8125rem] font-semibold text-forest-700">
+                            {formatPrice(item.price, item.priceUnit)} · {item.views.toLocaleString("en-PK")} views
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded-md border border-forest-600/25 bg-forest-600/10 px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-forest-700">
+                          Live
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+
+                  {openSubmissions.map((item) => (
+                    <div key={`sub-${item.id}`} className="flex items-center gap-4 rounded-xl border border-soft bg-white p-3">
+                      {item.imageUrls[0] ? (
+                        <img
+                          src={item.imageUrls[0]}
+                          alt={item.title}
+                          width={280}
+                          height={210}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-[74px] w-[104px] shrink-0 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="grid h-[74px] w-[104px] shrink-0 place-items-center rounded-lg bg-mist text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                          No photo
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-sans text-[0.9375rem] font-semibold text-navy-900">{item.title}</p>
+                        <p className="mt-0.5 truncate text-[0.8125rem] text-ink-muted">
+                          {item.locationArea}, {item.cityName} · {item.propertyType}
+                        </p>
+                        <p className="mt-1 text-[0.8125rem] text-ink-muted">
+                          {formatPrice(item.price, item.priceUnit)} · submitted {formatDate(item.createdAt)}
+                        </p>
+                        {item.status === "rejected" && item.adminNote && (
+                          <p className="mt-1.5 text-[0.8125rem] text-red-700">
+                            Reviewer note: {item.adminNote}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-md border px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.08em] ${
+                          item.status === "pending"
+                            ? "border-amber-200 bg-amber-50 text-amber-700"
+                            : "border-red-200 bg-red-50 text-red-700"
+                        }`}
+                      >
+                        {item.status === "pending" ? "In review" : "Not approved"}
+                      </span>
+                    </div>
+                  ))}
+
+                  {liveListings.length === 0 && openSubmissions.length > 0 && (
+                    <p className="text-[0.8125rem] leading-relaxed text-ink-muted">
+                      Your listing is in the review queue — our team checks the details, then publishes it here with a live
+                      link you can share.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <h2 className="mt-10 font-sans text-[1.15rem] font-bold text-navy-900">
                 Synced shortlist {saved.length > 0 && <span className="text-ink-muted">({saved.length})</span>}
               </h2>
               {saved.length === 0 ? (
@@ -151,7 +291,7 @@ export default async function AccountPage() {
               <h2 className="mt-10 font-sans text-[1.15rem] font-bold text-navy-900">Your enquiries</h2>
               {inquiries.length === 0 ? (
                 <p className="mt-4 rounded-panel border border-soft bg-mist p-6 text-[0.9rem] text-ink-muted">
-                  No enquiries yet. Send a request from any listing and it will be tracked here with the consultant's reply.
+                  No enquiries yet. Send a request from any listing and it will be tracked here with the consultant&rsquo;s reply.
                 </p>
               ) : (
                 <ul className="mt-4 divide-y divide-soft rounded-panel border border-soft bg-white">

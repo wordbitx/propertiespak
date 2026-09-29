@@ -60,8 +60,8 @@ const SPECS: LandingSpec[] = [
     filters: { purpose: "buy" },
     intro: [
       "Pakistan’s property market is a collection of distinct city and society markets rather than one national price curve. Lahore offers the broadest residential inventory, Islamabad combines planned sectors with institutional rental demand, and Karachi leads in apartments and commercial real estate.",
-      "Properties Pak brings sample houses, apartments, residential plots, villas, offices, shops and new-project inventory into one structured discovery experience. Use the city and society guides to understand local context, then compare price, area and indicative property signals before arranging a viewing.",
-      "All inventory and price references on this WordbitX demonstration platform are illustrative. For a real transaction, independently verify title, authority approval, dues, possession and the seller’s right to transfer before paying any token amount.",
+      "Properties Pak brings houses, apartments, residential plots, villas, offices, shops and new-project inventory into one structured discovery experience. Use the city and society guides to understand local context, then compare price, area and indicative property signals before arranging a viewing.",
+      "Every listing on Properties Pak is published by a registered owner, dealer or our own desk. For any transaction, independently verify title, authority approval, dues, possession and the seller’s right to transfer before paying a token amount.",
     ],
     facets: [
       { label: "Houses for sale in Pakistan", href: "/houses-for-sale-in-pakistan", note: "Family homes and luxury villas" },
@@ -83,10 +83,10 @@ const SPECS: LandingSpec[] = [
       { title: "Model total ownership cost", copy: "Include transfer charges, maintenance, society fees, vacancy and financing—not only the advertised price." },
     ],
     faqs: [
-      { question: "Where can I find property for sale in Pakistan?", answer: "Properties Pak organizes illustrative property inventory by city, property type and society across Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar." },
+      { question: "Where can I find property for sale in Pakistan?", answer: "Properties Pak organizes live property inventory by city, town, property type and society across Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar." },
       { question: "Which property types are available in Pakistan?", answer: "Common categories include houses, apartments, villas, residential plots, offices, shops, warehouses, farmhouses, commercial buildings and units in new developments." },
       { question: "What should I check before buying property in Pakistan?", answer: "Confirm ownership, transfer history, dues, authority approval, possession, approved building plans where relevant, and all taxes and transfer charges before payment." },
-      { question: "Are Properties Pak listings real transactions?", answer: "No. Properties Pak is an official WordbitX product demonstration. Its inventory, price bands and property signals are illustrative and should not be treated as transaction evidence or investment advice." },
+      { question: "Are Properties Pak listings real transactions?", answer: "Every listing is published by a registered account and reviewed before it goes live, and each listing page names the person or dealer behind it. Price bands and property signals are indicative — always verify documents and treat nothing here as investment advice." },
     ],
     related: [
       { label: "Pakistan real estate keyword guide", href: "/keywords-for-pakistan" },
@@ -106,7 +106,7 @@ const SPECS: LandingSpec[] = [
     filters: { purpose: "rent" },
     intro: [
       "Rental property demand in Pakistan is concentrated around employment districts, universities, hospitals, schools and well-managed housing societies. Lahore has broad family and corporate demand, Islamabad attracts institutional tenants, and Karachi combines apartment leasing with the country’s deepest commercial rental market.",
-      "This page brings illustrative houses, apartments, upper portions, offices, shops, warehouses and furnished rentals together. Compare monthly rent, deposit expectations, furnishing, parking and maintenance responsibilities before building a shortlist.",
+      "This page brings houses, apartments, upper portions, offices, shops, warehouses and furnished rentals together. Compare monthly rent, deposit expectations, furnishing, parking and maintenance responsibilities before building a shortlist.",
       "A clear tenancy agreement matters as much as the property itself. Record the rent escalation, security deposit, notice period, utility responsibility, maintenance scope and inventory of furnished items in writing.",
     ],
     facets: [
@@ -146,12 +146,12 @@ const SPECS: LandingSpec[] = [
     h1: "Houses for Sale in Pakistan",
     eyebrow: "Pakistan houses",
     metaTitle: "Houses for Sale in Pakistan | Family Homes & Villas | Properties Pak",
-    metaDescription: "Explore sample houses and villas for sale across Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar.",
+    metaDescription: "Explore houses and villas for sale across Lahore, Islamabad, Karachi, Rawalpindi, Faisalabad, Multan, Gujranwala and Peshawar.",
     keywords: ["houses for sale in Pakistan", "home for sale Pakistan", "villas for sale Pakistan"],
     filters: { purpose: "buy", category: "house" },
     intro: [
       "House markets in Pakistan are shaped by plot size, construction age, road width and society management. A 10 Marla house in Lahore, an Islamabad sector home and a Karachi bungalow may serve similar families but carry very different maintenance and liquidity profiles.",
-      "Use this national house directory to compare illustrative family homes and villas across major cities, then move into a city or society guide for more relevant local context.",
+      "Use this national house directory to compare family homes and villas across major cities, then move into a city or society guide for more relevant local context.",
       "For constructed property, inspect structure, waterproofing, wiring, plumbing, utility connections and approved building plans in addition to title and transfer documentation.",
     ],
     facets: [
@@ -183,12 +183,12 @@ const SPECS: LandingSpec[] = [
     h1: "Apartments for Sale in Pakistan",
     eyebrow: "Pakistan apartments",
     metaTitle: "Apartments for Sale in Pakistan | Flats & Penthouses | Properties Pak",
-    metaDescription: "Compare sample apartments, flats and penthouses for sale across Lahore, Islamabad, Karachi and other major Pakistan property markets.",
+    metaDescription: "Compare apartments, flats and penthouses for sale across Lahore, Islamabad, Karachi and other major Pakistan property markets.",
     keywords: ["apartments for sale in Pakistan", "flats for sale Pakistan", "penthouses Pakistan"],
     filters: { purpose: "buy", category: "apartment" },
     intro: [
       "Apartment ownership is expanding across Pakistan as central land becomes more expensive and managed buildings improve. Karachi has the deepest apartment tradition, Islamabad’s market is supported by institutional tenants, and Lahore’s vertical supply is growing around Gulberg and new developments.",
-      "Compare sample units by usable area, floor, parking, ventilation, maintenance charges, power backup and possession status. A lower asking price can be offset by weak building management or large one-time repair levies.",
+      "Compare units by usable area, floor, parking, ventilation, maintenance charges, power backup and possession status. A lower asking price can be offset by weak building management or large one-time repair levies.",
       "Before purchase, review title or allotment documents, completion approvals, association records, service charges, utility arrangements and the exact parking allocation.",
     ],
     facets: [
@@ -218,12 +218,12 @@ const SPECS: LandingSpec[] = [
     h1: "Plots for Sale in Pakistan",
     eyebrow: "Pakistan plots",
     metaTitle: "Plots for Sale in Pakistan | Residential & Commercial Land | Properties Pak",
-    metaDescription: "Explore sample residential and commercial plots across DHA, Bahria Town and developing property markets in Pakistan. Compare size, possession and documentation status.",
+    metaDescription: "Explore residential and commercial plots across DHA, Bahria Town and developing property markets in Pakistan. Compare ize, possession and documentation status.",
     keywords: ["plots for sale in Pakistan", "residential plots Pakistan", "commercial plots Pakistan"],
     filters: { purpose: "buy", category: "plot" },
     intro: [
       "Plot investment remains a major part of Pakistan’s real-estate market because it offers lower maintenance than constructed property and flexibility over when to build. Outcomes depend heavily on approval, development delivery, possession and transfer documentation.",
-      "This directory brings illustrative possession plots and documented file-style inventory together across major cities. Use local society guides to understand infrastructure, road access and development stage.",
+      "This directory brings possession plots and documented file-style inventory together across major cities. Use local society guides to understand infrastructure, road access and development stage.",
       "Never treat a file, ballot or map location as proof of title. Verify the allotment, payment history, transfer chain, authority approval and outstanding development charges independently.",
     ],
     facets: [
@@ -254,12 +254,12 @@ const SPECS: LandingSpec[] = [
     h1: "Commercial Property in Pakistan",
     eyebrow: "Pakistan commercial real estate",
     metaTitle: "Commercial Property in Pakistan | Offices, Shops & Warehouses | Properties Pak",
-    metaDescription: "Explore sample commercial property across Pakistan including offices, shops, retail, warehouses and commercial buildings in Lahore, Islamabad and Karachi.",
+    metaDescription: "Explore commercial property across Pakistan including offices, shops, retail, warehouses and commercial buildings in Lahore, Islamabad and Karachi.",
     keywords: ["commercial property in Pakistan", "offices for sale Pakistan", "shops for sale Pakistan", "warehouse Pakistan"],
     filters: { commercialOnly: true },
     intro: [
       "Commercial real estate in Pakistan is valued through income potential, tenant demand and operational suitability. Lahore and Islamabad lead in office and retail demand, while Karachi has the deepest corporate, industrial and logistics market.",
-      "Compare illustrative offices, shops, commercial buildings and warehouses by frontage, parking, sanctioned use, electrical load, building services and lease terms—not only advertised price.",
+      "Compare offices, shops, commercial buildings and warehouses by frontage, parking, sanctioned use, electrical load, building services and lease terms—not only advertised price.",
       "For an income asset, review the tenancy, escalation, payment history, fit-out ownership and recurring maintenance before calculating net yield.",
     ],
     facets: [
@@ -289,18 +289,18 @@ const SPECS: LandingSpec[] = [
     h1: "New Property Projects in Pakistan",
     eyebrow: "New developments",
     metaTitle: "New Property Projects in Pakistan | Developments & Payment Plans | Properties Pak",
-    metaDescription: "Explore sample new property projects in Pakistan with locations, unit types, development status, starting prices and investment considerations.",
+    metaDescription: "Explore new property projects in Pakistan with locations, unit types, development status, starting prices and investment considerations.",
     keywords: ["new property projects Pakistan", "new housing projects Pakistan", "off plan property Pakistan"],
     filters: { isNewProject: true },
     alternatives: { purpose: "buy" },
     intro: [
       "New property projects can offer phased payments and modern amenities, but they introduce development, approval and handover risk that completed property does not carry.",
-      "Properties Pak presents illustrative project pages with location, developer, project type, status, starting price and sample units so users can understand how a structured project marketplace works.",
+      "Properties Pak publishes project pages with location, developer, project type, status, starting price, unit mix and delivery timeline so buyers can compare developments before booking.",
       "Before booking, independently confirm the authority approval, land title, developer track record, payment schedule, escalation clauses, transfer policy and realistic completion plan.",
     ],
     facets: [
       { label: "All new projects", href: "/projects", note: "Project cards and development details" },
-      { label: "New-project inventory", href: "/properties/new-projects", note: "Sample units within developments" },
+      { label: "New-project inventory", href: "/properties/new-projects", note: "Units within developments" },
       { label: "Property investment guide", href: "/property-investment-in-pakistan", note: "Risk and return framework" },
     ],
     priceBands: [
@@ -343,7 +343,7 @@ function cityIntentSpec(
       : `${h1} | Properties Pak`,
     metaDescription: isInvestment
       ? `Explore property investment in ${cityName}, including residential, rental, plots, commercial opportunities, location factors, risk considerations and calculators.`
-      : `Explore sample ${typeLabel} for ${purposeWord} in ${cityName}. Compare locations, prices, sizes and property details with market guides and Properties Pak tools.`,
+      : `Explore ${typeLabel} for ${purposeWord} in ${cityName}. Compare locations, prices, sizes and property details with market guides and Properties Pak tools.`,
     keywords: isInvestment
       ? [`property investment in ${cityName}`, `real estate investment ${cityName}`, `best areas to invest ${cityName}`]
       : [h1.toLowerCase(), `${cityName} property`, `${typeLabel} in ${cityName}`],
@@ -353,14 +353,14 @@ function cityIntentSpec(
       marketNote,
       isInvestment
         ? `A sound ${cityName} investment case starts with location utility, comparable pricing, realistic rent and exit liquidity. Residential, plot and commercial assets respond to different demand drivers, so compare them as separate strategies.`
-        : `This curated page presents illustrative ${typeLabel} in ${cityName}. Use the filters and comparison tools to evaluate asking price, area, furnishing, possession and location before moving into a society guide.`,
+        : `This curated page presents ${typeLabel} in ${cityName}. Use the filters and comparison tools to evaluate asking price, area, furnishing, possession and location before moving into a society guide.`,
       isInvestment
         ? "Model rental yield, total ownership cost and downside scenarios before committing. No appreciation, rent or return is guaranteed, and every real purchase requires independent legal and financial verification."
-        : "Inventory and price references are demonstration data. Independently verify title, dues, approvals, property condition and transfer requirements in any real transaction.",
+        : "Price references are indicative. Independently verify title, dues, approvals, property condition and transfer requirements in any transaction.",
     ],
     facets: [
-      { label: `Property for sale in ${cityName}`, href: `/property-for-sale-in-${city}`, note: "All sample sale inventory" },
-      { label: `Property for rent in ${cityName}`, href: `/property-for-rent-in-${city}`, note: "All sample rental inventory" },
+      { label: `Property for sale in ${cityName}`, href: `/property-for-sale-in-${city}`, note: "All sale inventory" },
+      { label: `Property for rent in ${cityName}`, href: `/property-for-rent-in-${city}`, note: "All rental inventory" },
       { label: `Commercial property in ${cityName}`, href: `/commercial-property-in-${city}`, note: "Offices, shops and income assets" },
       { label: "Pakistan property directory", href: "/property-for-sale-in-pakistan", note: "Compare other cities" },
     ],
@@ -382,7 +382,7 @@ function cityIntentSpec(
     ],
     faqs: [
       { question: `How should I compare ${typeLabel} in ${cityName}?`, answer: `Compare the same property type in the same micro-location using price per square foot, condition, access, amenities, documentation and likely resale or tenant demand.` },
-      { question: isInvestment ? `Is property investment in ${cityName} guaranteed to appreciate?` : `Are these real ${cityName} listings?`, answer: isInvestment ? "No. Capital appreciation and rental income are uncertain and depend on entry price, infrastructure, demand, documentation and market conditions." : "No. Properties Pak is a WordbitX demonstration platform, and the inventory and market figures are illustrative sample content." },
+      { question: isInvestment ? `Is property investment in ${cityName} guaranteed to appreciate?` : `Are these real ${cityName} listings?`, answer: isInvestment ? "No. Capital appreciation and rental income are uncertain and depend on entry price, infrastructure, demand, documentation and market conditions." : "Every listing is published by a registered owner, dealer or the Properties Pak desk and is reviewed before publication. Market figures are indicative references, so verify the specific property and its documents before committing." },
     ],
     related: [
       { label: "Pakistan real estate keyword guide", href: "/keywords-for-pakistan" },

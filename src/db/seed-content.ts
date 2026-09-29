@@ -98,7 +98,7 @@ export const EXTRA_POSTS: ExtraPost[] = [
       "How to interpret Lahore price per square foot across DHA phases, Bahria Town, Gulberg and Johar Town — and why two seemingly similar houses can differ by 40%.",
     body: [
       "Lahore does not have one property market. It has a dozen, each with its own buyer pool, liquidity and pricing logic. Comparing a 10 Marla house in DHA Phase 6 with one in Johar Town on price alone will always mislead, because you are buying different things: access, society management, and the depth of the resale market.",
-      "Start with price per square foot rather than headline price. It normalises plot size and highlights whether a property is priced in line with its neighbours. In our illustrative demo benchmark we use around PKR 9,000 to 13,500 per square foot for developed DHA and Gulberg sectors, materially higher than outer schemes.",
+      "Start with price per square foot rather than headline price. It normalises plot size and highlights whether a property is priced in line with its neighbours. Our current Lahore benchmark for developed DHA and Gulberg sectors sits around PKR 9,000 to 13,500 per square foot, materially higher than outer schemes.",
       "Within DHA, phase and block matter more than most buyers expect. A 1 Kanal plot on a wide boulevard inside Phase 5 can trade well above an equivalent plot at the edge of a newer phase, purely because of frontage, road width and the depth of demand in that specific block.",
       "Bahria Town prices on lifestyle and amenity access. Buyers pay for organisation, internal transport, schooling and security. The trade-off appears in recurring society charges and in distance from central Lahore, both of which affect net yield and resale speed.",
       "Gulberg and Model Town price on centrality and scarcity. Inventory is limited, plots are larger and older construction is common, so renovation budgets decide whether a purchase works. Johar Town and Wapda Town sit at a more predictable entry point with larger supply and consistent family demand.",
@@ -234,7 +234,7 @@ export const EXTRA_POSTS: ExtraPost[] = [
       "Where a property is income-producing, rental income falls within the tax framework, with withholding applied by certain tenants and adjustable against your annual liability. Keep documented records of rent, maintenance expenses and any management fees.",
       "On disposal, capital gains treatment generally depends on how long the property was held, with the rate structure changing across holding periods. Maintain evidence of your acquisition cost, improvement spending and the sale date — these determine how your gain is computed.",
       "Holding costs are often overlooked: municipal property tax, society maintenance, utilities on vacant property and insurance where applicable. Over a long hold, these collectively exceed the headline one-time transaction taxes.",
-      "Use the Properties Pak property tax calculator to get an illustrative estimate of purchase and disposal charges, then verify every figure against current FBR and provincial guidance.",
+      "Use the Properties Pak property tax calculator to estimate purchase and disposal charges, then verify every figure against current FBR and provincial guidance.",
     ],
     author: "Properties Pak Research",
     readMinutes: 6,
@@ -282,7 +282,7 @@ export const EXTRA_POSTS: ExtraPost[] = [
     body: [
       "Building on a plot gives you exactly what you want, at the cost of time, supervision and price risk on materials. Budgeting accurately is the difference between a two-year project and a stalled one.",
       "Construction cost in Pakistan is best discussed per square foot of covered area, split into stages. Grey structure covers foundation, RCC frame, blockwork, plaster and roofing. Finishing covers flooring, doors, windows, kitchens and bathrooms. Services cover electrical, plumbing, HVAC provision and solar readiness.",
-      "Rates move with material prices, so treat any per-square-foot figure as a range. In our construction cost calculator we use illustrative tiers from economy to luxury construction, and the spread between the lowest and highest tier is typically two to three times, not twenty per cent.",
+      "Rates move with material prices, so treat any per-square-foot figure as a range. Our construction cost calculator uses tiers from economy to luxury construction, and the spread between the lowest and highest tier is typically two to three times, not twenty per cent.",
       "Contingency is the most commonly under-budgeted line. Allocate 10–15% of the estimated build cost for design changes, site conditions and material price movement over the construction period.",
       "Add the costs that are not construction: consultant and architect fees, approval charges, utility connection fees and site security over the build period. On premium builds these can add meaningful amounts.",
       "If you are financing the build, model the interest during construction separately — an instalment that starts before the house is habitable is a common source of strain.",

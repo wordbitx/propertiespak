@@ -36,7 +36,7 @@ export const TOOL_DEFINITIONS: {
   { key: "roi", label: "ROI", blurb: "Total and annualised return including rent and appreciation.", icon: IconSpark },
   { key: "growth", label: "Investment projection", blurb: "Model appreciation and cumulative rent over a holding period.", icon: IconLayers },
   { key: "construction", label: "Construction cost", blurb: "Budget a build by covered area and construction tier.", icon: IconBuilding },
-  { key: "tax", label: "Property tax", blurb: "Illustrative transaction, holding and disposal charges.", icon: IconArea },
+  { key: "tax", label: "Property tax", blurb: "Estimated transaction, holding and disposal charges.", icon: IconArea },
 ];
 
 const currency = (value: number) => `PKR ${Math.round(value).toLocaleString("en-PK")}`;
@@ -133,7 +133,7 @@ function Result({
       </dl>
       <p className="mt-5 text-[0.75rem] leading-relaxed text-white/45">
         {note ??
-          "Illustrative estimate for planning only. Bank rates, taxes and fees vary — confirm terms with your lender or advisor."}
+          "Planning estimate only. Bank rates, taxes and fees vary — confirm terms with your lender or advisor."}
       </p>
     </div>
   );
@@ -538,14 +538,14 @@ export function Calculators({
         )}
         {tool === "tax" && (
           <Result
-            emphasis={{ label: "Illustrative total charges", value: currency(tax.totalCost) }}
+            emphasis={{ label: "Estimated total charges", value: currency(tax.totalCost) }}
             items={[
               { label: "Purchase / transfer charges", value: currency(tax.purchase) },
               { label: "Society transfer (approx 1%)", value: currency(tax.societyTransfer) },
               { label: `Holding cost over ${holdYears} years`, value: currency(tax.holding) },
               { label: "Indicative gain charge", value: tax.cgt > 0 ? currency(tax.cgt) : "Not applied" },
             ]}
-            note="Illustrative estimate only. Tax treatment in Pakistan depends on filer status, holding period and current law — confirm with FBR guidance or a tax practitioner."
+            note="Estimate only. Tax treatment in Pakistan depends on filer status, holding period and current law — confirm with FBR guidance or a tax practitioner."
           />
         )}
       </div>

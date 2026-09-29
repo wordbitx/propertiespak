@@ -353,7 +353,7 @@ export default function PakistanKeywordHubPage() {
           <DirectorySection
             id="karachi"
             title="Karachi Property Searches"
-            description="Karachi residential, plot, rental, commercial and investment pages with relevant sample inventory."
+            description="Karachi residential, plot, rental, commercial and investment pages with live inventory."
             links={KARACHI}
           />
         </div>
@@ -419,8 +419,8 @@ export default function PakistanKeywordHubPage() {
                 infrastructure, access and micro-location.
               </p>
               <p>
-                Next, filter by property type, price range, bedrooms and area. Add two or three sample listings to the
-                comparison tool to line up price per square foot, amenities and illustrative Properties Pak property signals.
+                Next, filter by property type, price range, bedrooms and area. Add two or three listings to the
+                comparison tool to line up price per square foot, amenities and Properties Pak property signals.
               </p>
               <p>
                 For investment research, use the rental-yield, ROI, mortgage, tax and affordability calculators alongside
@@ -432,7 +432,7 @@ export default function PakistanKeywordHubPage() {
             <h2 className="font-sans text-[1.05rem] font-semibold text-navy-900">Continue into market resources</h2>
             <ul className="mt-4 space-y-3">
               {[
-                { label: "Browse all sample properties", href: "/properties" },
+                { label: "Browse all properties", href: "/properties" },
                 { label: "Explore new property projects", href: "/projects" },
                 { label: "Open commercial property hub", href: "/commercial" },
                 { label: "Use all property calculators", href: "/tools" },
@@ -451,11 +451,11 @@ export default function PakistanKeywordHubPage() {
               ))}
             </ul>
             <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
-              Properties Pak is an official real-estate platform demonstration by{" "}
+              Properties Pak is the official real-estate platform by{" "}
               <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-forest-700 hover:underline">
                 WordbitX Software Company
               </a>
-              . Inventory and market figures are illustrative.
+              . Market figures are indicative and updated regularly.
             </p>
           </div>
         </div>

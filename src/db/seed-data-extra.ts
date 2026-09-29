@@ -4,7 +4,7 @@ import type { SeedProperty } from "./seed-data";
 /**
  * Additional realistic marketplace inventory in the style of popular Pakistani
  * portals (Zameen-style plots, houses and rentals across DHA, Bahria, Lake
- * City and scheme areas). All copy is original demo content.
+ * City and scheme areas). All copy is original editorial content.
  */
 export const extraPropertySeed: SeedProperty[] = [
   {

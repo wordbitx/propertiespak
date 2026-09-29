@@ -118,7 +118,7 @@ export function ComparePageClient() {
         <h2 className="mt-5 font-sans text-[1.15rem] font-semibold text-navy-900">Nothing to compare yet</h2>
         <p className="mx-auto mt-2 max-w-xl text-[0.9rem] leading-relaxed text-ink-muted">
           Add two or three properties to the comparison view using the compare button on any listing card. You will then
-          see price, price per square foot, area, amenities and the illustrative Properties Pak Score side by side.
+          see price, price per square foot, area, amenities and the Properties Pak Score side by side.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/properties" className="btn btn-primary">
@@ -145,7 +145,7 @@ export function ComparePageClient() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p className="font-sans text-[0.9375rem] font-semibold text-navy-900">
           Comparing {items.length} properties
-          <span className="ml-2 font-normal text-ink-muted">Prices, size, amenities and demo scores side by side</span>
+          <span className="ml-2 font-normal text-ink-muted">Prices, size, amenities and property scores side by side</span>
         </p>
         <Link href="/properties" className="btn btn-outline px-3.5 py-2 text-[0.8125rem]">
           Add another property
@@ -259,7 +259,7 @@ export function ComparePageClient() {
           <strong className="font-semibold text-navy-900">How to read this.</strong> Price per square foot, area and the
           Properties Pak Score make two apparently similar listings genuinely comparable. Green ticks mark the
           strongest figure in each row. The property score is an {scores[0].label.toLowerCase()} built from each listing&rsquo;s
-          own attributes and sample market benchmarks — it is not a valuation or investment advice.
+          own attributes and published city benchmarks — it is not a valuation or investment advice.
         </p>
         <div className="rounded-panel border border-soft bg-white p-5">
           <p className="font-sans text-[0.9375rem] font-semibold text-navy-900">Want the numbers reviewed?</p>

@@ -112,6 +112,8 @@ export const properties = pgTable(
     listedByEmail: text("listed_by_email").notNull().default(""),
     listedByPhone: text("listed_by_phone").notNull().default(""),
     listedByWhatsapp: text("listed_by_whatsapp").notNull().default(""),
+    /** Registered account that owns this listing (null for platform inventory). */
+    listedByUserId: integer("listed_by_user_id"),
     views: integer("views").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -167,15 +169,39 @@ export const inquiries = pgTable("inquiries", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Registered platform users (buyers, investors, sellers). */
+/**
+ * Registered platform accounts. Every account that lists a property becomes a
+ * public dealer profile at `/dealers/<slug>`: the profile only carries a blue
+ * verification tick once an administrator verifies it in the admin workspace.
+ */
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().default(""),
   passwordHash: text("password_hash").notNull(),
+  /** Public profile slug; empty until the account publishes a listing. */
+  slug: text("slug").notNull().default(""),
+  /** member | dealer | agency — dealers are members who list property. */
+  role: text("role").notNull().default("member"),
+  citySlug: text("city_slug").notNull().default(""),
+  cityName: text("city_name").notNull().default(""),
+  agency: text("agency").notNull().default(""),
+  bio: text("bio").notNull().default(""),
+  whatsapp: text("whatsapp").notNull().default(""),
+  avatarUrl: text("avatar_url").notNull().default(""),
+  /** Blue tick state — set only from the admin workspace. */
+  isVerified: boolean("is_verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export type User = typeof users.$inferSelect;
+export type DealerStats = {
+  listings: number;
+  verifiedListings: number;
+  cities: number;
+};
 
 /** Saved properties per user (server-side favourites). */
 export const favorites = pgTable(
@@ -216,6 +242,8 @@ export const listingMedia = pgTable("listing_media", {
 export const listingSubmissions = pgTable("listing_submissions", {
   id: serial("id").primaryKey(),
   status: text("status").notNull().default("pending"),
+  /** Account that submitted the listing, when the owner was signed in. */
+  userId: integer("user_id"),
   adminNote: text("admin_note").notNull().default(""),
   propertyId: integer("property_id"),
   // Contact
@@ -260,6 +288,5 @@ export type Property = typeof properties.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type Testimonial = typeof testimonials.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;
-export type User = typeof users.$inferSelect;
 export type ListingSubmission = typeof listingSubmissions.$inferSelect;
 export type ListingMedia = typeof listingMedia.$inferSelect;

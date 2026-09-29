@@ -22,7 +22,7 @@ const FAQS = [
   {
     question: "What is Properties Pak?",
     answer:
-      "Properties Pak is a premium property marketplace demo for Pakistan. It brings sample sale and rental listings, new developments, commercial spaces, map search and investment calculators into one platform.",
+      "Properties Pak is Pakistan's property marketplace: live sale and rental listings, new developments, commercial space, map search, verified dealer profiles and investment calculators in one platform.",
   },
   {
     question: "Which cities does Properties Pak cover?",
@@ -32,7 +32,7 @@ const FAQS = [
   {
     question: "Are these real, verified listings?",
     answer:
-      "No \u2014 all inventory on this demo website is illustrative sample content created to showcase the platform. In a production deployment for a licensed agency, listings would be reviewed for documentation status, dues clearance and accuracy of size, price and location before publication.",
+      "Listings are published by registered owners, dealers and the Properties Pak desk, and every submission is reviewed by our team before it goes live. That review covers owner contact, area, size and pricing consistency, and every listing page shows who published it. Buyers should still confirm title, dues, possession and the transfer procedure in writing before paying any token amount.",
   },
   {
     question: "Can I list my property on Properties Pak?",
@@ -139,8 +139,8 @@ export default async function AboutPage() {
           />
           <dl className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              { label: "Demo Listings", value: stats.listings, note: "Sample sale and rental inventory" },
-              { label: "Sample properties", value: stats.verified, note: "Illustrative demo data" },
+              { label: "Live listings", value: stats.listings, note: "Sale and rental inventory" },
+              { label: "Checked listings", value: stats.verified, note: "Reviewed before publication" },
               { label: "New projects", value: stats.projects, note: "Active developments tracked" },
               { label: "Cities covered", value: cities.length, note: "Across four provinces" },
             ].map((item) => (
@@ -188,7 +188,7 @@ export default async function AboutPage() {
           <div className="rounded-panel border border-soft bg-mist p-6 lg:p-8">
             <h3 className="font-sans text-[1.05rem] font-semibold text-navy-900">Technology, company &amp; attribution</h3>
             <p className="mt-3 text-[0.9rem] leading-relaxed text-ink-muted">
-              {SITE.name} is the official real estate platform demo created &amp; developed by{" "}
+              {SITE.name} is the official real estate platform of Pakistan created &amp; developed by{" "}
               <a
                 href={SITE.companyUrl}
                 target="_blank"
@@ -273,14 +273,14 @@ export default async function AboutPage() {
         </div>
       </Section>
 
-      <Section tone="light" id="demo">
+      <Section tone="light" id="transparency">
         <div className="ui-container">
           <div className="rounded-panel border border-soft bg-mist p-6 lg:p-8">
             <p className="eyebrow text-forest-700">
               <span className="h-[1px] w-6 bg-current opacity-70" />
-              Demo &amp; data transparency
+              Data, verification &amp; transparency
             </p>
-            <h2 className="display-3 mt-3 text-navy-900">What is real, and what is demonstration content</h2>
+            <h2 className="display-3 mt-3 text-navy-900">What is verified, and what is an estimate</h2>
             <div className="mt-5 grid gap-6 lg:grid-cols-2">
               <div>
                 <h3 className="font-sans text-[0.9375rem] font-semibold text-navy-900">Built and working</h3>
@@ -300,14 +300,14 @@ export default async function AboutPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="font-sans text-[0.9375rem] font-semibold text-navy-900">Illustrative sample content</h3>
+                <h3 className="font-sans text-[0.9375rem] font-semibold text-navy-900">Estimates and guidance</h3>
                 <ul className="mt-3 space-y-2.5 text-[0.9rem] text-ink-muted">
                   {[
-                    "Listings, prices and areas are sample data, not live agency inventory",
-                    "Price bands and per-square-foot benchmarks are demo reference values",
-                    "The Property Score is an illustrative demo rating, not a valuation",
-                    "User scenarios shown on the homepage are composite examples, not client testimonials",
-                    "Calculators provide estimates for planning, not financial or tax advice",
+                    "Asking prices and price bands are published by the listing owner and can change without notice",
+                    "Per-square-foot benchmarks and the Property Score are comparative indicators, not a valuation",
+                    "Calculator outputs are planning estimates, not financial, legal or tax advice",
+                    "Dealer verification confirms identity, agency and contact details — it is not a title guarantee",
+                    "Always confirm title, dues, possession and the transfer procedure before paying a token",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
                       <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-navy-600" />
@@ -318,8 +318,8 @@ export default async function AboutPage() {
               </div>
             </div>
             <p className="mt-6 text-[0.8125rem] leading-relaxed text-ink-muted">
-              Properties Pak is a demonstration product. To run this platform on a licensed agency's own verified inventory,
-              contact {SITE.company} at{" "}
+              Agencies and developers can publish their full inventory under one verified account. To onboard a team or
+              discuss a co-branded deployment, contact {SITE.company} at{" "}
               <a href={`mailto:${SITE.companyEmail}`} className="font-semibold text-navy-900 hover:text-forest-700">
                 {SITE.companyEmail}
               </a>

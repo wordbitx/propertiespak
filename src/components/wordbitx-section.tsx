@@ -33,7 +33,7 @@ export function WordbitxSection() {
             <p className="eyebrow text-forest-700">Designed & engineered by</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" aria-label="WordbitX Software Company" className="wordbitx-wordmark">Wordbit<span className="text-forest-700">X</span></a>
             <h2 id="wordbitx-heading" className="mt-5 max-w-lg font-sans text-[clamp(1.35rem,2.6vw,2rem)] font-bold leading-tight text-navy-900">The technology behind Properties Pak.</h2>
-            <p className="mt-4 max-w-xl text-[0.9375rem] leading-7 text-ink-muted">Properties Pak is a real-estate demonstration by WordbitX Software Company. For a property marketplace, custom business software or digital solutions, talk to the team that built it.</p>
+            <p className="mt-4 max-w-xl text-[0.9375rem] leading-7 text-ink-muted">Properties Pak is the official real-estate platform engineered by WordbitX Software Company. For a property marketplace, custom business software or digital solutions, talk to the team that built it.</p>
             <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-navy-800 hover:text-forest-700">Explore WordbitX <IconArrowRight className="h-4 w-4" /></a>
           </div>
           <div className="wordbitx-contact-panel">
