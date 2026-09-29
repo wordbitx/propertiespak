@@ -30,7 +30,24 @@ export const photos = {
   },
 } as const;
 
-const HERO_PHOTO_ID = 31817157;
+/**
+ * Gallery used when an owner submits a listing without photos, by category.
+ * Seeded listings never reuse these, so an approved submission never looks
+ * like another listing.
+ */
+export const submissionFallbackPhotos: Record<string, readonly number[]> = {
+  house: [36676879, 8082227, 6585757, 7546213],
+  apartment: [8082227, 6585757, 7546213, 7031879],
+  plot: [36422828, 30505108, 31249549, 11680715],
+  office: [1313534, 267501, 13437132, 8310949],
+  shop: [30929605, 31573705, 15054264, 12547325],
+  building: [2040476, 4534504, 18468708, 1313534],
+  warehouse: [7937746, 11680715, 38524594, 25310909],
+  farmhouse: [36394726, 28915352, 19075392, 8135496],
+  penthouse: [7546321, 8141959, 7045919, 34818802],
+};
+
+export const HERO_PHOTO_ID = 31817157;
 const heroSrc = (width: number, height?: number) =>
   `https://images.pexels.com/photos/${HERO_PHOTO_ID}/pexels-photo-${HERO_PHOTO_ID}.jpeg?auto=compress&cs=tinysrgb` +
   (height ? `&fit=crop&w=${width}&h=${height}` : `&w=${width}`);
@@ -83,3 +100,20 @@ export function ogCard(input: { title: string; subtitle?: string; kicker?: strin
   if (input.footer) params.set("footer", input.footer);
   return `${OG_CARD_PATH}?${params.toString()}`;
 }
+
+/**
+ * Fixed photos used by page sections (homepage discovery tiles, the commercial
+ * page feature). Seeded listings never reuse these, so a listing card never
+ * repeats a section image.
+ */
+export const sectionPhotos = {
+  buy: 36676879,
+  rent: 8082227,
+  newProjects: 38524594,
+  commercial: 1313534,
+  luxury: 28054849,
+  apartments: 7546321,
+  plots: 36422828,
+  offices: 267501,
+  commercialFeature: 18468708,
+} as const;

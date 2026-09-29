@@ -32,13 +32,6 @@ const WORDBITX_PORTALS: Portal[] = [
     current: true,
   },
   {
-    name: "Pakistan Real Estate",
-    sector: "Property portal",
-    domain: "pakproperty.wordbitxtech.com",
-    url: "https://pakproperty.wordbitxtech.com/",
-    copy: "Society-style listings with search and layouts built for dealers.",
-  },
-  {
     name: "Motor & Automotive",
     sector: "Automotive",
     domain: "motor.wordbitxtech.com",
@@ -296,15 +289,15 @@ export default async function AboutPage() {
                 <IconPhone className="mt-0.5 h-4 w-4 shrink-0 text-forest-600" />
                 <div>
                   <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
-                    USA / International enquiries
+                    New York, USA · International enquiries
                   </dt>
                   <dd className="mt-1">
                     <a href={`tel:${SITE.companyPhoneUs.replace(/[^\d+]/g, "")}`} className="text-navy-900 hover:text-forest-700">
                       {SITE.companyPhoneUs}
                     </a>
                     <span className="mt-1 block text-[0.75rem] leading-relaxed text-ink-muted">
-                      WordbitX&rsquo;s international line (New York, USA) for company and software enquiries. It also
-                      takes WhatsApp messages for the Karachi desk.
+                      WordbitX&rsquo;s New York, USA line for company and software enquiries. It is also the
+                      Properties Pak international desk for overseas buyers and Karachi listings.
                     </span>
                   </dd>
                 </div>

@@ -3,7 +3,7 @@ import { SITE } from "@/lib/constants";
 
 const CONTACTS = [
   { label: "Pakistan", number: SITE.companyPhone, digits: "923251888841" },
-  { label: "USA & Intl", number: SITE.companyPhoneUs, digits: "19296197699" },
+  { label: "New York, USA", number: SITE.companyPhoneUs, digits: "19296197699" },
 ];
 
 /** Compact contacts reused in the elevated company section and site-wide footer. */

@@ -11,7 +11,7 @@ import { LeadForm } from "@/components/lead-form";
 import { formatPrice } from "@/lib/format";
 import { getCities, getMapProperties, searchProperties } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
-import { photo } from "@/lib/images";
+import { photo, sectionPhotos } from "@/lib/images";
 
 export const metadata: Metadata = buildMetadata({
   title: "Commercial Property in Pakistan — Offices, Shops & Warehouses",
@@ -190,7 +190,7 @@ export default async function CommercialPage() {
 
           <div className="overflow-hidden rounded-panel bg-soft">
             <img
-              src={photo(18468708, 1200, 1400)}
+              src={photo(sectionPhotos.commercialFeature, 1200, 1400)}
               alt="Glass office towers in a financial district"
               width={1200}
               height={1400}

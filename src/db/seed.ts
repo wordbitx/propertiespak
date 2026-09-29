@@ -9,7 +9,9 @@ import { hashPassword } from "@/lib/password";
 import { agentSeed, citySeed, postSeed, projectSeed, propertySeed, testimonialSeed } from "@/db/seed-data";
 import { extraPropertySeed } from "@/db/seed-data-extra";
 import { EXTRA_POSTS, POST_LINKS } from "@/db/seed-content";
-import { photo } from "@/lib/images";
+import { assignSeedGalleries } from "@/db/seed-gallery";
+import type { SeedProperty } from "@/db/seed-data";
+import { HERO_PHOTO_ID, photo, photos, sectionPhotos, submissionFallbackPhotos } from "@/lib/images";
 
 /**
  * Idempotent schema guard. The canonical schema lives in `src/db/schema.ts`
@@ -514,14 +516,37 @@ async function linkDealerListings(q: Executor) {
   }
 }
 
+/**
+ * Photos already used elsewhere on the site (hero, rejected hero, city tiles,
+ * project pages, guides and the submission fallback). Listings never reuse
+ * them, so a property card never looks like a blog cover or a city tile.
+ */
+const RESERVED_PHOTOS = new Set<number>([
+  HERO_PHOTO_ID,
+  28054849,
+  ...Object.values(photos.cities),
+  ...projectSeed.flatMap((project) => project.images),
+  ...postSeed.map((post) => post.image),
+  ...EXTRA_POSTS.map((post) => post.image),
+  ...Object.values(submissionFallbackPhotos).flat(),
+  ...Object.values(sectionPhotos),
+]);
+
+/** Every seeded listing, each with its own cover photo (see seed-gallery.ts). */
+const seedListings: SeedProperty[] = assignSeedGalleries(
+  [...propertySeed, ...extraPropertySeed, ...townPropertySeed, ...societyPropertySeed],
+  RESERVED_PHOTOS,
+);
+
+const listingCover = (property: SeedProperty) => photo(property.images[0], 1200, 800);
+const listingGallery = (property: SeedProperty) => property.images.map((id) => photo(id, 1600, 1050));
+
 async function seedProperties(q: Executor) {
   // Additive: insert only slugs that are missing, so new inventory lands
   // without touching existing listings or admin-approved properties.
   const existing = await q.select({ slug: properties.slug }).from(properties);
   const existingSlugs = new Set(existing.map((row) => row.slug));
-  const pending = [...propertySeed, ...extraPropertySeed, ...townPropertySeed, ...societyPropertySeed].filter(
-    (property) => !existingSlugs.has(property.slug),
-  );
+  const pending = seedListings.filter((property) => !existingSlugs.has(property.slug));
   if (pending.length === 0) return;
 
   await q.insert(properties).values(
@@ -551,8 +576,8 @@ async function seedProperties(q: Executor) {
       description: property.description,
       features: property.features,
       amenities: property.amenities,
-      coverImage: photo(property.images[0], 1200, 800),
-      images: property.images.map((id) => photo(id, 1600, 1050)),
+      coverImage: listingCover(property),
+      images: listingGallery(property),
       featured: property.featured,
       verified: property.verified,
       isNewProject: property.isNewProject,
@@ -562,6 +587,29 @@ async function seedProperties(q: Executor) {
       createdAt: new Date(Date.now() - property.daysAgo * 86_400_000),
     })),
   );
+}
+
+/**
+ * Brings the photos of already-inserted seed listings in line with the seed,
+ * in one statement. Only rows whose cover and gallery are still stock photos
+ * are touched, so photos a dealer or an administrator uploaded are kept.
+ */
+async function refreshSeedGalleries(q: Executor) {
+  const rows = seedListings.map(
+    (property) => sql`(${property.slug}::text, ${listingCover(property)}::text, ${JSON.stringify(listingGallery(property))}::jsonb)`,
+  );
+  await q.execute(sql`
+    update properties as p
+       set cover_image = v.cover, images = v.images
+      from (values ${sql.join(rows, sql`, `)}) as v(slug, cover, images)
+     where p.slug = v.slug
+       and p.cover_image like 'https://images.pexels.com/%'
+       and not exists (
+         select 1 from jsonb_array_elements_text(p.images) as img(url)
+          where img.url not like 'https://images.pexels.com/%'
+       )
+       and (p.cover_image is distinct from v.cover or p.images is distinct from v.images)
+  `);
 }
 
 /**
@@ -581,10 +629,7 @@ export const SEED_VERSION = createHash("sha256")
       POST_LINKS,
       testimonialSeed,
       dealerSeed,
-      propertySeed,
-      extraPropertySeed,
-      townPropertySeed,
-      societyPropertySeed,
+      seedListings,
     ]),
   )
   .digest("hex")
@@ -622,6 +667,7 @@ async function runSeed() {
     await refreshReferenceContent(tx);
     await seedDealerAccounts(tx);
     await seedProperties(tx);
+    await refreshSeedGalleries(tx);
     await linkDealerListings(tx);
     await tx.execute(sql`
       insert into app_meta (key, value, updated_at) values ('seed_version', ${SEED_VERSION}, now())

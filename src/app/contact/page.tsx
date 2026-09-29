@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Contact Properties Pak — Property Advisory in Pakistan",
   description:
-    "Talk to the Properties Pak property desk in Lahore, Islamabad, Karachi and Multan. Call +92 325 1888841 or send your requirement for matched listings and site visits.",
+    "Talk to the Properties Pak property desks in Lahore, Islamabad and Multan, or the international desk in New York. Call +92 325 1888841 or send your requirement for matched listings and site visits.",
   path: "/contact",
   keywords: ["property dealers Lahore", "real estate contact Pakistan", "Properties Pak contact"],
 });
@@ -74,7 +74,7 @@ export default async function ContactPage() {
                 <div>
                   <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">Desks</dt>
                   <dd className="mt-1 text-[0.9375rem] text-navy-900">
-                    Lahore · Islamabad · Karachi · Multan
+                    Lahore · Islamabad · Multan · New York, USA
                     <span className="mt-1 block text-[0.8125rem] text-ink-muted">
                       Viewings arranged by appointment across all covered cities.
                     </span>
@@ -207,7 +207,7 @@ export default async function ContactPage() {
             </div>
             <p className="mt-5 text-[0.75rem] leading-relaxed text-ink-muted">
               Property enquiries are handled by the Properties Pak city desks listed above. The USA number is WordbitX&rsquo;s
-              international business line, and it also takes WhatsApp messages for the Karachi desk.
+              New York line, and it also serves as the Properties Pak international desk for overseas buyers and Karachi listings.
             </p>
           </div>
         </div>

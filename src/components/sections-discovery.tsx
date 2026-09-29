@@ -17,20 +17,20 @@ import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import type { City, Post, Project, Property } from "@/db/schema";
 import { formatPrice } from "@/lib/format";
-import { photo } from "@/lib/images";
+import { photo, sectionPhotos } from "@/lib/images";
 import { SITE } from "@/lib/constants";
 import { siteImages } from "@/lib/site-images";
 import { SitePicture } from "@/components/site-picture";
 
 const CATEGORY_TILES = [
-  { label: "Buy", sub: "Houses, plots & villas", href: "/properties/for-sale", image: 36676879, icon: IconKey },
-  { label: "Rent", sub: "Homes & apartments", href: "/properties/for-rent", image: 8082227, icon: IconArea },
-  { label: "New Projects", sub: "Off-plan & launches", href: "/properties/new-projects", image: 38524594, icon: IconLayers },
-  { label: "Commercial", sub: "Offices & retail", href: "/commercial", image: 1313534, icon: IconBuilding },
-  { label: "Luxury Homes", sub: "Signature residences", href: "/properties?category=house", image: 28054849, icon: IconSpark },
-  { label: "Apartments", sub: "City living", href: "/properties?category=apartment", image: 7546321, icon: IconBuilding },
-  { label: "Plots", sub: "Developed sectors", href: "/properties?category=plot", image: 36422828, icon: IconCompass },
-  { label: "Offices", sub: "Corporate floors", href: "/properties?type=Office", image: 267501, icon: IconShield },
+  { label: "Buy", sub: "Houses, plots & villas", href: "/properties/for-sale", image: sectionPhotos.buy, icon: IconKey },
+  { label: "Rent", sub: "Homes & apartments", href: "/properties/for-rent", image: sectionPhotos.rent, icon: IconArea },
+  { label: "New Projects", sub: "Off-plan & launches", href: "/properties/new-projects", image: sectionPhotos.newProjects, icon: IconLayers },
+  { label: "Commercial", sub: "Offices & retail", href: "/commercial", image: sectionPhotos.commercial, icon: IconBuilding },
+  { label: "Luxury Homes", sub: "Signature residences", href: "/properties?category=house", image: sectionPhotos.luxury, icon: IconSpark },
+  { label: "Apartments", sub: "City living", href: "/properties?category=apartment", image: sectionPhotos.apartments, icon: IconBuilding },
+  { label: "Plots", sub: "Developed sectors", href: "/properties?category=plot", image: sectionPhotos.plots, icon: IconCompass },
+  { label: "Offices", sub: "Corporate floors", href: "/properties?type=Office", image: sectionPhotos.offices, icon: IconShield },
 ];
 
 export function CategoryGrid() {
