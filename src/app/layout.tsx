@@ -154,7 +154,14 @@ const IMAGE_FALLBACK_SVG =
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2f52"/><stop offset="1" stop-color="#10a456"/></linearGradient></defs><rect width="1200" height="800" fill="url(#g)"/><path d="M600 290 450 410h40v130h220V410h40z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="14" stroke-linejoin="round"/></svg>',
   );
-const IMAGE_FALLBACK_SCRIPT = `(function(){var F=${JSON.stringify(IMAGE_FALLBACK_SVG)};addEventListener("error",function(e){var i=e.target;if(!i||i.tagName!=="IMG"||i.dataset.fb==="2")return;var s=i.currentSrc||i.src||"";i.removeAttribute("srcset");if(!i.dataset.fb&&s.indexOf("images.pexels.com")>-1&&s.indexOf(".jpeg")>-1){i.dataset.fb="1";i.src=s.replace(".jpeg",".png");return}i.dataset.fb="2";i.src=F},true)})()`;
+/**
+ * Capture-phase <img> error handler, inlined before any image in the body.
+ * Pexels' CDN occasionally answers a request with a transient 5xx, so a failed
+ * Pexels photo is first retried as-is after a short pause, then as `.png` (a
+ * few originals are PNG-only), and only then swapped for a branded placeholder
+ * so a card never shows a broken-image icon.
+ */
+const IMAGE_FALLBACK_SCRIPT = `(function(){var F=${JSON.stringify(IMAGE_FALLBACK_SVG)};addEventListener("error",function(e){var i=e.target;if(!i||i.tagName!=="IMG")return;var n=+(i.dataset.fb||0);if(n>=3)return;var s=i.currentSrc||i.src||"";i.removeAttribute("srcset");var p=s.indexOf("images.pexels.com")>-1;if(p&&n===0){i.dataset.fb="1";setTimeout(function(){i.src=s+(s.indexOf("?")>-1?"&":"?")+"retry=1"},600);return}if(p&&n===1&&s.indexOf(".jpeg")>-1){i.dataset.fb="2";i.src=s.replace(".jpeg",".png").replace(/[?&]retry=1/,"");return}i.dataset.fb="3";i.src=F},true)})()`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const userId = await getSessionUserId();

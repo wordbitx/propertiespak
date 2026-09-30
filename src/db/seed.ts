@@ -8,6 +8,7 @@ import { societyPropertySeed } from "@/db/seed-societies";
 import { hashPassword } from "@/lib/password";
 import { agentSeed, citySeed, postSeed, projectSeed, propertySeed, testimonialSeed } from "@/db/seed-data";
 import { extraPropertySeed } from "@/db/seed-data-extra";
+import { dhaPropertySeed } from "@/db/seed-data-dha";
 import { EXTRA_POSTS, POST_LINKS } from "@/db/seed-content";
 import { assignSeedGalleries } from "@/db/seed-gallery";
 import type { SeedProperty } from "@/db/seed-data";
@@ -534,7 +535,7 @@ const RESERVED_PHOTOS = new Set<number>([
 
 /** Every seeded listing, each with its own cover photo (see seed-gallery.ts). */
 const seedListings: SeedProperty[] = assignSeedGalleries(
-  [...propertySeed, ...extraPropertySeed, ...townPropertySeed, ...societyPropertySeed],
+  [...propertySeed, ...extraPropertySeed, ...dhaPropertySeed, ...townPropertySeed, ...societyPropertySeed],
   RESERVED_PHOTOS,
 );
 
