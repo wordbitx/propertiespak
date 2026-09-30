@@ -174,7 +174,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
      * attribute difference as a failed hydration and re-renders the whole tree
      * on the client, which briefly shows two copies of the page.
      */
-    <html lang="en" className={`${jakarta.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${inter.variable}`}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <body className="bg-white text-ink antialiased" suppressHydrationWarning>
         {/* Runs straight from the HTML, before and independently of React, so the header turns solid on scroll even if hydration is slow or a JS chunk fails. */}
         <script dangerouslySetInnerHTML={{ __html: HEADER_SCROLL_SCRIPT }} />
