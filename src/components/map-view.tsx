@@ -19,11 +19,13 @@ export type MapProperty = {
   citySlug?: string; distanceKm?: number;
 };
 
-/** Category colour coding for map pins (the active pin always renders green). */
-const COMMERCIAL_TYPE = /(office|shop|warehouse|industrial|commercial building|commercial|plaza|factory)/i;
+/** Category colour coding for map pins (the selected pin always renders green). */
+const APARTMENT_TYPE = /(apartment|penthouse|portion|studio|flat\b)/i;
+const COMMERCIAL_TYPE = /(office|shop|warehouse|industrial|commercial|plaza|factory|building)/i;
 const PLOT_TYPE = /\b(plot|file|agricultural)\b/i;
 export function pinColorFor(propertyType: string): string {
-  if (COMMERCIAL_TYPE.test(propertyType)) return "#b45309";
+  if (COMMERCIAL_TYPE.test(propertyType)) return "#d97706";
+  if (APARTMENT_TYPE.test(propertyType)) return "#7c3aed";
   if (PLOT_TYPE.test(propertyType)) return "#0e7490";
   return "#06274a";
 }
@@ -31,8 +33,9 @@ export function pinColorFor(propertyType: string): string {
 /** Legend for the category colours, shown under multi-pin overview maps. */
 function PinLegend() {
   const items = [
-    { color: "#06274a", label: "Residential" },
-    { color: "#b45309", label: "Commercial" },
+    { color: "#06274a", label: "Houses & villas" },
+    { color: "#7c3aed", label: "Apartments" },
+    { color: "#d97706", label: "Commercial" },
     { color: "#0e7490", label: "Plots" },
     { color: "#10a456", label: "Selected" },
   ];
@@ -71,12 +74,12 @@ export function MapView({
   })), [properties, selected]);
 
   return (
-    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
+    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)] ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
       <div className="min-w-0">
         <LeafletMap
           center={focus}
           zoom={focusZoom}
-          heightClass="h-[420px] sm:h-[540px]"
+          heightClass="h-[420px] sm:h-[580px]"
           pins={pins}
           fitToPins={nearby || autoFit}
           autoOpenActive
@@ -104,7 +107,7 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="max-h-[580px] space-y-2 overflow-y-auto">
+        <ul className="max-h-[536px] space-y-2 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}

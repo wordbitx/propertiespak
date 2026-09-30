@@ -647,17 +647,14 @@
   line-height: 1.45;
   color: var(--color-ink);
 }
-/* Card popups (photo header) run edge-to-edge */
-.leaflet-popup-content-wrapper:has(.ewx-popup-card) {
+/* Compact photo-card popups run edge-to-edge with a small square photo. */
+.leaflet-popup-content-wrapper:has(.ewx-popup-row) {
   border-radius: 14px;
   overflow: hidden;
 }
-.leaflet-popup-content-wrapper:has(.ewx-popup-card) .leaflet-popup-content {
+.leaflet-popup-content-wrapper:has(.ewx-popup-row) .leaflet-popup-content {
   margin: 0;
-}
-.leaflet-popup-content-wrapper:has(.ewx-popup-card) .leaflet-popup-close-button {
-  color: #fff !important;
-  text-shadow: 0 1px 4px rgba(4, 16, 28, 0.55);
+  width: 252px !important;
 }
 .ewx-popup b {
   font-family: var(--font-sans);
@@ -672,24 +669,42 @@
   color: #6b7f94;
   font-size: 11px;
 }
-.ewx-popup-img {
+.ewx-popup-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+.ewx-popup-thumb {
   display: block;
-  width: 100%;
-  height: 110px;
+  width: 84px;
+  height: 96px;
+  flex-shrink: 0;
   object-fit: cover;
   background: var(--color-mist);
 }
+.ewx-popup-thumb--empty {
+  display: grid;
+  place-items: center;
+}
+.ewx-popup-thumb--empty svg {
+  width: 26px;
+  height: 26px;
+}
 .ewx-popup-body {
-  padding: 10px 12px 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px 11px 0;
 }
-.ewx-popup-card .ewx-popup-body b {
-  display: block;
-  margin-top: 3px;
+.ewx-popup-row .ewx-popup-body b {
+  font-size: 13px;
   line-height: 1.3;
-}
-.ewx-popup-card .ewx-popup-body .ewx-muted {
-  display: block;
-  margin-top: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .ewx-popup-price {
   display: inline-block;
@@ -701,7 +716,8 @@
 }
 .ewx-popup-cta {
   display: inline-block;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 4px;
   font: 600 12px/1 var(--font-sans);
 }
 .leaflet-control-attribution {

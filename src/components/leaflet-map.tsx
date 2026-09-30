@@ -139,12 +139,14 @@ function isPlaceholderTile(img: HTMLImageElement): boolean {
   }
 }
 
-/** Premium card popup for listing pins (photo header, price, CTA). */
+/** Premium compact card popup for listing pins — small photo, price, CTA. */
 function pinPopupHtml(pin: LeafletPin): string {
-  const image = pin.image ? `<img class="ewx-popup-img" src="${escapeText(pin.image)}" alt="" loading="lazy" />` : "";
+  const image = pin.image
+    ? `<img class="ewx-popup-thumb" src="${escapeText(pin.image)}" alt="" loading="lazy" />`
+    : `<span class="ewx-popup-thumb ewx-popup-thumb--empty" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#8aa0b5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 9 6 9-6" /><rect x="3" y="5" width="18" height="14" rx="2" /></svg></span>`;
   const price = pin.price ? `<span class="ewx-popup-price">${escapeText(pin.price)}</span>` : "";
   const cta = pin.href?.startsWith("/property/") ? `<a class="ewx-popup-cta" href="${escapeText(pin.href)}">View property →</a>` : "";
-  return `<div class="ewx-popup${image ? " ewx-popup-card" : ""}">${image}<div class="ewx-popup-body">${price}<b>${escapeText(pin.title)}</b>${pin.subtitle ? `<span class="ewx-muted">${escapeText(pin.subtitle)}</span>` : ""}${cta}</div></div>`;
+  return `<div class="ewx-popup ewx-popup-row">${image}<div class="ewx-popup-body">${price}<b>${escapeText(pin.title)}</b>${pin.subtitle ? `<span class="ewx-muted">${escapeText(pin.subtitle)}</span>` : ""}${cta}</div></div>`;
 }
 
 /** Body of the draggable picker pin popup — rebuilt on every label change. */
@@ -187,10 +189,11 @@ export function LeafletMap({
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  // Society layout renders like dhaplus.com by default — blended over the
-  // satellite base — and can be switched off from the "Layout" pill. The
-  // fault-tolerance guard swaps it off automatically if the tile source fails.
-  const [layoutOn, setLayoutOn] = useState(true);
+  // Society layout stays OFF by default — the DHA tile CDN fills sectors it
+  // has no data for with green "house" placeholder tiles, which read as broken
+  // on a professional map. The visitor can switch the layout on from the
+  // "Layout" pill; placeholders are filtered out whenever the CDN allows it.
+  const [layoutOn, setLayoutOn] = useState(false);
   const [opacity, setOpacity] = useState(0.65);
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
@@ -412,19 +415,16 @@ export function LeafletMap({
       buildLayers(true);
       return;
     }
-    // First use of this society: probe whether placeholder filtering works.
+    // First enable of this society: probe whether placeholder filtering works.
     const [[southLat, westLng], [northLat, eastLng]] = normaliseBounds(society.layers[0].bounds);
     const { x, y } = tileXYFor((southLat + northLat) / 2, (westLng + eastLng) / 2, 14);
     const probeUrl = society.layers[0].tiles.replace("{z}", "14").replace("{x}", String(x)).replace("{y}", String(y));
     probeTileFiltering(probeUrl).then((filterable) => {
       layoutProbeRef.current.set(society.slug, filterable);
-      if (filterable) {
-        buildLayers(true);
-      } else {
-        // Without filtering, the CDN's green filler tiles would litter the
-        // map — start with the layout off; the visitor can still switch it on.
-        setLayoutOn(false);
-      }
+      // The visitor explicitly switched the layout on, so render it either
+      // way — filtering only decides whether green CDN filler tiles get
+      // masked out. Wholesale tile failure still auto-disables (see above).
+      buildLayers(filterable);
     });
     return () => {
       cancelled = true;
@@ -452,7 +452,7 @@ export function LeafletMap({
         popupAnchor: [0, -38],
       });
       const m = Lmod.marker([pin.lat, pin.lng], { icon, title: pin.title, riseOnHover: true }).addTo(layer);
-      m.bindPopup(pinPopupHtml(pin), { closeButton: true, autoPan: true, maxWidth: 264, minWidth: 216 });
+      m.bindPopup(pinPopupHtml(pin), { closeButton: true, autoPan: true, maxWidth: 288, minWidth: 252 });
       m.on("click", () => onPinSelectRef.current?.(pin.id));
       // Hovering a pin reveals its card; leaving hides it again — unless the
       // pin is the one selected from the side list / a click, which stays open.
