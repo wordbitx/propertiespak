@@ -142,6 +142,20 @@ export const viewport: Viewport = {
  */
 const HEADER_SCROLL_SCRIPT = `(function(){var d=document.documentElement,s;function u(){var v=(window.scrollY||d.scrollTop)>36;if(v===s)return;s=v;if(v)d.setAttribute("data-header-solid","");else d.removeAttribute("data-header-solid")}u();addEventListener("scroll",u,{passive:true});addEventListener("pageshow",u);addEventListener("resize",u)})()`;
 
+/**
+ * Safety net for remote photos: if a Pexels JPEG fails (some originals are only
+ * published as PNG), retry once as .png, then fall back to a neutral branded
+ * placeholder instead of showing a broken image with its alt text. Listens in
+ * the capture phase from the top of <body>, so it catches errors that happen
+ * before React hydrates.
+ */
+const IMAGE_FALLBACK_SVG =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2f52"/><stop offset="1" stop-color="#10a456"/></linearGradient></defs><rect width="1200" height="800" fill="url(#g)"/><path d="M600 290 450 410h40v130h220V410h40z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="14" stroke-linejoin="round"/></svg>',
+  );
+const IMAGE_FALLBACK_SCRIPT = `(function(){var F=${JSON.stringify(IMAGE_FALLBACK_SVG)};addEventListener("error",function(e){var i=e.target;if(!i||i.tagName!=="IMG"||i.dataset.fb==="2")return;var s=i.currentSrc||i.src||"";i.removeAttribute("srcset");if(!i.dataset.fb&&s.indexOf("images.pexels.com")>-1&&s.indexOf(".jpeg")>-1){i.dataset.fb="1";i.src=s.replace(".jpeg",".png");return}i.dataset.fb="2";i.src=F},true)})()`;
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const userId = await getSessionUserId();
 
@@ -157,6 +171,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="bg-white text-ink antialiased" suppressHydrationWarning>
         {/* Runs straight from the HTML, before and independently of React, so the header turns solid on scroll even if hydration is slow or a JS chunk fails. */}
         <script dangerouslySetInnerHTML={{ __html: HEADER_SCROLL_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: IMAGE_FALLBACK_SCRIPT }} />
         <FavoritesProvider>
           <CompareProvider>
             <SiteHeader isAuthenticated={userId !== null} />
