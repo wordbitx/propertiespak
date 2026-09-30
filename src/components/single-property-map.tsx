@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { IconArrowRight, IconPin } from "@/components/icons";
 import type { MapProperty } from "@/components/map-view";
-import { findSocietyMap, societyFitBounds } from "@/lib/society-maps";
+import { findSocietyMap, layersContaining, societyFitBounds } from "@/lib/society-maps";
 import { formatArea, formatPriceShort } from "@/lib/format";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map").then((module) => module.LeafletMap), {
@@ -25,8 +25,14 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
     active: true,
   }], [property]);
   const society = useMemo(() => findSocietyMap(property.locationArea, property.citySlug), [property.locationArea, property.citySlug]);
-  // dhaplus-style: fit the whole society/phase in view instead of zooming to the pin.
-  const fit = useMemo(() => (society ? societyFitBounds(society, property.lat, property.lng) : null), [society, property.lat, property.lng]);
+  // dhaplus-style: only the sectors holding this pin render (neighbouring
+  // phases stay off the map), and the whole society/phase fits the viewport.
+  const societyForPin = useMemo(() => {
+    if (!society) return null;
+    const containing = layersContaining(society, property.lat, property.lng);
+    return containing.length > 0 && containing.length < society.layers.length ? { ...society, layers: containing } : society;
+  }, [society, property.lat, property.lng]);
+  const fit = useMemo(() => (societyForPin ? societyFitBounds(societyForPin, property.lat, property.lng) : null), [societyForPin, property.lat, property.lng]);
 
   return (
     <div className="min-w-0" data-testid="single-property-map" data-property-id={property.id}>
@@ -34,8 +40,7 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
         center={{ lat: property.lat, lng: property.lng }}
         zoom={16}
         pins={pins}
-        society={society}
-        defaultLayoutOn={Boolean(society)}
+        society={societyForPin}
         fitBounds={fit}
         showLocate={false}
         heightClass="h-[360px] sm:h-[460px] lg:h-[540px]"

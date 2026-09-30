@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { IconClose, IconMap, IconPin } from "@/components/icons";
 import { formatArea, formatPrice, formatPriceShort } from "@/lib/format";
-import { findSocietyMap } from "@/lib/society-maps";
+import { findSocietyMap, layersContaining } from "@/lib/society-maps";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map").then((module) => module.LeafletMap), {
   ssr: false,
@@ -65,7 +65,13 @@ export function MapView({
   const [focus, setFocus] = useState(center);
   const [focusZoom, setFocusZoom] = useState(zoom);
   const active = properties.find((property) => property.id === selected);
-  const society = useMemo(() => active ? findSocietyMap(active.locationArea, active.citySlug) : null, [active]);
+  const society = useMemo(() => {
+    if (!active) return null;
+    const found = findSocietyMap(active.locationArea, active.citySlug);
+    if (!found) return null;
+    const containing = layersContaining(found, active.lat, active.lng);
+    return containing.length > 0 && containing.length < found.layers.length ? { ...found, layers: containing } : found;
+  }, [active]);
   const pins = useMemo(() => properties.map((property) => ({
     id: property.id, lat: property.lat, lng: property.lng, title: property.title,
     subtitle: `${formatArea(property.areaValue, property.areaUnit)} ${property.propertyType} · ${property.locationArea}, ${property.cityName}`,
@@ -107,22 +113,22 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="max-h-[536px] space-y-2 overflow-y-auto">
+        <ul className="max-h-[560px] space-y-1.5 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}
               onMouseEnter={() => setSelected(property.id)}
-              className={`min-w-0 rounded-lg border p-2.5 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
+              className={`min-w-0 rounded-lg border p-2 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
             >
               <div className="flex min-w-0 items-start gap-3">
-                <img src={property.coverImage} alt="" width={140} height={110} loading="lazy" className="h-16 w-20 shrink-0 rounded-md object-cover" />
+                <img src={property.coverImage} alt="" width={140} height={110} loading="lazy" className="h-14 w-[4.25rem] shrink-0 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
                   <Link href={`/property/${property.slug}`} className="block text-[0.8125rem] font-semibold leading-5 text-navy-900 hover:text-forest-700">{property.title}</Link>
                   <p className="mt-1 text-[0.75rem] leading-5 text-ink-muted">{property.locationArea}, {property.cityName}</p>
                   <p className="mt-1 font-sans text-[0.8125rem] font-bold text-navy-900">{formatPriceShort(property.price, property.priceUnit)}</p>
                 </div>
               </div>
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-soft pt-2">
+              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-soft pt-1.5">
                 <span className="text-[0.6875rem] text-ink-muted">{typeof property.distanceKm === "number" ? `${property.distanceKm < 0.1 ? "Under 100 m" : `${property.distanceKm.toFixed(1)} km`} away · approximate` : formatArea(property.areaValue, property.areaUnit)}</span>
                 <button type="button" onClick={() => { setSelected(property.id); setFocus({ lat: property.lat, lng: property.lng }); setFocusZoom(16); }} className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-[0.75rem] font-semibold text-forest-700 hover:bg-forest-50">
                   <IconPin className="h-3.5 w-3.5" /> Show on map

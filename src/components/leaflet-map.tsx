@@ -27,8 +27,6 @@ type Props = {
   fitToPins?: boolean;
   /** Open the popup of whichever pin the parent marks active (list hover/click sync). */
   autoOpenActive?: boolean;
-  /** Society layout starts switched on (dhaplus-style society/property maps). */
-  defaultLayoutOn?: boolean;
   /** Fit the viewport to these [[south,west],[north,east]] bounds once ready (society fit). */
   fitBounds?: [[number, number], [number, number]] | null;
   showLocate?: boolean;
@@ -112,10 +110,10 @@ function probeTileFiltering(probeUrl: string): Promise<boolean> {
 }
 
 /**
- * Decide whether a layout tile is one of the CDN's green "no data" fillers
- * (solid saturated green with a small house glyph). Real layout artwork is a
- * colourful street/plot grid, so a tile that is overwhelmingly green-dominant
- * is a filler and should be hidden (the satellite base shows through instead).
+ * Decide whether a layout tile is one of the CDN's solid "no data" fillers
+ * (an opaque single-colour tile with a small glyph — ships as green or blue).
+ * Real layout artwork is a colourful street/plot grid, so a tile that is
+ * overwhelmingly one flat colour is a filler and should be hidden.
  */
 function isPlaceholderTile(img: HTMLImageElement): boolean {
   try {
@@ -127,17 +125,23 @@ function isPlaceholderTile(img: HTMLImageElement): boolean {
     if (!ctx) return false;
     ctx.drawImage(img, 0, 0, S, S);
     const { data } = ctx.getImageData(0, 0, S, S);
-    let green = 0;
+    let reference: [number, number, number] | null = null;
+    let similar = 0;
     let total = 0;
     for (let i = 0; i < data.length; i += 4) {
       if (data[i + 3] < 200) continue;
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+      const pixel: [number, number, number] = [data[i], data[i + 1], data[i + 2]];
       total += 1;
-      if (g - r >= 30 && g - b >= 18 && g >= 85 && g <= 175 && r <= 120) green += 1;
+      if (!reference) {
+        reference = pixel;
+        similar += 1;
+        continue;
+      }
+      if (Math.abs(pixel[0] - reference[0]) <= 30 && Math.abs(pixel[1] - reference[1]) <= 30 && Math.abs(pixel[2] - reference[2]) <= 30) {
+        similar += 1;
+      }
     }
-    return total > 0 && green / total >= 0.8;
+    return total > 0 && similar / total >= 0.82;
   } catch {
     return false;
   }
@@ -164,7 +168,6 @@ export function LeafletMap({
   pins = [],
   fitToPins = false,
   autoOpenActive = false,
-  defaultLayoutOn = false,
   fitBounds = null,
   showLocate = true,
   society = null,
@@ -195,12 +198,10 @@ export function LeafletMap({
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  // Overview maps start with the layout off (clean country/city view). Society
-  // maps — the property page — pass defaultLayoutOn and open dhaplus-style
-  // with the colourful sector layout rendered over the satellite base. Green
-  // "no data" filler tiles are masked out whenever the CDN allows pixel reads.
-  const [layoutOn, setLayoutOn] = useState(defaultLayoutOn);
-  const [opacity, setOpacity] = useState(1);
+  // The society layout renders whenever a society matches (dhaplus-style),
+  // at full strength. Green/blue "no data" filler tiles from the CDN are
+  // masked out; if the CDN is unreadable or down, the layout hides itself.
+  const [layoutDead, setLayoutDead] = useState(false);
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
@@ -379,7 +380,8 @@ export function LeafletMap({
     overlayTilesRef.current = [];
     tileHealthRef.current = { loaded: 0, failed: 0, reported: false };
     setLayoutMsg("");
-    if (!society || !layoutOn) return;
+    setLayoutDead(false);
+    if (!society || layoutDead) return;
     let cancelled = false;
 
     const buildLayers = (filterPlaceholders: boolean) => {
@@ -389,7 +391,7 @@ export function LeafletMap({
           minZoom: Math.min(layer.minZoom, 12),
           maxZoom: 20,
           maxNativeZoom: Math.min(layer.maxZoom, 16),
-          opacity,
+          opacity: 1,
           tms: false,
           bounds: Lmod.latLngBounds(normaliseBounds(layer.bounds)),
           attribution: "",
@@ -411,7 +413,7 @@ export function LeafletMap({
           health.failed += 1;
           if (!health.reported && health.failed >= 6 && health.loaded === 0) {
             health.reported = true;
-            setLayoutOn(false);
+            setLayoutDead(true);
             setLayoutMsg("Society layout is unavailable right now — showing the base map only.");
           }
         });
@@ -422,9 +424,10 @@ export function LeafletMap({
 
     const cached = layoutProbeRef.current.get(society.slug);
     if (cached === false) {
-      // The CDN does not allow pixel checks (and the auto-off already ran on
-      // first load) — the visitor re-enabled the layout, so respect that.
-      buildLayers(false);
+      // The CDN blocks pixel checks, so its filler tiles cannot be masked —
+      // keep the map clean by leaving the layout off.
+      setLayoutDead(true);
+      setLayoutMsg("Society layout isn't available for this map — showing the base map.");
       return;
     }
     if (cached === true) {
@@ -437,20 +440,18 @@ export function LeafletMap({
     const probeUrl = society.layers[0].tiles.replace("{z}", "14").replace("{x}", String(x)).replace("{y}", String(y));
     probeTileFiltering(probeUrl).then((filterable) => {
       layoutProbeRef.current.set(society.slug, filterable);
-      // The visitor explicitly switched the layout on, so render it either
-      // way — filtering only decides whether green CDN filler tiles get
-      // masked out. Wholesale tile failure still auto-disables (see above).
-      buildLayers(filterable);
+      if (filterable) {
+        buildLayers(true);
+      } else {
+        setLayoutDead(true);
+        setLayoutMsg("Society layout isn't available for this map — showing the base map.");
+      }
     });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [society, layoutOn, ready]);
-
-  useEffect(() => {
-    overlayTilesRef.current.forEach((t) => t.setOpacity(opacity));
-  }, [opacity]);
+  }, [society, layoutDead, ready]);
 
   /* ---------- listing pins ---------- */
   useEffect(() => {
@@ -639,28 +640,6 @@ export function LeafletMap({
           <button type="button" onClick={() => setFullscreen((v) => !v)} aria-label={fullscreen ? "Exit full screen" : "Full screen map"} title="Full screen" className={ctl}>
             <svg viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{fullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}</svg>
           </button>
-          {society && society.layers.length > 0 && (
-            <button
-              type="button"
-              role="switch"
-              aria-checked={layoutOn}
-              onClick={() => { setLayoutMsg(""); setLayoutOn((v) => !v); }}
-              title={layoutOn ? "Hide society layout" : "Show society layout"}
-              className="flex h-9 items-center gap-2 rounded-md border border-[#cfd8e3] bg-white px-2.5 text-navy-900 shadow-[0_1px_5px_rgba(0,0,0,.3)] transition-colors hover:bg-mist"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" /></svg>
-              <span className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]">Layout</span>
-              <span className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${layoutOn ? "bg-forest-600" : "bg-soft"}`} aria-hidden="true">
-                <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-all ${layoutOn ? "left-3.5" : "left-0.5"}`} />
-              </span>
-            </button>
-          )}
-          {society && layoutOn && (
-            <div className="flex items-center gap-2 rounded-md border border-[#cfd8e3] bg-white/95 px-2.5 py-1.5 shadow-[0_1px_5px_rgba(0,0,0,.3)]" title="Society layout opacity">
-              <input type="range" min={0} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} aria-label="Society layout opacity" className="h-1.5 w-24 cursor-pointer accent-[#10a456] sm:w-28" />
-              <span className="w-8 text-right text-[0.625rem] font-bold tabular-nums text-ink-muted">{Math.round(opacity * 100)}%</span>
-            </div>
-          )}
         </div>
 
         {locateMsg && (
