@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { IconArrowRight, IconPin } from "@/components/icons";
 import type { MapProperty } from "@/components/map-view";
-import { findSocietyMap } from "@/lib/society-maps";
-import { formatArea } from "@/lib/format";
+import { findSocietyMap, layersContaining, societyFitBounds } from "@/lib/society-maps";
+import { formatArea, formatPriceShort } from "@/lib/format";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map").then((module) => module.LeafletMap), {
   ssr: false,
@@ -20,9 +20,19 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
     lng: property.lng,
     title: property.title,
     subtitle: `${formatArea(property.areaValue, property.areaUnit)} ${property.propertyType} · ${property.locationArea}, ${property.cityName}`,
+    image: property.coverImage,
+    price: formatPriceShort(property.price, property.priceUnit),
     active: true,
   }], [property]);
   const society = useMemo(() => findSocietyMap(property.locationArea, property.citySlug), [property.locationArea, property.citySlug]);
+  // dhaplus-style: only the sectors holding this pin render (neighbouring
+  // phases stay off the map), and the whole society/phase fits the viewport.
+  const societyForPin = useMemo(() => {
+    if (!society) return null;
+    const containing = layersContaining(society, property.lat, property.lng);
+    return containing.length > 0 && containing.length < society.layers.length ? { ...society, layers: containing } : society;
+  }, [society, property.lat, property.lng]);
+  const fit = useMemo(() => (societyForPin ? societyFitBounds(societyForPin, property.lat, property.lng) : null), [societyForPin, property.lat, property.lng]);
 
   return (
     <div className="min-w-0" data-testid="single-property-map" data-property-id={property.id}>
@@ -30,10 +40,11 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
         center={{ lat: property.lat, lng: property.lng }}
         zoom={16}
         pins={pins}
-        society={society}
+        society={societyForPin}
+        fitBounds={fit}
         showLocate={false}
         heightClass="h-[360px] sm:h-[460px] lg:h-[540px]"
-        header={{ label: "Property location", subtitle: property.locationArea }}
+        header={{ label: society ? "Society Map" : "Property location", subtitle: property.locationArea }}
       />
       <div className="mt-3 flex min-w-0 flex-wrap items-start justify-between gap-3 rounded-lg border border-soft bg-white p-4">
         <p className="flex min-w-0 items-start gap-2 text-[0.8125rem] leading-6 text-ink-muted">

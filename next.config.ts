@@ -50,6 +50,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Preview hosts (Arena sandbox, Vercel previews) must never be indexed —
+        // the canonical host is propertiespak.com, and preview copies of pages
+        // would otherwise compete with it in search results.
+        source: "/:path*",
+        has: [{ type: "host", value: "(.*\\.e2b\\.app|.*\\.vercel\\.app|property\\.wordbitxtech\\.com|www\\.property\\.wordbitxtech\\.com)" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
         // Crawlers re-check sitemaps often; a short shared cache keeps them fast.
         source: "/:path(sitemap.xml|sitemap-index.xml|sitemaps/:file*)",
         headers: [{ key: "Cache-Control", value: "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400" }],
