@@ -365,7 +365,7 @@ const COMMERCIAL_TYPES = [
 
 export function CommercialSection({ properties }: { properties: Property[] }) {
   return (
-    <Section tone="mist" id="commercial">
+    <Section tone="light" id="commercial">
       <div className="ui-container">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal>
@@ -450,7 +450,7 @@ export function MapSection({
   zoom?: number;
 }) {
   return (
-    <Section tone="light" id="map">
+    <Section tone="mist" id="map">
       <div className="ui-container">
         <SectionHeading
           eyebrow="Location intelligence"
@@ -466,7 +466,7 @@ export function MapSection({
           ))}
         </div>
         <div className="mt-6">
-          <MapView properties={properties} center={center} zoom={zoom} />
+          <MapView properties={properties} center={center} zoom={zoom} autoFit />
         </div>
         <p className="mt-4 text-[0.75rem] leading-relaxed text-ink-muted">
           Map tiles © OpenStreetMap contributors. Markers are positioned at society level and are indicative only —

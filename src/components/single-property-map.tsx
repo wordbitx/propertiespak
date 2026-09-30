@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { IconArrowRight, IconPin } from "@/components/icons";
 import type { MapProperty } from "@/components/map-view";
 import { findSocietyMap } from "@/lib/society-maps";
-import { formatArea } from "@/lib/format";
+import { formatArea, formatPriceShort } from "@/lib/format";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map").then((module) => module.LeafletMap), {
   ssr: false,
@@ -20,6 +20,8 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
     lng: property.lng,
     title: property.title,
     subtitle: `${formatArea(property.areaValue, property.areaUnit)} ${property.propertyType} · ${property.locationArea}, ${property.cityName}`,
+    image: property.coverImage,
+    price: formatPriceShort(property.price, property.priceUnit),
     active: true,
   }], [property]);
   const society = useMemo(() => findSocietyMap(property.locationArea, property.citySlug), [property.locationArea, property.citySlug]);

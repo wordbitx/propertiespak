@@ -12,6 +12,8 @@ export type LeafletPin = {
   subtitle?: string;
   href?: string;
   price?: string;
+  /** Optional cover photo — renders the premium card popup header. */
+  image?: string;
   active?: boolean;
 };
 
@@ -54,6 +56,18 @@ function pinSvg(color: string) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="41" viewBox="0 0 30 41"><path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`;
 }
 
+/** 1×1 transparent pixel — failed tiles vanish instead of showing broken art. */
+const TRANSPARENT_TILE =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+/** Premium card popup for listing pins (photo header, price, CTA). */
+function pinPopupHtml(pin: LeafletPin): string {
+  const image = pin.image ? `<img class="ewx-popup-img" src="${escapeText(pin.image)}" alt="" loading="lazy" />` : "";
+  const price = pin.price ? `<span class="ewx-popup-price">${escapeText(pin.price)}</span>` : "";
+  const cta = pin.href?.startsWith("/property/") ? `<a class="ewx-popup-cta" href="${escapeText(pin.href)}">View property →</a>` : "";
+  return `<div class="ewx-popup${image ? " ewx-popup-card" : ""}">${image}<div class="ewx-popup-body">${price}<b>${escapeText(pin.title)}</b>${pin.subtitle ? `<span class="ewx-muted">${escapeText(pin.subtitle)}</span>` : ""}${cta}</div></div>`;
+}
+
 /** Body of the draggable picker pin popup — rebuilt on every label change. */
 function pickerPopupHtml(label: string, subtitle?: string): string {
   return `<div class="ewx-popup"><b>${escapeText(label)}</b>${subtitle ? `<br/><span>${escapeText(subtitle)}</span>` : ""}<br/><span class="ewx-muted">Drag the pin or tap the map to adjust</span></div>`;
@@ -86,10 +100,15 @@ export function LeafletMap({
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
   const overlayTilesRef = useRef<L.TileLayer[]>([]);
   const controlRef = useRef<L.Control.Layers | null>(null);
+  const tileHealthRef = useRef({ loaded: 0, failed: 0, reported: false });
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  const [opacity, setOpacity] = useState(1);
+  // Society layout is opt-in: maps open on clean satellite imagery, and the
+  // layout can be faded in from the "Layout" pill (blended over the base map).
+  const [layoutOn, setLayoutOn] = useState(false);
+  const [opacity, setOpacity] = useState(0.55);
+  const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
   const [baseName, setBaseName] = useState("Google Maps Satellite View");
@@ -119,7 +138,7 @@ export function LeafletMap({
       if (cancelled || !containerRef.current || mapRef.current) return;
       leafletRef.current = Lmod;
 
-      const attr = { attribution: "", maxZoom: 20, minZoom: 5 } as L.TileLayerOptions;
+      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE } as L.TileLayerOptions;
       const osm = Lmod.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { ...attr, subdomains: ["a", "b", "c"] });
       const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
       const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
@@ -249,13 +268,15 @@ export function LeafletMap({
     }
   }, [center.lat, center.lng, zoom, ready]);
 
-  /* ---------- society overlays ---------- */
+  /* ---------- society overlays (opt-in, fault-tolerant) ---------- */
   useEffect(() => {
-    const Lmod = leafletRef.current, map = mapRef.current, group = overlayGroupRef.current, control = controlRef.current;
-    if (!Lmod || !map || !group || !control || !ready) return;
-    overlayTilesRef.current.forEach((t) => { control.removeLayer(t); group.removeLayer(t); });
+    const Lmod = leafletRef.current, group = overlayGroupRef.current;
+    if (!Lmod || !group || !ready) return;
+    overlayTilesRef.current.forEach((t) => group.removeLayer(t));
     overlayTilesRef.current = [];
-    if (!society) return;
+    tileHealthRef.current = { loaded: 0, failed: 0, reported: false };
+    setLayoutMsg("");
+    if (!society || !layoutOn) return;
     for (const layer of society.layers) {
       const tile = Lmod.tileLayer(layer.tiles, {
         minZoom: Math.min(layer.minZoom, 12),
@@ -265,13 +286,25 @@ export function LeafletMap({
         tms: false,
         bounds: Lmod.latLngBounds(normaliseBounds(layer.bounds)),
         attribution: "",
+        errorTileUrl: TRANSPARENT_TILE,
+      });
+      // If the layout source is down (every tile failing), switch the layer off
+      // once and say so — instead of leaving broken tiles on the map.
+      tile.on("tileload", () => { tileHealthRef.current.loaded += 1; });
+      tile.on("tileerror", () => {
+        const health = tileHealthRef.current;
+        health.failed += 1;
+        if (!health.reported && health.failed >= 6 && health.loaded === 0) {
+          health.reported = true;
+          setLayoutOn(false);
+          setLayoutMsg("Society layout is unavailable right now — showing the base map only.");
+        }
       });
       tile.addTo(group);
-      control.addOverlay(tile, `${society.name.replace(/ Map$/, "")} — ${layer.name}`);
       overlayTilesRef.current.push(tile);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [society, ready]);
+  }, [society, layoutOn, ready]);
 
   useEffect(() => {
     overlayTilesRef.current.forEach((t) => t.setOpacity(opacity));
@@ -285,16 +318,16 @@ export function LeafletMap({
     for (const pin of pins) {
       const icon = Lmod.divIcon({
         className: "ewx-pin",
-        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price">${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#1f4fd8" : "#0d3b7d")}</div>`,
+        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price">${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : "#06274a")}</div>`,
         iconSize: [30, 41],
         iconAnchor: [15, 41],
         popupAnchor: [0, -38],
       });
-      const m = Lmod.marker([pin.lat, pin.lng], { icon, title: pin.title }).addTo(layer);
-      const html = `<div class="ewx-popup"><b>${escapeText(pin.title)}</b>${pin.subtitle ? `<br/><span>${escapeText(pin.subtitle)}</span>` : ""}${pin.href?.startsWith("/property/") ? `<br/><a href="${escapeText(pin.href)}">View property →</a>` : ""}</div>`;
-      m.bindPopup(html, { closeButton: true, autoPan: false, maxWidth: 260 });
+      const m = Lmod.marker([pin.lat, pin.lng], { icon, title: pin.title, riseOnHover: true }).addTo(layer);
+      m.bindPopup(pinPopupHtml(pin), { closeButton: true, autoPan: true, maxWidth: 264, minWidth: 216 });
       m.on("click", () => onPinSelectRef.current?.(pin.id));
-      if (pin.active) m.openPopup();
+      // Overview maps with many pins open clean — only single-pin maps pop open.
+      if (pin.active && pins.length === 1) m.openPopup();
     }
     const dataKey = pins.map((pin) => `${pin.id}:${pin.lat}:${pin.lng}`).join("|");
     if (fitToPins && pins.length && lastFit.current !== dataKey && mapRef.current) {
@@ -412,10 +445,10 @@ export function LeafletMap({
   return (
     <div className={frame} data-map-marker-count={pins.length} data-map-property-ids={pins.map((pin) => pin.id).join(",")}>
       {header && (
-        <div className="flex items-center justify-between gap-3 bg-[#1f4fd8] px-4 py-3.5 sm:px-5">
+        <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-navy-950 via-navy-900 to-navy-800 px-4 py-3.5 sm:px-5">
           <p className="flex min-w-0 items-center gap-2.5 font-sans text-[0.9375rem] font-semibold text-white">
-            <span className="shrink-0">{header.label ?? "Society Map"}</span>
-            {header.subtitle && <span className="truncate rounded-md bg-[#173db0] px-2.5 py-1 text-[0.75rem] font-bold text-white">{header.subtitle}</span>}
+            <span className="shrink-0">{header.label ?? "Property map"}</span>
+            {header.subtitle && <span className="truncate rounded-md bg-forest-800/80 px-2.5 py-1 text-[0.75rem] font-bold text-white ring-1 ring-white/15">{header.subtitle}</span>}
             {header.title && header.title !== header.subtitle && <span className="hidden truncate font-normal text-white/70 2xl:inline">{header.title}</span>}
           </p>
           <div className="flex shrink-0 items-center gap-3">
@@ -435,26 +468,46 @@ export function LeafletMap({
         <div ref={containerRef} className={`w-full ${fullscreen ? "h-full" : heightClass} ${onPick ? "cursor-crosshair" : ""}`} />
 
         {/* Right-side custom controls */}
-        <div className="absolute right-3 top-3 z-[500] flex flex-col gap-2">
+        <div className="absolute right-3 top-3 z-[500] flex flex-col items-end gap-2">
           {showLocate && <button type="button" onClick={() => locate(false)} disabled={locating} aria-label="Use my current location" title="My location" className={`${ctl} disabled:opacity-60`}>
             <svg viewBox="0 0 24 24" className={`h-5 w-5 ${locating ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>
           </button>}
           <button type="button" onClick={() => setFullscreen((v) => !v)} aria-label={fullscreen ? "Exit full screen" : "Full screen map"} title="Full screen" className={ctl}>
             <svg viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{fullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}</svg>
           </button>
+          {society && society.layers.length > 0 && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={layoutOn}
+              onClick={() => { setLayoutMsg(""); setLayoutOn((v) => !v); }}
+              title={layoutOn ? "Hide society layout" : "Show society layout"}
+              className="flex h-9 items-center gap-2 rounded-md border border-[#cfd8e3] bg-white px-2.5 text-navy-900 shadow-[0_1px_5px_rgba(0,0,0,.3)] transition-colors hover:bg-mist"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" /></svg>
+              <span className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]">Layout</span>
+              <span className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${layoutOn ? "bg-forest-600" : "bg-soft"}`} aria-hidden="true">
+                <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-all ${layoutOn ? "left-3.5" : "left-0.5"}`} />
+              </span>
+            </button>
+          )}
+          {society && layoutOn && (
+            <div className="flex items-center gap-2 rounded-md border border-[#cfd8e3] bg-white/95 px-2.5 py-1.5 shadow-[0_1px_5px_rgba(0,0,0,.3)]" title="Society layout opacity">
+              <input type="range" min={0} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} aria-label="Society layout opacity" className="h-1.5 w-24 cursor-pointer accent-[#10a456] sm:w-28" />
+              <span className="w-8 text-right text-[0.625rem] font-bold tabular-nums text-ink-muted">{Math.round(opacity * 100)}%</span>
+            </div>
+          )}
         </div>
-
-        {/* Society layout opacity slider */}
-        {society && society.layers.length > 0 && (
-          <div className="absolute right-14 top-3 z-[500] flex items-center gap-2 rounded-md border border-[#cfd8e3] bg-white/95 px-2.5 py-1.5 shadow-[0_1px_5px_rgba(0,0,0,.3)]" title="Society layout opacity">
-            <span className="hidden text-[0.625rem] font-bold uppercase tracking-[0.08em] text-ink-muted sm:inline">Layout</span>
-            <input type="range" min={0} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} aria-label="Society layout opacity" className="h-1.5 w-24 cursor-pointer accent-[#1f4fd8] sm:w-32" />
-          </div>
-        )}
 
         {locateMsg && (
           <div className="absolute inset-x-3 bottom-8 z-[500] rounded-md border border-[#cfd8e3] bg-white/95 px-3 py-2 text-[0.75rem] text-navy-900 shadow-soft sm:left-auto sm:right-3 sm:max-w-xs" role="status">
             <div className="flex items-start justify-between gap-2"><span>{locateMsg}</span><button type="button" onClick={() => setLocateMsg("")} aria-label="Dismiss" className="shrink-0 text-ink-muted">✕</button></div>
+          </div>
+        )}
+
+        {layoutMsg && (
+          <div className="absolute inset-x-3 bottom-20 z-[500] rounded-md border border-[#cfd8e3] bg-white/95 px-3 py-2 text-[0.75rem] text-navy-900 shadow-soft sm:left-auto sm:right-3 sm:max-w-xs" role="status">
+            <div className="flex items-start justify-between gap-2"><span>{layoutMsg}</span><button type="button" onClick={() => setLayoutMsg("")} aria-label="Dismiss" className="shrink-0 text-ink-muted">✕</button></div>
           </div>
         )}
 

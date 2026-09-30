@@ -20,11 +20,11 @@ export type MapProperty = {
 };
 
 export function MapView({
-  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false,
+  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false,
 }: {
   properties: MapProperty[];
   center: { lat: number; lng: number };
-  zoom?: number; className?: string; mapTitle?: string; mapSubtitle?: string; nearby?: boolean;
+  zoom?: number; className?: string; mapTitle?: string; mapSubtitle?: string; nearby?: boolean; autoFit?: boolean;
 }) {
   const [selected, setSelected] = useState<number | null>(nearby ? null : properties[0]?.id ?? null);
   const [focus, setFocus] = useState(center);
@@ -34,7 +34,7 @@ export function MapView({
   const pins = useMemo(() => properties.map((property) => ({
     id: property.id, lat: property.lat, lng: property.lng, title: property.title,
     subtitle: `${formatArea(property.areaValue, property.areaUnit)} ${property.propertyType} · ${property.locationArea}, ${property.cityName}`,
-    href: `/property/${property.slug}`, price: formatPriceShort(property.price, property.priceUnit), active: property.id === selected,
+    href: `/property/${property.slug}`, price: formatPriceShort(property.price, property.priceUnit), image: property.coverImage, active: property.id === selected,
   })), [properties, selected]);
 
   return (
@@ -45,9 +45,9 @@ export function MapView({
           zoom={focusZoom}
           heightClass="h-[380px] sm:h-[500px]"
           pins={pins}
-          fitToPins={nearby}
+          fitToPins={nearby || autoFit}
           society={society}
-          header={{ label: nearby ? "Nearby properties" : undefined, subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
+          header={{ label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
           onPinSelect={(id) => setSelected(Number(id))}
         />
         {active && (

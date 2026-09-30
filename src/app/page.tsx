@@ -156,11 +156,12 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* "Every property category, in one place" sits directly above "Spaces Built for Business". */}
-      <CategoryGrid />
+      {/* "Spaces Built for Business" leads into the location map directly below it. */}
       <CommercialSection properties={commercialListings.items} />
-      {/* Discover Properties by Location now sits directly above the new-projects row. */}
+      {/* "Discover Properties by Location" sits directly below the commercial section. */}
       <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
+      {/* "Every property category, in one place" closes the discovery run before new projects. */}
+      <CategoryGrid />
       <NewProjectsSection projects={projects} />
       <CityDiscovery cities={cities} counts={cityCounts} />
       <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
