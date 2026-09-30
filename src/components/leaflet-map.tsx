@@ -27,6 +27,8 @@ type Props = {
   fitToPins?: boolean;
   /** Open the popup of whichever pin the parent marks active (list hover/click sync). */
   autoOpenActive?: boolean;
+  /** Society layout starts switched on (dhaplus-style society/property maps). */
+  defaultLayoutOn?: boolean;
   showLocate?: boolean;
   society?: SocietyMapDef | null;
   /** Called when the user taps/clicks the map (picker mode). */
@@ -160,6 +162,7 @@ export function LeafletMap({
   pins = [],
   fitToPins = false,
   autoOpenActive = false,
+  defaultLayoutOn = false,
   showLocate = true,
   society = null,
   onPick,
@@ -189,12 +192,12 @@ export function LeafletMap({
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  // Society layout stays OFF by default — the DHA tile CDN fills sectors it
-  // has no data for with green "house" placeholder tiles, which read as broken
-  // on a professional map. The visitor can switch the layout on from the
-  // "Layout" pill; placeholders are filtered out whenever the CDN allows it.
-  const [layoutOn, setLayoutOn] = useState(false);
-  const [opacity, setOpacity] = useState(0.65);
+  // Overview maps start with the layout off (clean country/city view). Society
+  // maps — the property page — pass defaultLayoutOn and open dhaplus-style
+  // with the colourful sector layout rendered over the satellite base. Green
+  // "no data" filler tiles are masked out whenever the CDN allows pixel reads.
+  const [layoutOn, setLayoutOn] = useState(defaultLayoutOn);
+  const [opacity, setOpacity] = useState(0.9);
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
@@ -372,7 +375,7 @@ export function LeafletMap({
         const tile = Lmod.tileLayer(layer.tiles, {
           minZoom: Math.min(layer.minZoom, 12),
           maxZoom: 20,
-          maxNativeZoom: layer.maxZoom,
+          maxNativeZoom: Math.min(layer.maxZoom, 16),
           opacity,
           tms: false,
           bounds: Lmod.latLngBounds(normaliseBounds(layer.bounds)),

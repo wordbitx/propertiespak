@@ -33,9 +33,10 @@ export function SinglePropertyMap({ property, address }: { property: MapProperty
         zoom={16}
         pins={pins}
         society={society}
+        defaultLayoutOn={Boolean(society)}
         showLocate={false}
         heightClass="h-[360px] sm:h-[460px] lg:h-[540px]"
-        header={{ label: "Property location", subtitle: property.locationArea }}
+        header={{ label: society ? "Society Map" : "Property location", subtitle: property.locationArea }}
       />
       <div className="mt-3 flex min-w-0 flex-wrap items-start justify-between gap-3 rounded-lg border border-soft bg-white p-4">
         <p className="flex min-w-0 items-start gap-2 text-[0.8125rem] leading-6 text-ink-muted">
