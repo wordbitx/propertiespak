@@ -196,6 +196,8 @@ export function LeafletMap({
   const layoutProbeRef = useRef<Map<string, boolean>>(new Map());
   /** One-shot guard so the base-map fallback only fires once. */
   const baseFallbackRef = useRef(false);
+  /** Slug of the society the overlay state currently belongs to. */
+  const lastSocietyRef = useRef<string | null>(null);
   const lastActiveRef = useRef<string | number | null | undefined>(undefined);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
@@ -397,8 +399,16 @@ export function LeafletMap({
     overlayTilesRef.current.forEach((t) => group.removeLayer(t));
     overlayTilesRef.current = [];
     tileHealthRef.current = { loaded: 0, failed: 0, reported: false };
-    setLayoutMsg("");
-    setLayoutDead(false);
+    // Reset the failure state only when a different society comes in —
+    // resetting on every effect run flipped layoutDead back and forth and
+    // made the status note blink forever.
+    const societyKey = society?.slug ?? null;
+    if (lastSocietyRef.current !== societyKey) {
+      lastSocietyRef.current = societyKey;
+      tileHealthRef.current = { loaded: 0, failed: 0, reported: false };
+      setLayoutMsg("");
+      setLayoutDead(false);
+    }
     if (!society || layoutDead) return;
     let cancelled = false;
 

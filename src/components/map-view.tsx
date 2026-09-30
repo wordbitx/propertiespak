@@ -105,7 +105,7 @@ export function MapView({
           </div>
         )}
       </div>
-      <div className="min-w-0 rounded-panel border border-soft bg-white p-2 shadow-soft">
+      <div className="flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-2 shadow-soft">
         <div className="flex items-center justify-between gap-2 px-3 py-3">
           <p className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-navy-900">
             <IconMap className="h-4 w-4 shrink-0 text-forest-600" />
@@ -113,7 +113,7 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="max-h-[560px] space-y-1.5 overflow-y-auto">
+        <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}
