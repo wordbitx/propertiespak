@@ -83,7 +83,7 @@ export default async function HomePage() {
     searchProperties({ sort: "newest", pageSize: 8 }),
     getCities(),
     getCityListingCounts(),
-    getProjects(3),
+    getProjects(4),
     searchProperties({ category: "commercial", pageSize: 4, sort: "popular" }),
     searchProperties({ category: "commercial", pageSize: 1 }),
     searchProperties({ purpose: "rent", pageSize: 1 }),

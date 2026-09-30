@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { IconArrowRight } from "@/components/icons";
 import { BlueTick } from "@/components/verified-badge";
+import { useDealerBelt } from "@/components/use-dealer-belt";
 import type { DealerProfile } from "@/lib/queries";
 
 function initialsFor(name: string) {
@@ -41,41 +41,11 @@ const MIN_GROUP_CARDS = 12;
  * no duplicated content.
  */
 export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
-  const [held, setHeld] = useState(false);
-  const beltRef = useRef<HTMLDivElement>(null);
-
   const repeats = Math.max(1, Math.ceil(MIN_GROUP_CARDS / Math.max(1, dealers.length)));
   const belt = Array.from({ length: repeats }, () => dealers).flat();
   const duration = Math.max(MIN_DURATION_SECONDS, Math.round(belt.length * SECONDS_PER_CARD));
-
-  /**
-   * Fallback loop. The stylesheet animates the belt; if that animation is not
-   * available the belt would otherwise sit still, so the same −50% travel is
-   * driven here with requestAnimationFrame. It steps aside the moment the CSS
-   * animation exists, and never runs for reduced-motion visitors.
-   */
-  useEffect(() => {
-    const track = beltRef.current;
-    if (!track) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (getComputedStyle(track).animationName !== "none") return;
-
-    let frame = 0;
-    let started = performance.now();
-    const step = (now: number) => {
-      const half = track.scrollWidth / 2;
-      if (half > 0) {
-        const elapsed = (now - started) / 1000;
-        const travelled = (elapsed * half) / duration;
-        track.style.transform = `translate3d(${-(travelled % half)}px, 0, 0)`;
-      } else {
-        started = now;
-      }
-      frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [duration]);
+  // Hovering (or focusing) any card pauses the belt; moving away resumes it.
+  const { beltRef, held, hold, release } = useDealerBelt(duration);
 
   const verifiedCount = dealers.filter((dealer) => dealer.isVerified).length;
   const listingCount = dealers.reduce((total, dealer) => total + (dealer.listings ?? 0), 0);
@@ -208,7 +178,13 @@ export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
 
       {/* Clipped inside the page container — the belt fades out at both edges instead of scrolling the page. */}
       <div className="ui-container mt-10">
-        <div className="dealer-belt-viewport" data-testid="dealers-marquee" style={{ overflow: "hidden" }}>
+        <div
+          className="dealer-belt-viewport"
+          data-testid="dealers-marquee"
+          style={{ overflow: "hidden" }}
+          onMouseEnter={hold}
+          onMouseLeave={release}
+        >
           <div
             ref={beltRef}
             className="dealer-belt"
@@ -216,8 +192,8 @@ export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
             // Layout is inline on purpose: the belt stays a single horizontal row
             // even if the stylesheet that carries the belt rules is unavailable.
             style={{ display: "flex", width: "max-content", animationDuration: `${duration}s` }}
-            onFocusCapture={() => setHeld(true)}
-            onBlurCapture={() => setHeld(false)}
+            onFocusCapture={hold}
+            onBlurCapture={release}
           >
             {renderBelt(belt, false)}
             {renderBelt(belt, true)}

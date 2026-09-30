@@ -291,8 +291,8 @@ export function NewProjectsSection({ projects }: { projects: Project[] }) {
           description="Launch pricing, payment plans and handover timelines from developers active in Lahore, Islamabad, Karachi, Faisalabad and Multan."
           action={{ label: "Explore all projects", href: "/projects" }}
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {projects.slice(0, 3).map((project, index) => (
+        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {projects.slice(0, 4).map((project, index) => (
             <Reveal key={project.slug} delay={index * 60}>
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                 <Link href={`/projects/${project.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">

@@ -23,6 +23,8 @@ type Props = {
   pins?: LeafletPin[];
   /** Fit a distinct nearby dataset once; selection never triggers another fit. */
   fitToPins?: boolean;
+  /** Open the popup of whichever pin the parent marks active (list hover/click sync). */
+  autoOpenActive?: boolean;
   showLocate?: boolean;
   society?: SocietyMapDef | null;
   /** Called when the user taps/clicks the map (picker mode). */
@@ -78,6 +80,7 @@ export function LeafletMap({
   zoom = 14,
   pins = [],
   fitToPins = false,
+  autoOpenActive = false,
   showLocate = true,
   society = null,
   onPick,
@@ -101,13 +104,15 @@ export function LeafletMap({
   const overlayTilesRef = useRef<L.TileLayer[]>([]);
   const controlRef = useRef<L.Control.Layers | null>(null);
   const tileHealthRef = useRef({ loaded: 0, failed: 0, reported: false });
+  const lastActiveRef = useRef<string | number | null | undefined>(undefined);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  // Society layout is opt-in: maps open on clean satellite imagery, and the
-  // layout can be faded in from the "Layout" pill (blended over the base map).
-  const [layoutOn, setLayoutOn] = useState(false);
-  const [opacity, setOpacity] = useState(0.55);
+  // Society layout renders like dhaplus.com by default — blended over the
+  // satellite base — and can be switched off from the "Layout" pill. The
+  // fault-tolerance guard swaps it off automatically if the tile source fails.
+  const [layoutOn, setLayoutOn] = useState(true);
+  const [opacity, setOpacity] = useState(0.65);
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
@@ -315,6 +320,8 @@ export function LeafletMap({
     const Lmod = leafletRef.current, layer = pinLayerRef.current;
     if (!Lmod || !layer || !ready) return;
     layer.clearLayers();
+    let activeMarker: L.Marker | null = null;
+    let activeId: string | number | null = null;
     for (const pin of pins) {
       const icon = Lmod.divIcon({
         className: "ewx-pin",
@@ -326,16 +333,32 @@ export function LeafletMap({
       const m = Lmod.marker([pin.lat, pin.lng], { icon, title: pin.title, riseOnHover: true }).addTo(layer);
       m.bindPopup(pinPopupHtml(pin), { closeButton: true, autoPan: true, maxWidth: 264, minWidth: 216 });
       m.on("click", () => onPinSelectRef.current?.(pin.id));
-      // Overview maps with many pins open clean — only single-pin maps pop open.
-      if (pin.active && pins.length === 1) m.openPopup();
+      // Hovering a pin reveals its card; leaving hides it again — unless the
+      // pin is the one selected from the side list / a click, which stays open.
+      m.on("mouseenter", () => m.openPopup());
+      m.on("mouseout", () => {
+        if (!pin.active && m.isPopupOpen()) m.closePopup();
+      });
+      if (pin.active) {
+        activeMarker = m;
+        activeId = pin.id;
+      }
     }
+    // Single-pin maps always label their pin. Multi-pin maps open the selected
+    // pin's card only when the selection CHANGES (side-list hover, tap) — the
+    // initial paint stays clean.
+    if (lastActiveRef.current === undefined) lastActiveRef.current = activeId;
+    if (activeMarker && (pins.length === 1 || (autoOpenActive && activeId !== null && activeId !== lastActiveRef.current))) {
+      activeMarker.openPopup();
+    }
+    lastActiveRef.current = activeId;
     const dataKey = pins.map((pin) => `${pin.id}:${pin.lat}:${pin.lng}`).join("|");
     if (fitToPins && pins.length && lastFit.current !== dataKey && mapRef.current) {
       lastFit.current = dataKey;
       const bounds = Lmod.latLngBounds(pins.map((pin) => [pin.lat, pin.lng] as [number, number]));
       mapRef.current.fitBounds(bounds.pad(0.15), { padding: [40, 40], maxZoom: 15, animate: false });
     }
-  }, [pins, ready, fitToPins]);
+  }, [pins, ready, fitToPins, autoOpenActive]);
 
   /* ---------- draggable picker marker ---------- */
   useEffect(() => {
@@ -410,7 +433,11 @@ export function LeafletMap({
       (err) => {
         setLocating(false);
         if (silent) return;
-        setLocateMsg(err.code === 1 ? "Location permission denied — allow it in your browser and tap ⊕ again." : "Could not get your location. Check GPS and try again.");
+        setLocateMsg(
+          err.code === 1
+            ? "Location is blocked for this site — allow location in your browser (or open the site in a new tab), then tap the crosshair again."
+            : "Could not get your location. Check GPS and try again.",
+        );
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
     );

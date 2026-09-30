@@ -46,6 +46,7 @@ export function MapView({
           heightClass="h-[380px] sm:h-[500px]"
           pins={pins}
           fitToPins={nearby || autoFit}
+          autoOpenActive
           society={society}
           header={{ label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
           onPinSelect={(id) => setSelected(Number(id))}
@@ -71,7 +72,11 @@ export function MapView({
         </div>
         <ul className="max-h-[480px] space-y-2 overflow-y-auto">
           {properties.map((property) => (
-            <li key={property.id} className={`min-w-0 rounded-lg border p-2.5 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70"}`}>
+            <li
+              key={property.id}
+              onMouseEnter={() => setSelected(property.id)}
+              className={`min-w-0 rounded-lg border p-2.5 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
+            >
               <div className="flex min-w-0 items-start gap-3">
                 <img src={property.coverImage} alt="" width={140} height={110} loading="lazy" className="h-16 w-20 shrink-0 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
