@@ -79,12 +79,12 @@ export default async function HomePage() {
     showcaseDealers,
   ] = await Promise.all([
     getPlatformStats(),
-    getFeaturedProperties(6),
+    getFeaturedProperties(8),
     searchProperties({ sort: "newest", pageSize: 8 }),
     getCities(),
     getCityListingCounts(),
     getProjects(3),
-    searchProperties({ category: "commercial", pageSize: 3, sort: "popular" }),
+    searchProperties({ category: "commercial", pageSize: 4, sort: "popular" }),
     searchProperties({ category: "commercial", pageSize: 1 }),
     searchProperties({ purpose: "rent", pageSize: 1 }),
     getMapProperties({}, 100),
@@ -141,7 +141,7 @@ export default async function HomePage() {
             ))}
           </div>
           {/* Four across on desktop (two full rows of 4), matching the featured grid. */}
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {discovery.items.map((property, index) => (
               <Reveal key={property.id} delay={index * 50}>
                 <PropertyCard property={property} priority={index < 4} />

@@ -26,6 +26,7 @@ export const listingPhotos = {
     27852347, 740587, 15743368, 12124723, 35069531, 29560257, 30196347, 39102530, 30165027, 28054862,
     13562772, 29679172, 33977060,
     13771880, 33213827, 27258292, 23639035, 13041129, 1022936, 28736656, 38035858, 23932603, 8681218, 11495845,
+    8082322, 8143671, 8143677, 12558848, 39495896, 15334535, 15334539, 9150640, 7045711, 7045701, 7076373, 17627997, 18719312,
   ],
   /** Living rooms, lounges and open-plan halls. */
   living: [
@@ -58,4 +59,26 @@ export const listingPhotos = {
   land: [15422584, 27062931, 35101084, 9310734, 32370508, 3030307, 35101081, 30557705, 11201060, 21230507],
   /** Office buildings and commercial facades. */
   commercial: [323772],
+} as const;
+
+/**
+ * The best-looking shots, reserved for featured listings ("Featured
+ * properties, hand-picked this week"). Featured listings pick covers from here
+ * first — newest first, so the homepage row gets the top of each list — and
+ * their galleries lean on the premium interiors. Every ID also sits in one of
+ * the pools above, so uniqueness rules still apply.
+ */
+export const premiumListingPhotos = {
+  /** Grand villas and mansions: lawns, pools, dusk lighting. Best first. */
+  homes: [
+    8082322, 8143671, 16573669, 10647324, 8082328, 39495896, 8143677, 15334535, 12558848, 9150640, 7031604, 8143683,
+    7076373, 19344325, 323780, 28736656, 1974596, 15334539, 7045711, 30196347, 13041129, 17627997, 18719312,
+  ],
+  /** Luxury apartment lounges, used as covers for featured apartments. */
+  apartments: [20277194, 8135492, 16631149],
+  /** Premium interiors that featured galleries prefer. */
+  interiors: [
+    34688219, 33529500, 20418771, 8135503, 13722886, 7045703, 18285887, 36777559, 13722854, 35203563, 18285949,
+    27531873, 17735412,
+  ],
 } as const;

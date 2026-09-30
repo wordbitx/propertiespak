@@ -1,5 +1,5 @@
 import { photos } from "@/lib/images";
-import { listingPhotos } from "@/lib/listing-photos";
+import { listingPhotos, premiumListingPhotos } from "@/lib/listing-photos";
 import type { SeedProperty } from "./seed-data";
 
 type Kind = "house" | "rental" | "apartment" | "plot" | "commercial";
@@ -74,11 +74,27 @@ export function assignSeedGalleries(list: SeedProperty[], exclude: ReadonlySet<n
   const takenCovers = new Set<number>();
   const covers = new Map<string, number>();
 
-  const ordered = KIND_ORDER.flatMap((kind) => list.filter((property) => kindOf(property) === kind));
+  // Featured listings go first (newest first — the homepage shows the newest
+  // featured) and take the premium shots; everyone else follows by kind.
+  const featured = list.filter((property) => property.featured).sort((a, b) => a.daysAgo - b.daysAgo);
+  const ordered = [
+    ...featured,
+    ...KIND_ORDER.flatMap((kind) => list.filter((property) => !property.featured && kindOf(property) === kind)),
+  ];
+  const usable = new Set(allIds);
+  const premiumFor: Partial<Record<Kind, readonly number[]>> = {
+    house: premiumListingPhotos.homes,
+    rental: premiumListingPhotos.homes,
+    apartment: premiumListingPhotos.apartments,
+  };
+  const premiumInteriors = new Set<number>(premiumListingPhotos.interiors);
   for (const property of ordered) {
     const kind = kindOf(property);
     let cover: number | undefined;
-    for (const name of COVER_POOLS[kind]) {
+    if (property.featured) {
+      cover = premiumFor[kind]?.find((id) => usable.has(id) && !takenCovers.has(id));
+    }
+    for (const name of cover === undefined ? COVER_POOLS[kind] : []) {
       cover = pools[name].find((id) => !takenCovers.has(id));
       if (cover !== undefined) break;
     }
@@ -123,7 +139,11 @@ export function assignSeedGalleries(list: SeedProperty[], exclude: ReadonlySet<n
           }
         }
         const score =
-          overlap * 100 + (galleryUses.get(id) ?? 0) * 10 + (takenCovers.has(id) ? 5 : 0) + (hashOf(`${seed}:${id}`) % 10) / 10;
+          overlap * 100 +
+          (galleryUses.get(id) ?? 0) * 10 +
+          (takenCovers.has(id) ? 5 : 0) -
+          (property.featured && premiumInteriors.has(id) ? 25 : 0) +
+          (hashOf(`${seed}:${id}`) % 10) / 10;
         if (score < bestScore) {
           bestScore = score;
           best = id;

@@ -92,7 +92,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const [agent, dealer, similar, nearby] = await Promise.all([
     getAgentBySlug(property.agentSlug),
     getLeadDealerForProperty(property),
-    getSimilarProperties(property, 3),
+    getSimilarProperties(property, 4),
     getNearbyProperties(property, 6, 20),
   ]);
 
@@ -536,7 +536,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               description={`Comparable ${property.propertyType.toLowerCase()} options in ${property.cityName} and nearby areas.`}
               action={{ label: "Browse all", href: `/properties?city=${property.citySlug}` }}
             />
-            <div className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {similar.map((item, index) => (
                 <Reveal key={item.id} delay={index * 50}>
                   <PropertyCard property={item} />

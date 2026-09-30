@@ -268,7 +268,7 @@ export function FeaturedProperties({ properties }: { properties: Property[] }) {
           description="Curated listings across premium Lahore, Islamabad and Karachi addresses."
           action={{ label: "See all featured", href: "/properties?featured=1" }}
         />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {properties.map((property, index) => (
             <Reveal key={property.id} delay={index * 60}>
               <PropertyCard property={property} />
@@ -425,8 +425,8 @@ export function CommercialSection({ properties }: { properties: Property[] }) {
         </div>
 
         {properties.length > 0 && (
-          <div className="mt-16 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {properties.slice(0, 3).map((property, index) => (
+          <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {properties.slice(0, 4).map((property, index) => (
               <Reveal key={property.id} delay={index * 60}>
                 <PropertyCard property={property} />
               </Reveal>

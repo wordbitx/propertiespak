@@ -147,7 +147,7 @@ async function searchPropertiesUncached(filters: PropertyFilters = {}) {
   await ensureSeeded();
   const conditions = buildConditions(filters);
   const where = conditions.length ? and(...conditions) : undefined;
-  const pageSize = filters.pageSize ?? 9;
+  const pageSize = filters.pageSize ?? 12;
   const page = Math.max(1, filters.page ?? 1);
 
   const [items, countRows] = await Promise.all([

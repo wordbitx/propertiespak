@@ -46,7 +46,7 @@ export function parseListingFilters(raw: RawSearchParams, fixed: PropertyFilters
     isNewProject: first(raw.newProjects) === "1" ? true : fixed.isNewProject,
     sort: first(raw.sort) ?? "newest",
     page: numeric(raw.page) ?? 1,
-    pageSize: fixed.pageSize ?? 9,
+    pageSize: fixed.pageSize ?? 12,
   };
 }
 
@@ -224,10 +224,10 @@ export async function ListingView({
             </div>
           ) : (
             <>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {result.items.map((property, index) => (
                   <Reveal key={property.id} delay={index * 40}>
-                    <PropertyCard property={property} priority={index < 3} />
+                    <PropertyCard property={property} priority={index < 4} />
                   </Reveal>
                 ))}
               </div>
