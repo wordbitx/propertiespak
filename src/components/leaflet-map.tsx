@@ -29,6 +29,8 @@ type Props = {
   autoOpenActive?: boolean;
   /** Society layout starts switched on (dhaplus-style society/property maps). */
   defaultLayoutOn?: boolean;
+  /** Fit the viewport to these [[south,west],[north,east]] bounds once ready (society fit). */
+  fitBounds?: [[number, number], [number, number]] | null;
   showLocate?: boolean;
   society?: SocietyMapDef | null;
   /** Called when the user taps/clicks the map (picker mode). */
@@ -163,6 +165,7 @@ export function LeafletMap({
   fitToPins = false,
   autoOpenActive = false,
   defaultLayoutOn = false,
+  fitBounds = null,
   showLocate = true,
   society = null,
   onPick,
@@ -197,7 +200,7 @@ export function LeafletMap({
   // with the colourful sector layout rendered over the satellite base. Green
   // "no data" filler tiles are masked out whenever the CDN allows pixel reads.
   const [layoutOn, setLayoutOn] = useState(defaultLayoutOn);
-  const [opacity, setOpacity] = useState(0.9);
+  const [opacity, setOpacity] = useState(1);
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
@@ -351,12 +354,22 @@ export function LeafletMap({
   /* ---------- recenter when props change ---------- */
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready) return;
+    if (!map || !ready || fitBounds) return;
     const cur = map.getCenter();
     if (Math.abs(cur.lat - center.lat) > 1e-7 || Math.abs(cur.lng - center.lng) > 1e-7 || Math.abs(map.getZoom() - zoom) > 0.01) {
       map.flyTo([center.lat, center.lng], zoom, { duration: 0.6 });
     }
   }, [center.lat, center.lng, zoom, ready]);
+
+  /* ---------- society fit (dhaplus-style whole-society view) ---------- */
+  useEffect(() => {
+    const Lmod = leafletRef.current;
+    const map = mapRef.current;
+    if (!Lmod || !map || !ready || !fitBounds) return;
+    const bounds = Lmod.latLngBounds(fitBounds);
+    if (!bounds.isValid()) return;
+    map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16, animate: true });
+  }, [fitBounds, ready]);
 
   /* ---------- society overlays (default-on, placeholder-aware) ---------- */
   useEffect(() => {

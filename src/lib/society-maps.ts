@@ -295,3 +295,25 @@ export function findSocietyMap(areaText: string, citySlug?: string): SocietyMapD
 export function layersContaining(def: SocietyMapDef, lat: number, lng: number): SocietyLayer[] {
   return def.layers.filter(({ bounds: [north, east, south, west] }) => lat <= north && lat >= south && lng <= east && lng >= west);
 }
+
+/**
+ * Viewport bounds for a dhaplus-style society map: the union of the layers
+ * that contain the property pin (or the whole society when the pin sits
+ * outside every layer), as [[south, west], [north, east]] for Leaflet.
+ */
+export function societyFitBounds(def: SocietyMapDef, lat: number, lng: number): [[number, number], [number, number]] | null {
+  const inside = layersContaining(def, lat, lng);
+  const layers = inside.length > 0 ? inside : def.layers;
+  if (layers.length === 0) return null;
+  let south = 90;
+  let west = 180;
+  let north = -90;
+  let east = -180;
+  for (const { bounds: [layerNorth, layerEast, layerSouth, layerWest] } of layers) {
+    south = Math.min(south, layerSouth);
+    west = Math.min(west, layerWest);
+    north = Math.max(north, layerNorth);
+    east = Math.max(east, layerEast);
+  }
+  return [[south, west], [north, east]];
+}
