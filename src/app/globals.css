@@ -492,14 +492,19 @@
   background: #e5e3df;
   z-index: 0;
 }
+/* Basemap picker toggle — a layers icon instead of the blank bundled PNG. */
 .leaflet-control-layers-toggle {
-  background-image: url("/leaflet/layers.png");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23061c33' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 2 9 5-9 5-9-5 9-5Z'/%3E%3Cpath d='m3 12.5 9 5 9-5'/%3E%3Cpath d='m3 17.5 9 5 9-5'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
   width: 36px;
   height: 36px;
+  border-radius: 10px;
 }
 .leaflet-retina .leaflet-control-layers-toggle {
-  background-image: url("/leaflet/layers-2x.png");
-  background-size: 26px 26px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23061c33' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 2 9 5-9 5-9-5 9-5Z'/%3E%3Cpath d='m3 12.5 9 5 9-5'/%3E%3Cpath d='m3 17.5 9 5 9-5'/%3E%3C/svg%3E");
+  background-size: 22px 22px;
 }
 .leaflet-bar {
   border-radius: 10px;

@@ -19,6 +19,38 @@ export type MapProperty = {
   citySlug?: string; distanceKm?: number;
 };
 
+/** Category colour coding for map pins (the active pin always renders green). */
+const COMMERCIAL_TYPE = /(office|shop|warehouse|industrial|commercial building|commercial|plaza|factory)/i;
+const PLOT_TYPE = /\b(plot|file|agricultural)\b/i;
+export function pinColorFor(propertyType: string): string {
+  if (COMMERCIAL_TYPE.test(propertyType)) return "#b45309";
+  if (PLOT_TYPE.test(propertyType)) return "#0e7490";
+  return "#06274a";
+}
+
+/** Legend for the category colours, shown under multi-pin overview maps. */
+function PinLegend() {
+  const items = [
+    { color: "#06274a", label: "Residential" },
+    { color: "#b45309", label: "Commercial" },
+    { color: "#0e7490", label: "Plots" },
+    { color: "#10a456", label: "Selected" },
+  ];
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.6875rem] font-medium text-ink-muted">
+      {items.map((item) => (
+        <span key={item.label} className="inline-flex items-center gap-1.5">
+          <svg viewBox="0 0 30 41" className="h-3.5 w-auto" aria-hidden="true">
+            <path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill={item.color} />
+            <circle cx="15" cy="15" r="6" fill="#fff" />
+          </svg>
+          {item.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function MapView({
   properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false,
 }: {
@@ -34,16 +66,17 @@ export function MapView({
   const pins = useMemo(() => properties.map((property) => ({
     id: property.id, lat: property.lat, lng: property.lng, title: property.title,
     subtitle: `${formatArea(property.areaValue, property.areaUnit)} ${property.propertyType} · ${property.locationArea}, ${property.cityName}`,
-    href: `/property/${property.slug}`, price: formatPriceShort(property.price, property.priceUnit), image: property.coverImage, active: property.id === selected,
+    href: `/property/${property.slug}`, price: formatPriceShort(property.price, property.priceUnit), image: property.coverImage,
+    color: pinColorFor(property.propertyType), active: property.id === selected,
   })), [properties, selected]);
 
   return (
-    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
+    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
       <div className="min-w-0">
         <LeafletMap
           center={focus}
           zoom={focusZoom}
-          heightClass="h-[380px] sm:h-[500px]"
+          heightClass="h-[420px] sm:h-[540px]"
           pins={pins}
           fitToPins={nearby || autoFit}
           autoOpenActive
@@ -51,6 +84,7 @@ export function MapView({
           header={{ label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
           onPinSelect={(id) => setSelected(Number(id))}
         />
+        {!nearby && properties.length > 1 && <PinLegend />}
         {active && (
           <div className="mt-3 flex min-w-0 gap-3 rounded-xl border border-soft bg-white p-3">
             <img src={active.coverImage} alt={active.title} width={160} height={120} loading="lazy" className="h-16 w-20 shrink-0 rounded-lg object-cover" />
@@ -70,7 +104,7 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="max-h-[480px] space-y-2 overflow-y-auto">
+        <ul className="max-h-[580px] space-y-2 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}

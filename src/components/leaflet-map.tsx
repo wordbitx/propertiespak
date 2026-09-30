@@ -14,6 +14,8 @@ export type LeafletPin = {
   price?: string;
   /** Optional cover photo — renders the premium card popup header. */
   image?: string;
+  /** Pin body colour (category coding); the active pin always renders brand green. */
+  color?: string;
   active?: boolean;
 };
 
@@ -62,6 +64,81 @@ function pinSvg(color: string) {
 const TRANSPARENT_TILE =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
+/** Tile x/y for a lat/lng at a given zoom (slippy-map scheme). */
+function tileXYFor(lat: number, lng: number, z: number) {
+  const n = 2 ** z;
+  const x = Math.floor(((lng + 180) / 360) * n);
+  const latRad = (lat * Math.PI) / 180;
+  const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n);
+  return { x, y };
+}
+
+/**
+ * The DHA layout CDN serves an opaque green "house" tile where it has no data.
+ * Those tiles can only be detected by reading their pixels, which needs CORS.
+ * Probe once per society: if the CDN allows anonymous reads we can filter the
+ * placeholders out; otherwise the layout keeps its raw behaviour.
+ */
+function probeTileFiltering(probeUrl: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    const timer = window.setTimeout(() => resolve(false), 6000);
+    img.onload = () => {
+      window.clearTimeout(timer);
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 4;
+        canvas.height = 4;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(false);
+        ctx.drawImage(img, 0, 0, 4, 4);
+        ctx.getImageData(0, 0, 4, 4);
+        resolve(true);
+      } catch {
+        resolve(false);
+      }
+    };
+    img.onerror = () => {
+      window.clearTimeout(timer);
+      resolve(false);
+    };
+    img.src = probeUrl;
+  });
+}
+
+/**
+ * Decide whether a layout tile is one of the CDN's green "no data" fillers
+ * (solid saturated green with a small house glyph). Real layout artwork is a
+ * colourful street/plot grid, so a tile that is overwhelmingly green-dominant
+ * is a filler and should be hidden (the satellite base shows through instead).
+ */
+function isPlaceholderTile(img: HTMLImageElement): boolean {
+  try {
+    const S = 24;
+    const canvas = document.createElement("canvas");
+    canvas.width = S;
+    canvas.height = S;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.drawImage(img, 0, 0, S, S);
+    const { data } = ctx.getImageData(0, 0, S, S);
+    let green = 0;
+    let total = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 200) continue;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      total += 1;
+      if (g - r >= 30 && g - b >= 18 && g >= 85 && g <= 175 && r <= 120) green += 1;
+    }
+    return total > 0 && green / total >= 0.8;
+  } catch {
+    return false;
+  }
+}
+
 /** Premium card popup for listing pins (photo header, price, CTA). */
 function pinPopupHtml(pin: LeafletPin): string {
   const image = pin.image ? `<img class="ewx-popup-img" src="${escapeText(pin.image)}" alt="" loading="lazy" />` : "";
@@ -104,6 +181,8 @@ export function LeafletMap({
   const overlayTilesRef = useRef<L.TileLayer[]>([]);
   const controlRef = useRef<L.Control.Layers | null>(null);
   const tileHealthRef = useRef({ loaded: 0, failed: 0, reported: false });
+  /** Per-society result of the CORS probe that enables placeholder filtering. */
+  const layoutProbeRef = useRef<Map<string, boolean>>(new Map());
   const lastActiveRef = useRef<string | number | null | undefined>(undefined);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
@@ -143,7 +222,7 @@ export function LeafletMap({
       if (cancelled || !containerRef.current || mapRef.current) return;
       leafletRef.current = Lmod;
 
-      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE } as L.TileLayerOptions;
+      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 4, updateWhenIdle: false, updateWhenZooming: false } as L.TileLayerOptions;
       const osm = Lmod.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { ...attr, subdomains: ["a", "b", "c"] });
       const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
       const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
@@ -188,7 +267,7 @@ export function LeafletMap({
         mousePoint = Lmod.point(e.clientX - rect.left, e.clientY - rect.top);
 
         const delta = -e.deltaY * (e.deltaMode === 1 ? 24 : e.deltaMode === 2 ? 350 : 1);
-        const factor = e.ctrlKey ? 0.007 : 0.0022;
+        const factor = e.ctrlKey ? 0.008 : 0.0028;
         const zoomStep = delta * factor;
 
         targetZoom = Math.min(20, Math.max(5, (isZooming ? targetZoom : map.getZoom()) + zoomStep));
@@ -199,7 +278,7 @@ export function LeafletMap({
             const curZ = map.getZoom();
             const diff = targetZoom - curZ;
             if (Math.abs(diff) > 0.005) {
-              const nextZ = curZ + diff * 0.22;
+              const nextZ = curZ + diff * 0.3;
               if (mousePoint) {
                 map.setZoomAround(mousePoint, nextZ, { animate: false });
               }
@@ -273,7 +352,7 @@ export function LeafletMap({
     }
   }, [center.lat, center.lng, zoom, ready]);
 
-  /* ---------- society overlays (opt-in, fault-tolerant) ---------- */
+  /* ---------- society overlays (default-on, placeholder-aware) ---------- */
   useEffect(() => {
     const Lmod = leafletRef.current, group = overlayGroupRef.current;
     if (!Lmod || !group || !ready) return;
@@ -282,32 +361,74 @@ export function LeafletMap({
     tileHealthRef.current = { loaded: 0, failed: 0, reported: false };
     setLayoutMsg("");
     if (!society || !layoutOn) return;
-    for (const layer of society.layers) {
-      const tile = Lmod.tileLayer(layer.tiles, {
-        minZoom: Math.min(layer.minZoom, 12),
-        maxZoom: 20,
-        maxNativeZoom: layer.maxZoom,
-        opacity,
-        tms: false,
-        bounds: Lmod.latLngBounds(normaliseBounds(layer.bounds)),
-        attribution: "",
-        errorTileUrl: TRANSPARENT_TILE,
-      });
-      // If the layout source is down (every tile failing), switch the layer off
-      // once and say so — instead of leaving broken tiles on the map.
-      tile.on("tileload", () => { tileHealthRef.current.loaded += 1; });
-      tile.on("tileerror", () => {
-        const health = tileHealthRef.current;
-        health.failed += 1;
-        if (!health.reported && health.failed >= 6 && health.loaded === 0) {
-          health.reported = true;
-          setLayoutOn(false);
-          setLayoutMsg("Society layout is unavailable right now — showing the base map only.");
-        }
-      });
-      tile.addTo(group);
-      overlayTilesRef.current.push(tile);
+    let cancelled = false;
+
+    const buildLayers = (filterPlaceholders: boolean) => {
+      if (cancelled) return;
+      for (const layer of society.layers) {
+        const tile = Lmod.tileLayer(layer.tiles, {
+          minZoom: Math.min(layer.minZoom, 12),
+          maxZoom: 20,
+          maxNativeZoom: layer.maxZoom,
+          opacity,
+          tms: false,
+          bounds: Lmod.latLngBounds(normaliseBounds(layer.bounds)),
+          attribution: "",
+          errorTileUrl: TRANSPARENT_TILE,
+          ...(filterPlaceholders ? { crossOrigin: "anonymous" as const } : {}),
+        });
+        // If the layout source is down (every tile failing), switch the layer
+        // off once and say so — instead of leaving broken tiles on the map.
+        tile.on("tileload", (e) => {
+          tileHealthRef.current.loaded += 1;
+          // Green "no data" fillers from the CDN become transparent so the
+          // satellite base shows through (dhaplus-style clean overlay).
+          if (filterPlaceholders && isPlaceholderTile(e.tile as HTMLImageElement)) {
+            (e.tile as HTMLImageElement).src = TRANSPARENT_TILE;
+          }
+        });
+        tile.on("tileerror", () => {
+          const health = tileHealthRef.current;
+          health.failed += 1;
+          if (!health.reported && health.failed >= 6 && health.loaded === 0) {
+            health.reported = true;
+            setLayoutOn(false);
+            setLayoutMsg("Society layout is unavailable right now — showing the base map only.");
+          }
+        });
+        tile.addTo(group);
+        overlayTilesRef.current.push(tile);
+      }
+    };
+
+    const cached = layoutProbeRef.current.get(society.slug);
+    if (cached === false) {
+      // The CDN does not allow pixel checks (and the auto-off already ran on
+      // first load) — the visitor re-enabled the layout, so respect that.
+      buildLayers(false);
+      return;
     }
+    if (cached === true) {
+      buildLayers(true);
+      return;
+    }
+    // First use of this society: probe whether placeholder filtering works.
+    const [[southLat, westLng], [northLat, eastLng]] = normaliseBounds(society.layers[0].bounds);
+    const { x, y } = tileXYFor((southLat + northLat) / 2, (westLng + eastLng) / 2, 14);
+    const probeUrl = society.layers[0].tiles.replace("{z}", "14").replace("{x}", String(x)).replace("{y}", String(y));
+    probeTileFiltering(probeUrl).then((filterable) => {
+      layoutProbeRef.current.set(society.slug, filterable);
+      if (filterable) {
+        buildLayers(true);
+      } else {
+        // Without filtering, the CDN's green filler tiles would litter the
+        // map — start with the layout off; the visitor can still switch it on.
+        setLayoutOn(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [society, layoutOn, ready]);
 
@@ -325,7 +446,7 @@ export function LeafletMap({
     for (const pin of pins) {
       const icon = Lmod.divIcon({
         className: "ewx-pin",
-        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price">${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : "#06274a")}</div>`,
+        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price">${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`,
         iconSize: [30, 41],
         iconAnchor: [15, 41],
         popupAnchor: [0, -38],
@@ -369,7 +490,7 @@ export function LeafletMap({
       pickerRef.current = null;
       return;
     }
-    const icon = Lmod.divIcon({ className: "ewx-pin", html: `<div class="ewx-pin-wrap is-active">${pinSvg("#1f4fd8")}</div>`, iconSize: [30, 41], iconAnchor: [15, 41], popupAnchor: [0, -38] });
+    const icon = Lmod.divIcon({ className: "ewx-pin", html: `<div class="ewx-pin-wrap is-active">${pinSvg("#10a456")}</div>`, iconSize: [30, 41], iconAnchor: [15, 41], popupAnchor: [0, -38] });
     if (!pickerRef.current) {
       pickerRef.current = Lmod.marker([pickerPosition.lat, pickerPosition.lng], { icon, draggable: true, autoPan: true }).addTo(map);
       pickerRef.current.on("dragend", () => {
