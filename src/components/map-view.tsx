@@ -113,26 +113,35 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
+        <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}
               onMouseEnter={() => setSelected(property.id)}
-              className={`min-w-0 rounded-lg border p-2 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
+              className={`group min-w-0 overflow-hidden rounded-xl border transition-all duration-150 ${property.id === selected ? "border-forest-600/50 bg-forest-50/40 shadow-[0_0_0_1px_rgba(16,164,86,0.35)]" : "border-soft/80 hover:border-navy-100 hover:shadow-soft"}`}
             >
-              <div className="flex min-w-0 items-start gap-3">
-                <img src={property.coverImage} alt="" width={140} height={110} loading="lazy" className="h-14 w-[4.25rem] shrink-0 rounded-md object-cover" />
-                <div className="min-w-0 flex-1">
-                  <Link href={`/property/${property.slug}`} className="block text-[0.8125rem] font-semibold leading-5 text-navy-900 hover:text-forest-700">{property.title}</Link>
-                  <p className="mt-1 text-[0.75rem] leading-5 text-ink-muted">{property.locationArea}, {property.cityName}</p>
-                  <p className="mt-1 font-sans text-[0.8125rem] font-bold text-navy-900">{formatPriceShort(property.price, property.priceUnit)}</p>
-                </div>
-              </div>
-              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-soft pt-1.5">
-                <span className="text-[0.6875rem] text-ink-muted">{typeof property.distanceKm === "number" ? `${property.distanceKm < 0.1 ? "Under 100 m" : `${property.distanceKm.toFixed(1)} km`} away · approximate` : formatArea(property.areaValue, property.areaUnit)}</span>
-                <button type="button" onClick={() => { setSelected(property.id); setFocus({ lat: property.lat, lng: property.lng }); setFocusZoom(16); }} className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-[0.75rem] font-semibold text-forest-700 hover:bg-forest-50">
-                  <IconPin className="h-3.5 w-3.5" /> Show on map
+              <div className="relative">
+                <img src={property.coverImage} alt="" width={280} height={152} loading="lazy" className="h-[74px] w-full object-cover" />
+                <span className="absolute left-2 top-2 rounded-md bg-white/95 px-1.5 py-0.5 font-sans text-[0.6875rem] font-bold text-navy-900 shadow-sm">
+                  {formatPriceShort(property.price, property.priceUnit)}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Show ${property.title} on map`}
+                  title="Show on map"
+                  onClick={() => { setSelected(property.id); setFocus({ lat: property.lat, lng: property.lng }); setFocusZoom(16); }}
+                  className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-forest-700 shadow-sm transition-transform hover:scale-105 hover:bg-white"
+                >
+                  <IconPin className="h-3.5 w-3.5" />
                 </button>
+              </div>
+              <div className="min-w-0 px-2.5 py-2">
+                <Link href={`/property/${property.slug}`} className="block truncate text-[0.8125rem] font-semibold leading-5 text-navy-900 hover:text-forest-700">{property.title}</Link>
+                <p className="mt-0.5 truncate text-[0.6875rem] leading-4 text-ink-muted">
+                  {typeof property.distanceKm === "number"
+                    ? `${property.distanceKm < 0.1 ? "Under 100 m" : `${property.distanceKm.toFixed(1)} km`} away · ${property.locationArea}`
+                    : `${formatArea(property.areaValue, property.areaUnit)} · ${property.locationArea}, ${property.cityName}`}
+                </p>
               </div>
             </li>
           ))}
