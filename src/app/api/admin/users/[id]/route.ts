@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { clearVerificationRequest, setUserVerification } from "@/lib/queries";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!updated) {
       return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
     }
+    invalidateCatalog();
     return NextResponse.json({ ok: true, user: updated });
   } catch (error) {
     console.error("admin verification failed", error);

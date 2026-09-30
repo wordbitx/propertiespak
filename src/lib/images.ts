@@ -31,20 +31,51 @@ export const photos = {
 } as const;
 
 /**
- * Architectural photography by Max Vakhtbovych (Pexels photo 8134750).
- * Local assets generated from a 3600×2400 source, never upscaled.
- * Portrait crops are art-directed separately; AVIF has a WebP fallback.
+ * Gallery used when an owner submits a listing without photos, by category.
+ * Seeded listings never reuse these, so an approved submission never looks
+ * like another listing.
+ */
+export const submissionFallbackPhotos: Record<string, readonly number[]> = {
+  house: [36676879, 8082227, 6585757, 7546213],
+  apartment: [8082227, 6585757, 7546213, 7031879],
+  plot: [36422828, 30505108, 31249549, 11680715],
+  office: [1313534, 267501, 13437132, 8310949],
+  shop: [30929605, 31573705, 15054264, 12547325],
+  building: [2040476, 4534504, 18468708, 1313534],
+  warehouse: [7937746, 11680715, 38524594, 25310909],
+  farmhouse: [36394726, 28915352, 19075392, 8135496],
+  penthouse: [7546321, 8141959, 7045919, 34818802],
+};
+
+export const HERO_PHOTO_ID = 31817157;
+const heroSrc = (width: number, height?: number) =>
+  `https://images.pexels.com/photos/${HERO_PHOTO_ID}/pexels-photo-${HERO_PHOTO_ID}.jpeg?auto=compress&cs=tinysrgb` +
+  (height ? `&fit=crop&w=${width}&h=${height}` : `&w=${width}`);
+
+/**
+ * Hero: contemporary luxury villa with an infinity pool at sunset by Ahmet
+ * Çötür (Pexels photo 31817157), shot at 7688 × 5128. It is served straight
+ * from the Pexels image CDN, which resizes from that full-resolution original,
+ * so every width in the srcset is a true downscale — including 3840px for 4K
+ * and retina desktops. Portrait mobile crops are cut at 3:4 by the CDN. The
+ * hero component preconnects to images.pexels.com so the first byte is not
+ * delayed. The villa sits on the right of the frame, leaving the sunset sky and
+ * the pool behind the headline.
  */
 export const heroImage = {
-  desktop: "/images/residence-3200.webp",
-  tablet: "/images/residence-1600.webp",
-  mobile: "/images/residence-mobile-768.webp",
-  desktopSrcSet: "/images/residence-1600.webp 1600w, /images/residence-2400.webp 2400w, /images/residence-3200.webp 3200w",
-  avifSrcSet: "/images/residence-1600.avif 1600w, /images/residence-2400.avif 2400w, /images/residence-3200.avif 3200w",
-  mobileSrcSet: "/images/residence-mobile-768.webp 768w, /images/residence-mobile-1280.webp 1280w",
-  mobileAvifSrcSet: "/images/residence-mobile-768.avif 768w, /images/residence-mobile-1280.avif 1280w",
+  origin: "https://images.pexels.com",
+  desktop: heroSrc(2400),
+  desktopSrcSet: [1280, 1600, 2000, 2400, 3200, 3840].map((w) => `${heroSrc(w)} ${w}w`).join(", "),
+  mobileSrcSet: [
+    [640, 854],
+    [960, 1280],
+    [1280, 1707],
+  ]
+    .map(([w, h]) => `${heroSrc(w, h)} ${w}w`)
+    .join(", "),
+  /** Local, real-JPEG social card (WhatsApp / Facebook / X previews). */
   og: "/images/residence-social.jpg",
-  alt: "Contemporary residence with floor-to-ceiling windows, a landscaped lawn and a swimming pool",
+  alt: "Contemporary luxury villa with floor-to-ceiling glass and an infinity pool at sunset",
 };
 
 export const investmentImage = {
@@ -69,3 +100,20 @@ export function ogCard(input: { title: string; subtitle?: string; kicker?: strin
   if (input.footer) params.set("footer", input.footer);
   return `${OG_CARD_PATH}?${params.toString()}`;
 }
+
+/**
+ * Fixed photos used by page sections (homepage discovery tiles, the commercial
+ * page feature). Seeded listings never reuse these, so a listing card never
+ * repeats a section image.
+ */
+export const sectionPhotos = {
+  buy: 36676879,
+  rent: 8082227,
+  newProjects: 38524594,
+  commercial: 1313534,
+  luxury: 28054849,
+  apartments: 7546321,
+  plots: 36422828,
+  offices: 267501,
+  commercialFeature: 18468708,
+} as const;

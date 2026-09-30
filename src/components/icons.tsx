@@ -373,32 +373,75 @@ export function IconX(props: IconProps) {
 }
 
 /**
- * Properties Pak brand mark — a green canopy roof over a solid body with a
- * navy doorway on a deep-navy tile. The roof uses the site's own greens
- * (forest-700 → forest-500), the eave casts a hairline shadow so the mark keeps
- * depth at large sizes, and the tile carries a 9% inner ring so it stays crisp
- * on light backgrounds. Vector-only so it reads cleanly from 16px favicons up
- * to the 512px app icon.
+ * Properties Pak brand mark — the official logo: a white "P" whose bowl frames
+ * a four-pane window, a green roof chevron sweeping under it and three rising
+ * bars (two white, one green) for growth. The green is the single brand green
+ * (--color-brand, #10A456) used across the whole site. Drawn as a vector on the brand's
+ * deep-navy tile so it stays crisp from 16px favicons up to the 512px app icon.
  */
+/** The mark itself, in the logo's original 1568×627 artwork space. */
+function LogoMarkShapes({ white }: { white: string }) {
+  return (
+    <>
+      <path d="M560 246 L596 219 L596 376 L560 405 Z" fill={white} />
+      <path d="M609 197 L637 175 L637 340 L609 363 Z" fill={white} />
+      <path d="M654 122 Q654 115 660 119 L699 152 L699 288 L654 326 Z" fill="#10A456" />
+      <path
+        d="M731 138 H890 A113 113 0 0 1 952 350 L903 307 A56 56 0 0 0 888 195 H806 Q792 195 791 210 L718 272 V151 Q718 138 731 138 Z"
+        fill={white}
+      />
+      <path
+        d="M562 437 L571 424 L782 242 Q790 234 798 242 L940 356 Q928 372 906 372 Q890 370 880 362 L790 289 L622 437 Z"
+        fill="#10A456"
+      />
+      <g fill="#FFFFFF">
+        <rect x="759" y="354" width="28" height="29" />
+        <rect x="796" y="354" width="28" height="29" />
+        <rect x="759" y="392" width="28" height="29" />
+        <rect x="796" y="392" width="28" height="29" />
+      </g>
+    </>
+  );
+}
+
 export function IconLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
       <defs>
         <linearGradient id="ppMarkTile" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#0B355C" />
-          <stop offset="1" stopColor="#04182C" />
+          <stop offset="0" stopColor="#0A1A3A" />
+          <stop offset="1" stopColor="#050E26" />
         </linearGradient>
-        <linearGradient id="ppMarkRoof" x1="0.15" y1="0" x2="0.85" y2="1">
-          <stop offset="0" stopColor="#0D8A4C" />
-          <stop offset="1" stopColor="#22C55E" />
+        <linearGradient id="ppMarkWhite" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset="1" stopColor="#E4E8EE" />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="13.5" fill="url(#ppMarkTile)" />
       <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" strokeOpacity="0.09" strokeWidth="1.2" />
-      <path d="M24 12.1 11.4 24.8a2.05 2.05 0 0 0 1.37 3.5h22.46a2.05 2.05 0 0 0 1.37-3.5Z" fill="url(#ppMarkRoof)" />
-      <path d="M15.9 27.6h16.2v9.25a2.05 2.05 0 0 1-2.05 2.05H17.95a2.05 2.05 0 0 1-2.05-2.05Z" fill="#FFFFFF" />
-      <path d="M12.6 28.85h22.8v0.95a1.4 1.4 0 0 1-1.4 1.4H14a1.4 1.4 0 0 1-1.4-1.4Z" fill="#04182C" opacity="0.16" />
-      <path d="M21.4 38.9v-4.2a1.7 1.7 0 0 1 1.7-1.7h1.8a1.7 1.7 0 0 1 1.7 1.7v4.2Z" fill="#0B355C" />
+      <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
+        <LogoMarkShapes white="url(#ppMarkWhite)" />
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * The same mark with no tile — the transparent logo, for dark surfaces such as
+ * the header while it floats over the hero photograph. The viewBox is a square
+ * around the mark so it occupies exactly the tile's box and swapping between
+ * the two never shifts the wordmark.
+ */
+export function IconLogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="553.5 48 460 460" aria-hidden="true" className={className}>
+      <defs>
+        <linearGradient id="ppBareWhite" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset="1" stopColor="#E4E8EE" />
+        </linearGradient>
+      </defs>
+      <LogoMarkShapes white="url(#ppBareWhite)" />
     </svg>
   );
 }

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import { favorites, listingSubmissions, properties } from "@/db/schema";
 import { getSessionUserId } from "@/lib/auth";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,7 @@ export async function PATCH(request: Request, { params }: Params) {
       .where(and(eq(properties.id, id), eq(properties.listedByUserId, userId)))
       .returning({ id: properties.id, slug: properties.slug, published: properties.published });
 
+    invalidateCatalog();
     return json({ ok: true, listing: updated });
   } catch (error) {
     console.error("owner listing visibility update failed", error);
@@ -96,6 +98,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     await db.delete(favorites).where(eq(favorites.propertyId, id));
     await db.update(listingSubmissions).set({ propertyId: null }).where(eq(listingSubmissions.propertyId, id));
 
+    invalidateCatalog();
     return json({ ok: true, deleted: deleted[0].id });
   } catch (error) {
     console.error("owner listing delete failed", error);

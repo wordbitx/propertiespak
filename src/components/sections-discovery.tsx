@@ -17,23 +17,25 @@ import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import type { City, Post, Project, Property } from "@/db/schema";
 import { formatPrice } from "@/lib/format";
-import { photo } from "@/lib/images";
+import { photo, sectionPhotos } from "@/lib/images";
 import { SITE } from "@/lib/constants";
+import { siteImages } from "@/lib/site-images";
+import { SitePicture } from "@/components/site-picture";
 
 const CATEGORY_TILES = [
-  { label: "Buy", sub: "Houses, plots & villas", href: "/properties/for-sale", image: 36676879, icon: IconKey },
-  { label: "Rent", sub: "Homes & apartments", href: "/properties/for-rent", image: 8082227, icon: IconArea },
-  { label: "New Projects", sub: "Off-plan & launches", href: "/properties/new-projects", image: 38524594, icon: IconLayers },
-  { label: "Commercial", sub: "Offices & retail", href: "/commercial", image: 1313534, icon: IconBuilding },
-  { label: "Luxury Homes", sub: "Signature residences", href: "/properties?category=house", image: 28054849, icon: IconSpark },
-  { label: "Apartments", sub: "City living", href: "/properties?category=apartment", image: 7546321, icon: IconBuilding },
-  { label: "Plots", sub: "Developed sectors", href: "/properties?category=plot", image: 36422828, icon: IconCompass },
-  { label: "Offices", sub: "Corporate floors", href: "/properties?type=Office", image: 267501, icon: IconShield },
+  { label: "Buy", sub: "Houses, plots & villas", href: "/properties/for-sale", image: sectionPhotos.buy, icon: IconKey },
+  { label: "Rent", sub: "Homes & apartments", href: "/properties/for-rent", image: sectionPhotos.rent, icon: IconArea },
+  { label: "New Projects", sub: "Off-plan & launches", href: "/properties/new-projects", image: sectionPhotos.newProjects, icon: IconLayers },
+  { label: "Commercial", sub: "Offices & retail", href: "/commercial", image: sectionPhotos.commercial, icon: IconBuilding },
+  { label: "Luxury Homes", sub: "Signature residences", href: "/properties?category=house", image: sectionPhotos.luxury, icon: IconSpark },
+  { label: "Apartments", sub: "City living", href: "/properties?category=apartment", image: sectionPhotos.apartments, icon: IconBuilding },
+  { label: "Plots", sub: "Developed sectors", href: "/properties?category=plot", image: sectionPhotos.plots, icon: IconCompass },
+  { label: "Offices", sub: "Corporate floors", href: "/properties?type=Office", image: sectionPhotos.offices, icon: IconShield },
 ];
 
 export function CategoryGrid() {
   return (
-    <Section tone="mist">
+    <Section tone="light">
       <div className="ui-container">
         <SectionHeading
           eyebrow="Browse by intent"
@@ -266,7 +268,7 @@ export function FeaturedProperties({ properties }: { properties: Property[] }) {
           description="Curated listings across premium Lahore, Islamabad and Karachi addresses."
           action={{ label: "See all featured", href: "/properties?featured=1" }}
         />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {properties.map((property, index) => (
             <Reveal key={property.id} delay={index * 60}>
               <PropertyCard property={property} />
@@ -281,7 +283,7 @@ export function FeaturedProperties({ properties }: { properties: Property[] }) {
 export function NewProjectsSection({ projects }: { projects: Project[] }) {
   if (projects.length === 0) return null;
   return (
-    <Section tone="light" id="projects">
+    <Section tone="mist" id="projects">
       <div className="ui-container">
         <SectionHeading
           eyebrow="New developments"
@@ -363,7 +365,7 @@ const COMMERCIAL_TYPES = [
 
 export function CommercialSection({ properties }: { properties: Property[] }) {
   return (
-    <Section tone="light" id="commercial">
+    <Section tone="mist" id="commercial">
       <div className="ui-container">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal>
@@ -401,25 +403,19 @@ export function CommercialSection({ properties }: { properties: Property[] }) {
           </Reveal>
 
           <Reveal delay={120} className="relative">
-            <div className="overflow-hidden rounded-panel bg-soft">
-              <img
-                src={photo(1313534, 1100, 820)}
-                alt="Modern glass commercial building facade in a business district"
-                width={1100}
-                height={820}
-                loading="lazy"
-                decoding="async"
-                className="h-[320px] w-full object-cover lg:h-[420px]"
+            {/* Locally served, premium dusk photography (AVIF with WebP fallback). */}
+            <div className="relative overflow-hidden rounded-panel bg-navy-950 shadow-card ring-1 ring-navy-900/10">
+              <SitePicture
+                image={siteImages.commercialTower}
+                sizes="(min-width: 1024px) 620px, 100vw"
+                className="h-[320px] w-full object-cover object-[50%_40%] lg:h-[420px]"
               />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/35 via-transparent to-transparent" />
             </div>
             <div className="absolute -bottom-8 left-6 hidden w-[240px] overflow-hidden rounded-panel border border-soft bg-white p-3 shadow-card sm:block">
-              <img
-                src={photo(267501, 480, 300)}
-                alt="Corporate office building with parking"
-                width={480}
-                height={300}
-                loading="lazy"
-                decoding="async"
+              <SitePicture
+                image={siteImages.commercialLobby}
+                sizes="216px"
                 className="h-[130px] w-full rounded-lg object-cover"
               />
               <p className="mt-3 font-sans text-[0.8125rem] font-semibold text-navy-900">Prime corridor assets</p>
@@ -429,8 +425,8 @@ export function CommercialSection({ properties }: { properties: Property[] }) {
         </div>
 
         {properties.length > 0 && (
-          <div className="mt-16 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {properties.slice(0, 3).map((property, index) => (
+          <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {properties.slice(0, 4).map((property, index) => (
               <Reveal key={property.id} delay={index * 60}>
                 <PropertyCard property={property} />
               </Reveal>
@@ -454,7 +450,7 @@ export function MapSection({
   zoom?: number;
 }) {
   return (
-    <Section tone="mist" id="map">
+    <Section tone="light" id="map">
       <div className="ui-container">
         <SectionHeading
           eyebrow="Location intelligence"

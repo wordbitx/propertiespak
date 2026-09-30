@@ -28,7 +28,7 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{
             backgroundImage:
-              "radial-gradient(820px 420px at 10% -12%, rgba(22,179,100,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
+              "radial-gradient(820px 420px at 10% -12%, rgba(16,164,86,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
           }}
         />
         <div className="ui-container relative z-10">
@@ -121,10 +121,10 @@ export async function LandingPageView({ content }: { content: LandingContent }) 
               .
             </p>
           ) : (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {listings.map((property, index) => (
                 <Reveal key={property.id} delay={index * 40}>
-                  <PropertyCard property={property} priority={index < 3} />
+                  <PropertyCard property={property} priority={index < 4} />
                 </Reveal>
               ))}
             </div>

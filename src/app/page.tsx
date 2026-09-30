@@ -79,12 +79,12 @@ export default async function HomePage() {
     showcaseDealers,
   ] = await Promise.all([
     getPlatformStats(),
-    getFeaturedProperties(6),
-    searchProperties({ sort: "newest", pageSize: 9 }),
+    getFeaturedProperties(8),
+    searchProperties({ sort: "newest", pageSize: 8 }),
     getCities(),
     getCityListingCounts(),
     getProjects(3),
-    searchProperties({ category: "commercial", pageSize: 3, sort: "popular" }),
+    searchProperties({ category: "commercial", pageSize: 4, sort: "popular" }),
     searchProperties({ category: "commercial", pageSize: 1 }),
     searchProperties({ purpose: "rent", pageSize: 1 }),
     getMapProperties({}, 100),
@@ -118,7 +118,7 @@ export default async function HomePage() {
     <>
       <Hero />
 
-      {/* Dealer belt sits under the hero; the classic category tiles live further down, just above the city markets. */}
+      {/* Dealer belt sits under the hero; the category tiles sit just above the commercial section. */}
       <DealersSlider dealers={showcaseDealers} />
 
       {/* Featured inventory leads the marketplace: the strongest listings first, then full discovery. */}
@@ -140,10 +140,11 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {/* Four across on desktop (two full rows of 4), matching the featured grid. */}
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {discovery.items.map((property, index) => (
               <Reveal key={property.id} delay={index * 50}>
-                <PropertyCard property={property} priority={index < 3} />
+                <PropertyCard property={property} priority={index < 4} />
               </Reveal>
             ))}
           </div>
@@ -155,12 +156,12 @@ export default async function HomePage() {
         </div>
       </Section>
 
+      {/* "Every property category, in one place" sits directly above "Spaces Built for Business". */}
+      <CategoryGrid />
       <CommercialSection properties={commercialListings.items} />
       {/* Discover Properties by Location now sits directly above the new-projects row. */}
       <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
       <NewProjectsSection projects={projects} />
-      {/* "Browse by intent" tiles back in their original spot: directly above the city markets. */}
-      <CategoryGrid />
       <CityDiscovery cities={cities} counts={cityCounts} />
       <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 

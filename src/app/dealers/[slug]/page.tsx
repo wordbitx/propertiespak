@@ -280,10 +280,10 @@ export default async function DealerProfilePage({ params }: PageProps) {
               inventory.
             </p>
           ) : (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {listings.map((property, index) => (
                 <Reveal key={property.id} delay={index * 40}>
-                  <PropertyCard property={property} priority={index < 3} />
+                  <PropertyCard property={property} priority={index < 4} />
                 </Reveal>
               ))}
             </div>

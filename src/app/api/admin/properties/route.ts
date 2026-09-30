@@ -5,6 +5,7 @@ import { ensureSeeded } from "@/db/seed";
 import { properties } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { slugify, validatePropertyPayload } from "@/lib/property-input";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
       .insert(properties)
       .values({ ...validated.data, slug, views: 0 })
       .returning({ id: properties.id, slug: properties.slug });
+    invalidateCatalog();
     return NextResponse.json({ ok: true, property: inserted[0] });
   } catch (error) {
     console.error("admin create property failed", error);

@@ -24,7 +24,7 @@ export function PageHero({
         className="pointer-events-none absolute inset-0 opacity-[0.55]"
         style={{
           backgroundImage:
-            "radial-gradient(900px 420px at 12% -10%, rgba(22,179,100,0.28), transparent 62%), radial-gradient(700px 380px at 88% 8%, rgba(19,80,127,0.55), transparent 60%)",
+            "radial-gradient(900px 420px at 12% -10%, rgba(16,164,86,0.28), transparent 62%), radial-gradient(700px 380px at 88% 8%, rgba(19,80,127,0.55), transparent 60%)",
         }}
       />
       <div

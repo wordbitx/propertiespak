@@ -69,14 +69,14 @@ export default function PakistanKeywordHubPage() {
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{
             backgroundImage:
-              "radial-gradient(820px 420px at 10% -12%, rgba(22,179,100,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
+              "radial-gradient(820px 420px at 10% -12%, rgba(16,164,86,0.24), transparent 62%), radial-gradient(760px 420px at 90% 6%, rgba(19,80,127,0.5), transparent 62%)",
           }}
         />
         <div className="ui-container relative z-10">
           <Breadcrumbs
             items={[
               { name: "Home", href: "/" },
-              { name: "SEO Resources", href: "/sitemap" },
+              { name: "Properties", href: "/properties" },
               { name: "Pakistan Real Estate Keywords", href: "/keywords-for-pakistan" },
             ]}
           />
@@ -202,7 +202,6 @@ export default function PakistanKeywordHubPage() {
                 { label: "Open commercial property hub", href: "/commercial" },
                 { label: "Use all property calculators", href: "/tools" },
                 { label: "Read Pakistan property insights", href: "/blog" },
-                { label: "View complete HTML sitemap", href: "/sitemap" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

@@ -5,6 +5,7 @@ import { ensureSeeded } from "@/db/seed";
 import { favorites, listingSubmissions, properties } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { validatePropertyPayload } from "@/lib/property-input";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,7 @@ export async function PUT(request: Request, { params }: Params) {
       .where(eq(properties.id, id))
       .returning({ id: properties.id, slug: properties.slug });
     if (!updated[0]) return NextResponse.json({ ok: false, error: "Property not found." }, { status: 404 });
+    invalidateCatalog();
     return NextResponse.json({ ok: true, property: updated[0] });
   } catch (error) {
     console.error("admin update property failed", error);
@@ -69,6 +71,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (!deleted[0]) return NextResponse.json({ ok: false, error: "Property not found." }, { status: 404 });
     await db.delete(favorites).where(eq(favorites.propertyId, id));
     await db.update(listingSubmissions).set({ propertyId: null }).where(eq(listingSubmissions.propertyId, id));
+    invalidateCatalog();
     return NextResponse.json({ ok: true, deleted: id });
   } catch (error) {
     console.error("admin delete property failed", error);

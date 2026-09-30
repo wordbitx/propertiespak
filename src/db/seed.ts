@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { db } from "@/db";
+import { db, type Executor } from "@/db";
 import { agents, cities, posts, projects, properties, testimonials, users } from "@/db/schema";
 import { dealerSeed } from "@/db/seed-dealers";
 import { townPropertySeed } from "@/db/seed-towns";
@@ -7,16 +8,18 @@ import { societyPropertySeed } from "@/db/seed-societies";
 import { hashPassword } from "@/lib/password";
 import { agentSeed, citySeed, postSeed, projectSeed, propertySeed, testimonialSeed } from "@/db/seed-data";
 import { extraPropertySeed } from "@/db/seed-data-extra";
+import { dhaPropertySeed } from "@/db/seed-data-dha";
 import { EXTRA_POSTS, POST_LINKS } from "@/db/seed-content";
-import { photo } from "@/lib/images";
+import { assignSeedGalleries } from "@/db/seed-gallery";
+import type { SeedProperty } from "@/db/seed-data";
+import { HERO_PHOTO_ID, photo, photos, sectionPhotos, submissionFallbackPhotos } from "@/lib/images";
 
 /**
  * Idempotent schema guard. The canonical schema lives in `src/db/schema.ts`
  * (applied with `drizzle-kit push`); this raw DDL keeps the app bootable in a
  * fresh sandbox where push has not run yet.
  */
-async function ensureSchema() {
-  await db.execute(sql`
+const SCHEMA_SQL = `
     CREATE TABLE IF NOT EXISTS cities (
       id serial PRIMARY KEY,
       slug text NOT NULL UNIQUE,
@@ -285,19 +288,27 @@ async function ensureSchema() {
     WHERE s.property_id = p.id
       AND s.status = 'approved'
       AND coalesce(p.listed_by_phone, '') = '';
-  `);
+    CREATE TABLE IF NOT EXISTS app_meta (
+      key text PRIMARY KEY,
+      value text NOT NULL,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+`;
+
+async function ensureSchema(q: Executor) {
+  await q.execute(sql.raw(SCHEMA_SQL));
 }
 
-/** Reference content is refreshed on every cold start; listings are inserted once. */
-async function refreshReferenceContent() {
-  await db.delete(cities).where(inArray(cities.slug, citySeed.map((city) => city.slug)));
-  await db.insert(cities).values(citySeed);
+/** Reference content is refreshed whenever the seed changes; listings are inserted once. */
+async function refreshReferenceContent(q: Executor) {
+  await q.delete(cities).where(inArray(cities.slug, citySeed.map((city) => city.slug)));
+  await q.insert(cities).values(citySeed);
 
-  await db.delete(agents).where(inArray(agents.slug, agentSeed.map((agent) => agent.slug)));
-  await db.insert(agents).values(agentSeed);
+  await q.delete(agents).where(inArray(agents.slug, agentSeed.map((agent) => agent.slug)));
+  await q.insert(agents).values(agentSeed);
 
-  await db.delete(projects).where(inArray(projects.slug, projectSeed.map((project) => project.slug)));
-  await db.insert(projects).values(
+  await q.delete(projects).where(inArray(projects.slug, projectSeed.map((project) => project.slug)));
+  await q.insert(projects).values(
     projectSeed.map((project, index) => ({
       slug: project.slug,
       name: project.name,
@@ -350,31 +361,31 @@ async function refreshReferenceContent() {
   }));
 
   const postRows = [...basePosts, ...extraPosts];
-  await db.delete(posts).where(inArray(posts.slug, postRows.map((post) => post.slug)));
-  await db.insert(posts).values(postRows);
+  await q.delete(posts).where(inArray(posts.slug, postRows.map((post) => post.slug)));
+  await q.insert(posts).values(postRows);
 
-  const { rows } = await db.execute<{ total: number }>(sql`select cast(count(*) as int) as total from testimonials`);
+  const { rows } = await q.execute<{ total: number }>(sql`select cast(count(*) as int) as total from testimonials`);
   if (Number(rows[0]?.total ?? 0) === 0) {
-    await db.insert(testimonials).values(testimonialSeed);
+    await q.insert(testimonials).values(testimonialSeed);
   }
 }
 
 /**
- * Founding dealer accounts. Profile fields are refreshed on every boot; the
+ * Founding dealer accounts. Profile fields are refreshed whenever the seed changes; the
  * verification flag is only *seeded* once so an administrator's decision in the
  * admin workspace is never overwritten by a restart.
  */
-async function seedDealerAccounts() {
+async function seedDealerAccounts(q: Executor) {
   for (const dealer of dealerSeed) {
     const phoneDigits = dealer.phone.replace(/[^0-9]/g, "");
-    const existing = await db
+    const existing = await q
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, dealer.email))
       .limit(1);
 
     if (existing.length === 0) {
-      await db.insert(users).values({
+      await q.insert(users).values({
         name: dealer.name,
         email: dealer.email,
         phone: dealer.phone,
@@ -399,7 +410,7 @@ async function seedDealerAccounts() {
       continue;
     }
 
-    await db
+    await q
       .update(users)
       .set({
         name: dealer.name,
@@ -429,7 +440,7 @@ async function seedDealerAccounts() {
  * details, so `/dealers/<slug>` pages, the blue tick and the owner contact
  * block on each listing all agree.
  */
-async function linkDealerListings() {
+async function linkDealerListings(q: Executor) {
   const cities = Array.from(new Set(dealerSeed.map((dealer) => dealer.citySlug)));
 
   for (const citySlug of cities) {
@@ -437,7 +448,7 @@ async function linkDealerListings() {
     const accounts: { id: number; name: string; phone: string; email: string }[] = [];
 
     for (const dealer of cityDealers) {
-      const rows = await db
+      const rows = await q
         .select({ id: users.id, name: users.name, phone: users.phone })
         .from(users)
         .where(eq(users.email, dealer.email))
@@ -447,7 +458,7 @@ async function linkDealerListings() {
     }
     if (accounts.length === 0) continue;
 
-    const unassigned = await db
+    const unassigned = await q
       .select({ id: properties.id })
       .from(properties)
       .where(and(isNull(properties.listedByUserId), eq(properties.citySlug, citySlug)))
@@ -458,7 +469,7 @@ async function linkDealerListings() {
     // listings the account already publishes, so repeated seeds stay stable
     // and whatever is left over stays a Properties Pak desk listing.
     const MAX_PER_DEALER = 24;
-    const existing = await db
+    const existing = await q
       .select({ userId: properties.listedByUserId, total: sql<number>`count(*)::int` })
       .from(properties)
       .where(sql`${properties.listedByUserId} is not null`)
@@ -492,7 +503,7 @@ async function linkDealerListings() {
     for (const account of accounts) {
       const ids = buckets.get(account.id) ?? [];
       if (ids.length === 0) continue;
-      await db
+      await q
         .update(properties)
         .set({
           listedByUserId: account.id,
@@ -506,17 +517,40 @@ async function linkDealerListings() {
   }
 }
 
-async function seedProperties() {
+/**
+ * Photos already used elsewhere on the site (hero, rejected hero, city tiles,
+ * project pages, guides and the submission fallback). Listings never reuse
+ * them, so a property card never looks like a blog cover or a city tile.
+ */
+const RESERVED_PHOTOS = new Set<number>([
+  HERO_PHOTO_ID,
+  28054849,
+  ...Object.values(photos.cities),
+  ...projectSeed.flatMap((project) => project.images),
+  ...postSeed.map((post) => post.image),
+  ...EXTRA_POSTS.map((post) => post.image),
+  ...Object.values(submissionFallbackPhotos).flat(),
+  ...Object.values(sectionPhotos),
+]);
+
+/** Every seeded listing, each with its own cover photo (see seed-gallery.ts). */
+const seedListings: SeedProperty[] = assignSeedGalleries(
+  [...propertySeed, ...extraPropertySeed, ...dhaPropertySeed, ...townPropertySeed, ...societyPropertySeed],
+  RESERVED_PHOTOS,
+);
+
+const listingCover = (property: SeedProperty) => photo(property.images[0], 1200, 800);
+const listingGallery = (property: SeedProperty) => property.images.map((id) => photo(id, 1600, 1050));
+
+async function seedProperties(q: Executor) {
   // Additive: insert only slugs that are missing, so new inventory lands
   // without touching existing listings or admin-approved properties.
-  const existing = await db.select({ slug: properties.slug }).from(properties);
+  const existing = await q.select({ slug: properties.slug }).from(properties);
   const existingSlugs = new Set(existing.map((row) => row.slug));
-  const pending = [...propertySeed, ...extraPropertySeed, ...townPropertySeed, ...societyPropertySeed].filter(
-    (property) => !existingSlugs.has(property.slug),
-  );
+  const pending = seedListings.filter((property) => !existingSlugs.has(property.slug));
   if (pending.length === 0) return;
 
-  await db.insert(properties).values(
+  await q.insert(properties).values(
     pending.map((property) => ({
       slug: property.slug,
       title: property.title,
@@ -543,8 +577,8 @@ async function seedProperties() {
       description: property.description,
       features: property.features,
       amenities: property.amenities,
-      coverImage: photo(property.images[0], 1200, 800),
-      images: property.images.map((id) => photo(id, 1600, 1050)),
+      coverImage: listingCover(property),
+      images: listingGallery(property),
       featured: property.featured,
       verified: property.verified,
       isNewProject: property.isNewProject,
@@ -556,12 +590,91 @@ async function seedProperties() {
   );
 }
 
+/**
+ * Brings the photos of already-inserted seed listings in line with the seed,
+ * in one statement. Only rows whose cover and gallery are still stock photos
+ * are touched, so photos a dealer or an administrator uploaded are kept.
+ */
+async function refreshSeedGalleries(q: Executor) {
+  const rows = seedListings.map(
+    (property) => sql`(${property.slug}::text, ${listingCover(property)}::text, ${JSON.stringify(listingGallery(property))}::jsonb)`,
+  );
+  await q.execute(sql`
+    update properties as p
+       set cover_image = v.cover, images = v.images
+      from (values ${sql.join(rows, sql`, `)}) as v(slug, cover, images)
+     where p.slug = v.slug
+       and p.cover_image like 'https://images.pexels.com/%'
+       and not exists (
+         select 1 from jsonb_array_elements_text(p.images) as img(url)
+          where img.url not like 'https://images.pexels.com/%'
+       )
+       and (p.cover_image is distinct from v.cover or p.images is distinct from v.images)
+  `);
+}
+
+/**
+ * Fingerprint of everything the seed writes. It changes only when the seed
+ * data or the schema guard changes (i.e. on a deploy that edits them), so the
+ * full seed runs once per change instead of on every serverless cold start.
+ */
+export const SEED_VERSION = createHash("sha256")
+  .update(SCHEMA_SQL)
+  .update(
+    JSON.stringify([
+      citySeed,
+      agentSeed,
+      projectSeed,
+      postSeed,
+      EXTRA_POSTS,
+      POST_LINKS,
+      testimonialSeed,
+      dealerSeed,
+      seedListings,
+    ]),
+  )
+  .digest("hex")
+  .slice(0, 16);
+
+/** Arbitrary constant so concurrent cold starts never seed at the same time. */
+const SEED_LOCK_KEY = 727_274_101;
+
+async function storedSeedVersion(q: Executor): Promise<string | null> {
+  try {
+    const { rows } = await q.execute<{ value: string }>(
+      sql`select value from app_meta where key = 'seed_version' limit 1`,
+    );
+    return rows[0]?.value ?? null;
+  } catch (error) {
+    // 42P01 = undefined_table: brand-new database, the seed below creates it.
+    if ((error as { code?: string; cause?: { code?: string } })?.code === "42P01") return null;
+    if ((error as { cause?: { code?: string } })?.cause?.code === "42P01") return null;
+    throw error;
+  }
+}
+
 async function runSeed() {
-  await ensureSchema();
-  await refreshReferenceContent();
-  await seedDealerAccounts();
-  await seedProperties();
-  await linkDealerListings();
+  // Fast path: a single round trip. This is what every cold start pays.
+  if ((await storedSeedVersion(db)) === SEED_VERSION) return;
+
+  // Slow path (first boot, or a deploy that changed seed data). One
+  // transaction keeps readers from ever seeing half-refreshed content, and the
+  // transaction-scoped advisory lock works through transaction poolers
+  // (Supabase / PgBouncer port 6543) where session locks would not.
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(${SEED_LOCK_KEY})`);
+    await ensureSchema(tx); // idempotent; also creates app_meta on a fresh database
+    if ((await storedSeedVersion(tx)) === SEED_VERSION) return; // another instance finished first
+    await refreshReferenceContent(tx);
+    await seedDealerAccounts(tx);
+    await seedProperties(tx);
+    await refreshSeedGalleries(tx);
+    await linkDealerListings(tx);
+    await tx.execute(sql`
+      insert into app_meta (key, value, updated_at) values ('seed_version', ${SEED_VERSION}, now())
+      on conflict (key) do update set value = excluded.value, updated_at = now()
+    `);
+  });
 }
 
 let seedPromise: Promise<void> | null = null;

@@ -11,7 +11,7 @@ import { LeadForm } from "@/components/lead-form";
 import { formatPrice } from "@/lib/format";
 import { getCities, getMapProperties, searchProperties } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
-import { photo } from "@/lib/images";
+import { photo, sectionPhotos } from "@/lib/images";
 
 export const metadata: Metadata = buildMetadata({
   title: "Commercial Property in Pakistan — Offices, Shops & Warehouses",
@@ -51,7 +51,7 @@ const ASSET_CLASSES = [
 
 export default async function CommercialPage() {
   const [listings, rentals, cities, mapRows] = await Promise.all([
-    searchProperties({ category: "commercial", pageSize: 6, sort: "popular" }),
+    searchProperties({ category: "commercial", pageSize: 8, sort: "popular" }),
     searchProperties({ category: "commercial", purpose: "rent", pageSize: 3, sort: "price-asc" }),
     getCities(),
     getMapProperties({ category: "commercial" }, 12),
@@ -134,7 +134,7 @@ export default async function CommercialPage() {
             description="Income-ready assets and workspaces currently available across our tracked cities."
             action={{ label: "All commercial listings", href: "/properties/commercial" }}
           />
-          <div className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {listings.items.map((property, index) => (
               <Reveal key={property.id} delay={index * 50}>
                 <PropertyCard property={property} />
@@ -190,7 +190,7 @@ export default async function CommercialPage() {
 
           <div className="overflow-hidden rounded-panel bg-soft">
             <img
-              src={photo(18468708, 1200, 1400)}
+              src={photo(sectionPhotos.commercialFeature, 1200, 1400)}
               alt="Glass office towers in a financial district"
               width={1200}
               height={1400}

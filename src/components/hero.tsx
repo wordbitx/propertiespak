@@ -13,17 +13,17 @@ import { heroImage } from "@/lib/images";
 export function Hero() {
   return (
     <>
+      {/* React hoists this into <head>: the CDN connection opens before the hero <img> is parsed. */}
+      <link rel="preconnect" href={heroImage.origin} />
       <section id="home-hero" className="home-hero" aria-labelledby="hero-heading" data-testid="home-hero">
         <picture className="hero-photograph">
-          <source media="(max-width: 767px)" type="image/avif" srcSet={heroImage.mobileAvifSrcSet} sizes="100vw" />
-          <source media="(max-width: 767px)" type="image/webp" srcSet={heroImage.mobileSrcSet} sizes="100vw" />
-          <source type="image/avif" srcSet={heroImage.avifSrcSet} sizes="100vw" />
+          <source media="(max-width: 767px)" srcSet={heroImage.mobileSrcSet} sizes="100vw" />
           <img
             src={heroImage.desktop}
             srcSet={heroImage.desktopSrcSet}
             sizes="100vw"
-            width={3200}
-            height={2000}
+            width={2400}
+            height={1601}
             alt={heroImage.alt}
             loading="eager"
             fetchPriority="high"

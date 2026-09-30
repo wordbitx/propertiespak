@@ -74,7 +74,7 @@ export function FavoritesList() {
           <IconClose className="h-4 w-4" /> Clear shortlist
         </button>
       </div>
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}

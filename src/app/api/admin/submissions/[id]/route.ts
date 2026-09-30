@@ -4,7 +4,8 @@ import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
 import { listingSubmissions, properties, users } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { photo } from "@/lib/images";
+import { photo, submissionFallbackPhotos } from "@/lib/images";
+import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -30,17 +31,7 @@ const AGENT_BY_CITY: Record<string, string> = {
 };
 
 /** Fallback gallery when the owner did not attach photo URLs. */
-const FALLBACK_BY_CATEGORY: Record<string, number[]> = {
-  house: [36676879, 8082227, 6585757, 7546213],
-  apartment: [8082227, 6585757, 7546213, 7031879],
-  plot: [36422828, 30505108, 31249549, 11680715],
-  office: [1313534, 267501, 13437132, 8310949],
-  shop: [30929605, 31573705, 15054264, 12547325],
-  building: [2040476, 4534504, 18468708, 1313534],
-  warehouse: [7937746, 11680715, 38524594, 25310909],
-  farmhouse: [36394726, 28915352, 19075392, 8135496],
-  penthouse: [7546321, 8141959, 7045919, 34818802],
-};
+const FALLBACK_BY_CATEGORY = submissionFallbackPhotos;
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdminAuthenticated())) {
@@ -166,6 +157,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       })
       .where(eq(listingSubmissions.id, submissionId));
 
+    invalidateCatalog();
     return NextResponse.json({ ok: true, status: "approved", propertySlug: inserted[0]?.slug ?? null });
   } catch (error) {
     console.error("admin review failed", error);

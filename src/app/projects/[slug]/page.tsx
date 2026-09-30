@@ -39,7 +39,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   if (!project) notFound();
 
   const [units, others] = await Promise.all([
-    searchProperties({ isNewProject: true, city: project.citySlug, pageSize: 3, sort: "price-asc" }),
+    searchProperties({ isNewProject: true, city: project.citySlug, pageSize: 4, sort: "price-asc" }),
     getProjects(3),
   ]);
 
@@ -176,7 +176,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               description={`Currently released units in ${project.cityName} with instalment plans and booking terms.`}
               action={{ label: "All new project units", href: "/properties/new-projects" }}
             />
-            <div className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {units.items.map((property, index) => (
                 <Reveal key={property.id} delay={index * 50}>
                   <PropertyCard property={property} />

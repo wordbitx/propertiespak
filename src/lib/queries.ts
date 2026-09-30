@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, getTableColumns, gte, ilike, inArray, isNotNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureSeeded } from "@/db/seed";
+import { cachedQuery } from "@/lib/cache";
 import {
   agents,
   cities,
@@ -142,11 +143,11 @@ export function orderFor(sort?: string) {
   }
 }
 
-export async function searchProperties(filters: PropertyFilters = {}) {
+async function searchPropertiesUncached(filters: PropertyFilters = {}) {
   await ensureSeeded();
   const conditions = buildConditions(filters);
   const where = conditions.length ? and(...conditions) : undefined;
-  const pageSize = filters.pageSize ?? 9;
+  const pageSize = filters.pageSize ?? 12;
   const page = Math.max(1, filters.page ?? 1);
 
   const [items, countRows] = await Promise.all([
@@ -166,7 +167,7 @@ export async function searchProperties(filters: PropertyFilters = {}) {
 }
 
 /** Listing query used by the curated SEO landing pages. */
-export async function getLandingProperties(filters: PropertyFilters, limit = 9) {
+async function getLandingPropertiesUncached(filters: PropertyFilters, limit = 9) {
   await ensureSeeded();
   const conditions = buildConditions(filters);
   const where = conditions.length ? and(...conditions) : undefined;
@@ -183,7 +184,7 @@ export async function getLandingProperties(filters: PropertyFilters, limit = 9) 
   return { items, total: countRows[0]?.total ?? 0 };
 }
 
-export async function getPropertyBySlug(slug: string): Promise<Property | undefined> {
+async function getPropertyBySlugUncached(slug: string): Promise<Property | undefined> {
   await ensureSeeded();
   const rows = await db
     .select()
@@ -193,7 +194,7 @@ export async function getPropertyBySlug(slug: string): Promise<Property | undefi
   return rows[0];
 }
 
-export async function getAllPropertySlugs() {
+async function getAllPropertySlugsUncached() {
   await ensureSeeded();
   return db
     .select({ slug: properties.slug, updatedAt: properties.createdAt })
@@ -202,7 +203,7 @@ export async function getAllPropertySlugs() {
     .orderBy(desc(properties.createdAt));
 }
 
-export async function getSimilarProperties(property: Property, limit = 3) {
+async function getSimilarPropertiesUncached(property: Pick<Property, "id" | "citySlug" | "propertyType" | "purpose">, limit = 3) {
   await ensureSeeded();
   const rows = await db
     .select()
@@ -224,7 +225,7 @@ export async function getSimilarProperties(property: Property, limit = 3) {
 }
 
 /** Nearby is geographic proximity, not merely matching purpose or property type. */
-export async function getNearbyProperties(property: Property, limit = 6, radiusKm = 20) {
+async function getNearbyPropertiesUncached(property: Pick<Property, "id" | "lat" | "lng">, limit = 6, radiusKm = 20) {
   await ensureSeeded();
   if (!Number.isFinite(property.lat) || !Number.isFinite(property.lng)) return [];
   const latitudeSpan = radiusKm / 111;
@@ -248,7 +249,7 @@ export async function getNearbyProperties(property: Property, limit = 6, radiusK
   return rows.map((row) => ({ ...row.property, distanceKm: Number(row.distanceKm) }));
 }
 
-export async function getFeaturedProperties(limit = 4) {
+async function getFeaturedPropertiesUncached(limit = 4) {
   await ensureSeeded();
   return db
     .select(LISTING_WITH_DEALER)
@@ -259,13 +260,13 @@ export async function getFeaturedProperties(limit = 4) {
     .limit(limit);
 }
 
-export async function getPropertiesByIds(ids: number[]) {
+async function getPropertiesByIdsUncached(ids: number[]) {
   await ensureSeeded();
   if (ids.length === 0) return [];
   return db.select().from(properties).where(and(inArray(properties.id, ids), isPublished));
 }
 
-export async function getMapProperties(filters: PropertyFilters = {}, limit = 24) {
+async function getMapPropertiesUncached(filters: PropertyFilters = {}, limit = 24) {
   await ensureSeeded();
   const conditions = buildConditions(filters);
   return db
@@ -277,18 +278,18 @@ export async function getMapProperties(filters: PropertyFilters = {}, limit = 24
     .limit(limit);
 }
 
-export async function getCities() {
+async function getCitiesUncached() {
   await ensureSeeded();
   return db.select().from(cities).orderBy(asc(cities.sortOrder));
 }
 
-export async function getCityBySlug(slug: string) {
+async function getCityBySlugUncached(slug: string) {
   await ensureSeeded();
   const rows = await db.select().from(cities).where(eq(cities.slug, slug)).limit(1);
   return rows[0];
 }
 
-export async function getCityListingCounts() {
+async function getCityListingCountsUncached() {
   await ensureSeeded();
   const rows = await db
     .select({ citySlug: properties.citySlug, total: sql<number>`cast(count(*) as int)` })
@@ -298,7 +299,7 @@ export async function getCityListingCounts() {
   return new Map(rows.map((row) => [row.citySlug, row.total]));
 }
 
-export async function getProjects(limit = 12, featuredOnly = false) {
+async function getProjectsUncached(limit = 12, featuredOnly = false) {
   await ensureSeeded();
   const query = db.select().from(projects);
   const rows = featuredOnly
@@ -307,29 +308,29 @@ export async function getProjects(limit = 12, featuredOnly = false) {
   return rows;
 }
 
-export async function getProjectBySlug(slug: string) {
+async function getProjectBySlugUncached(slug: string) {
   await ensureSeeded();
   const rows = await db.select().from(projects).where(eq(projects.slug, slug)).limit(1);
   return rows[0];
 }
 
-export async function getAllProjectSlugs() {
+async function getAllProjectSlugsUncached() {
   await ensureSeeded();
   return db.select({ slug: projects.slug }).from(projects);
 }
 
-export async function getPosts(limit = 6) {
+async function getPostsUncached(limit = 6) {
   await ensureSeeded();
   return db.select().from(posts).orderBy(desc(posts.publishedAt)).limit(limit);
 }
 
-export async function getPostBySlug(slug: string) {
+async function getPostBySlugUncached(slug: string) {
   await ensureSeeded();
   const rows = await db.select().from(posts).where(eq(posts.slug, slug)).limit(1);
   return rows[0];
 }
 
-export async function getAllPostSlugs() {
+async function getAllPostSlugsUncached() {
   await ensureSeeded();
   return db
     .select({ slug: posts.slug, updatedAt: posts.publishedAt })
@@ -337,41 +338,39 @@ export async function getAllPostSlugs() {
     .orderBy(desc(posts.publishedAt));
 }
 
-export async function getTestimonials() {
+async function getTestimonialsUncached() {
   await ensureSeeded();
   return db.select().from(testimonials).orderBy(asc(testimonials.sortOrder));
 }
 
-export async function getAgents() {
+async function getAgentsUncached() {
   await ensureSeeded();
   return db.select().from(agents).orderBy(asc(agents.id));
 }
 
-export async function getAgentBySlug(slug: string) {
+async function getAgentBySlugUncached(slug: string) {
   await ensureSeeded();
   const rows = await db.select().from(agents).where(eq(agents.slug, slug)).limit(1);
   return rows[0];
 }
 
-export async function getPlatformStats() {
+async function getPlatformStatsUncached() {
   await ensureSeeded();
-  const [listingRows, cityRows, verifiedRows, featuredRows] = await Promise.all([
-    db.select({ total: sql<number>`cast(count(*) as int)` }).from(properties).where(isPublished),
-    db
-      .select({ total: sql<number>`cast(count(distinct ${properties.citySlug}) as int)` })
-      .from(properties)
-      .where(isPublished),
-    db
-      .select({ total: sql<number>`cast(count(*) as int)` })
-      .from(properties)
-      .where(and(eq(properties.verified, true), isPublished)),
-    db.select({ total: sql<number>`cast(count(*) as int)` }).from(projects),
-  ]);
+  // One round trip instead of four.
+  const [row] = await db
+    .select({
+      listings: sql<number>`cast(count(*) as int)`,
+      cities: sql<number>`cast(count(distinct ${properties.citySlug}) as int)`,
+      verified: sql<number>`cast(count(*) filter (where ${properties.verified}) as int)`,
+      projects: sql<number>`(select cast(count(*) as int) from ${projects})`,
+    })
+    .from(properties)
+    .where(isPublished);
   return {
-    listings: listingRows[0]?.total ?? 0,
-    cities: cityRows[0]?.total ?? 0,
-    verified: verifiedRows[0]?.total ?? 0,
-    projects: featuredRows[0]?.total ?? 0,
+    listings: Number(row?.listings ?? 0),
+    cities: Number(row?.cities ?? 0),
+    verified: Number(row?.verified ?? 0),
+    projects: Number(row?.projects ?? 0),
   };
 }
 
@@ -479,7 +478,7 @@ const dealerAggregates = {
  * Public dealer profiles. Only accounts that actually published inventory are
  * returned — a registered buyer with an empty shortlist is not a dealer.
  */
-export async function getDealers(options: { verifiedOnly?: boolean; city?: string; limit?: number } = {}) {
+async function getDealersUncached(options: { verifiedOnly?: boolean; city?: string; limit?: number } = {}) {
   await ensureSeeded();
   const rows = await db
     .select(dealerAggregates)
@@ -495,7 +494,7 @@ export async function getDealers(options: { verifiedOnly?: boolean; city?: strin
   return options.verifiedOnly ? dealers.filter((dealer) => dealer.isVerified) : dealers;
 }
 
-export async function getDealerCount() {
+async function getDealerCountUncached() {
   await ensureSeeded();
   const rows = await db
     .select({ total: sql<number>`cast(count(distinct ${users.id}) as int)` })
@@ -505,7 +504,7 @@ export async function getDealerCount() {
   return rows[0]?.total ?? 0;
 }
 
-export async function getDealerBySlug(slug: string): Promise<DealerProfile | undefined> {
+async function getDealerBySlugUncached(slug: string): Promise<DealerProfile | undefined> {
   await ensureSeeded();
   const rows = await db
     .select(dealerAggregates)
@@ -529,7 +528,7 @@ export async function getDealerByEmail(email: string): Promise<DealerProfile | u
   return (rows[0] as unknown as DealerProfile) ?? undefined;
 }
 
-export async function getAllDealerSlugs() {
+async function getAllDealerSlugsUncached() {
   await ensureSeeded();
   return db
     .select({ slug: users.slug, updatedAt: users.createdAt, verified: users.isVerified })
@@ -578,13 +577,13 @@ export async function getUserSubmissions(user: Pick<User, "id" | "email">) {
 export type OwnerSubmission = Awaited<ReturnType<typeof getUserSubmissions>>[number];
 
 /** Listings published by one dealer, newest first. */
-export async function getPropertiesForDealer(user: Pick<User, "id" | "email">, limit = 12) {
+async function getPropertiesForDealerUncached(userId: number, limit = 12) {
   await ensureSeeded();
   return db
     .select(LISTING_WITH_DEALER)
     .from(properties)
     .leftJoin(users, listingOwnerJoin())
-    .where(and(listedByUser(user.id), isPublished))
+    .where(and(listedByUser(userId), isPublished))
     .orderBy(desc(properties.featured), desc(properties.createdAt))
     .limit(Math.max(1, Math.min(48, limit)));
 }
@@ -611,7 +610,7 @@ export async function getOwnedProperties(userId: number, limit = 60) {
  * return nothing and the page falls back to the Properties Pak desk contact —
  * a published email address is never treated as proof of ownership.
  */
-export async function getLeadDealerForProperty(property: Property): Promise<DealerProfile | undefined> {
+async function getLeadDealerForPropertyUncached(property: Pick<Property, "listedByUserId">): Promise<DealerProfile | undefined> {
   if (!property.listedByUserId) return undefined;
   const rows = await db
     .select(dealerAggregates)
@@ -649,7 +648,7 @@ export async function setUserVerification(userId: number, verified: boolean) {
 }
 
 /** Distinct towns present in the live inventory, for the cascading filters. */
-export async function getListingAreasByCity() {
+async function getListingAreasByCityUncached() {
   await ensureSeeded();
   const rows = await db
     .select({
@@ -669,7 +668,7 @@ export async function getListingAreasByCity() {
  * publishes listings or has completed a professional profile, so a new signup
  * appears as soon as they finish setup — before that the account stays private.
  */
-export async function getDealerShowcase(limit = 60) {
+async function getDealerShowcaseUncached(limit = 60) {
   await ensureSeeded();
   const rows = await db
     .select(dealerAggregates)
@@ -758,4 +757,59 @@ export async function clearVerificationRequest(userId: number) {
     .where(eq(users.id, userId))
     .returning({ id: users.id });
   return updated[0];
+}
+
+// ---------------------------------------------------------------------------
+// Public reads go through the shared data cache (see src/lib/cache.ts).
+// ---------------------------------------------------------------------------
+
+export const searchProperties = cachedQuery("searchProperties", searchPropertiesUncached);
+export const getLandingProperties = cachedQuery("getLandingProperties", getLandingPropertiesUncached);
+export const getPropertyBySlug = cachedQuery("getPropertyBySlug", getPropertyBySlugUncached);
+export const getAllPropertySlugs = cachedQuery("getAllPropertySlugs", getAllPropertySlugsUncached);
+export const getFeaturedProperties = cachedQuery("getFeaturedProperties", getFeaturedPropertiesUncached);
+export const getPropertiesByIds = cachedQuery("getPropertiesByIds", getPropertiesByIdsUncached);
+export const getMapProperties = cachedQuery("getMapProperties", getMapPropertiesUncached);
+export const getCities = cachedQuery("getCities", getCitiesUncached);
+export const getCityBySlug = cachedQuery("getCityBySlug", getCityBySlugUncached);
+export const getCityListingCounts = cachedQuery("getCityListingCounts", getCityListingCountsUncached);
+export const getProjects = cachedQuery("getProjects", getProjectsUncached);
+export const getProjectBySlug = cachedQuery("getProjectBySlug", getProjectBySlugUncached);
+export const getAllProjectSlugs = cachedQuery("getAllProjectSlugs", getAllProjectSlugsUncached);
+export const getPosts = cachedQuery("getPosts", getPostsUncached);
+export const getPostBySlug = cachedQuery("getPostBySlug", getPostBySlugUncached);
+export const getAllPostSlugs = cachedQuery("getAllPostSlugs", getAllPostSlugsUncached);
+export const getTestimonials = cachedQuery("getTestimonials", getTestimonialsUncached);
+export const getAgents = cachedQuery("getAgents", getAgentsUncached);
+export const getAgentBySlug = cachedQuery("getAgentBySlug", getAgentBySlugUncached);
+export const getPlatformStats = cachedQuery("getPlatformStats", getPlatformStatsUncached);
+export const getDealers = cachedQuery("getDealers", getDealersUncached);
+export const getDealerCount = cachedQuery("getDealerCount", getDealerCountUncached);
+export const getDealerBySlug = cachedQuery("getDealerBySlug", getDealerBySlugUncached);
+export const getAllDealerSlugs = cachedQuery("getAllDealerSlugs", getAllDealerSlugsUncached);
+export const getListingAreasByCity = cachedQuery("getListingAreasByCity", getListingAreasByCityUncached);
+export const getDealerShowcase = cachedQuery("getDealerShowcase", getDealerShowcaseUncached);
+
+const similarPropertiesCached = cachedQuery("getSimilarProperties", getSimilarPropertiesUncached);
+export function getSimilarProperties(property: Pick<Property, "id" | "citySlug" | "propertyType" | "purpose">, limit = 3) {
+  const { id, citySlug, propertyType, purpose } = property;
+  return similarPropertiesCached({ id, citySlug, propertyType, purpose }, limit);
+}
+
+const nearbyPropertiesCached = cachedQuery("getNearbyProperties", getNearbyPropertiesUncached);
+export function getNearbyProperties(property: Pick<Property, "id" | "lat" | "lng">, limit = 6, radiusKm = 20) {
+  const { id, lat, lng } = property;
+  return nearbyPropertiesCached({ id, lat, lng }, limit, radiusKm);
+}
+
+const leadDealerCached = cachedQuery("getLeadDealerForProperty", getLeadDealerForPropertyUncached);
+export function getLeadDealerForProperty(property: Pick<Property, "listedByUserId">): Promise<DealerProfile | undefined> {
+  if (!property.listedByUserId) return Promise.resolve(undefined);
+  return leadDealerCached({ listedByUserId: property.listedByUserId });
+}
+
+const propertiesForDealerCached = cachedQuery("getPropertiesForDealer", getPropertiesForDealerUncached);
+export function getPropertiesForDealer(user: Pick<User, "id" | "email">, limit = 12) {
+  // Key on the id only — callers may pass a full user row.
+  return propertiesForDealerCached(user.id, limit);
 }
