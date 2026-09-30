@@ -113,7 +113,7 @@ export function MapView({
           </p>
           {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
         </div>
-        <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
+        <ul className="max-h-[600px] min-h-0 flex-1 space-y-1.5 overflow-y-auto">
           {properties.map((property) => (
             <li
               key={property.id}
