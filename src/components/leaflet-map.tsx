@@ -194,6 +194,8 @@ export function LeafletMap({
   const tileHealthRef = useRef({ loaded: 0, failed: 0, reported: false });
   /** Per-society result of the CORS probe that enables placeholder filtering. */
   const layoutProbeRef = useRef<Map<string, boolean>>(new Map());
+  /** One-shot guard so the base-map fallback only fires once. */
+  const baseFallbackRef = useRef(false);
   const lastActiveRef = useRef<string | number | null | undefined>(undefined);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
@@ -233,7 +235,6 @@ export function LeafletMap({
       leafletRef.current = Lmod;
 
       const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 4, updateWhenIdle: false, updateWhenZooming: false } as L.TileLayerOptions;
-      const osm = Lmod.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { ...attr, subdomains: ["a", "b", "c"] });
       const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
       const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
 
@@ -325,7 +326,7 @@ export function LeafletMap({
       overlayGroupRef.current = overlayGroup;
 
       const control = Lmod.control.layers(
-        { "OpenStreetMap": osm, "Google Maps": gmap, "Google Maps Satellite View": gsat },
+        { "Google Maps Satellite View": gsat, "Google Maps": gmap },
         {},
         { collapsed: true, position: "topleft" },
       ).addTo(map);
@@ -335,6 +336,23 @@ export function LeafletMap({
       pinLayerRef.current = Lmod.layerGroup().addTo(map);
 
       map.on("click", (e: L.LeafletMouseEvent) => onPickRef.current?.(e.latlng.lat, e.latlng.lng));
+
+      // One-shot guard: if the active base layer starts returning blocked
+      // tiles (403 block pages), fall back to the other Google layer once
+      // instead of leaving a wall of error tiles on screen.
+      let baseFailures = 0;
+      const onBaseTileError = () => {
+        baseFailures += 1;
+        if (baseFailures < 8 || baseFallbackRef.current) return;
+        baseFallbackRef.current = true;
+        const toSatellite = map.hasLayer(gmap);
+        map.removeLayer(toSatellite ? gmap : gsat);
+        (toSatellite ? gsat : gmap).addTo(map);
+        setBaseName(toSatellite ? "Google Maps Satellite View" : "Google Maps");
+        setLayoutMsg("Imagery provider blocked — switched the base map. Sorry about that.");
+      };
+      gsat.on("tileerror", onBaseTileError);
+      gmap.on("tileerror", onBaseTileError);
 
       mapRef.current = map;
       setReady(true);

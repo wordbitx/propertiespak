@@ -469,8 +469,8 @@ export function MapSection({
           <MapView properties={properties} center={center} zoom={zoom} autoFit />
         </div>
         <p className="mt-4 text-[0.75rem] leading-relaxed text-ink-muted">
-          Map tiles © OpenStreetMap contributors. Markers are positioned at society level and are indicative only —
-          confirm exact plot location during a site visit.
+          Imagery © Google · Society layouts © ioi Technologies / DHA Plus. Markers are positioned at society level and
+          are indicative only — confirm exact plot location during a site visit.
         </p>
       </div>
     </Section>
