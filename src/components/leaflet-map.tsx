@@ -446,7 +446,7 @@ export function LeafletMap({
     for (const pin of pins) {
       const icon = Lmod.divIcon({
         className: "ewx-pin",
-        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price">${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`,
+        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price"${!pin.active && pin.color ? ` style="border-left:3px solid ${pin.color}"` : ""}>${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`,
         iconSize: [30, 41],
         iconAnchor: [15, 41],
         popupAnchor: [0, -38],
