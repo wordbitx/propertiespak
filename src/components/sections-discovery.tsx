@@ -282,7 +282,7 @@ export function NewProjectsSection({ projects }: { projects: Project[] }) {
           description="Compare locations, payment plans and handover details."
           action={{ label: "Explore all projects", href: "/projects" }}
         />
-        <MobileScrollGrid label="New housing projects" autoPlay>
+        <MobileScrollGrid label="New housing projects" autoPlay testId="project-rail">
           {projects.slice(0, 8).map((project) => (
             <div key={project.slug} className="home-project-item">
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">

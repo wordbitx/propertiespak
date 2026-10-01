@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { IconArrowRight } from "@/components/icons";
 
 /** A native horizontal rail with optional paused auto-advancement at every breakpoint. */
-export function MobileScrollGrid({ children, label, autoPlay = false, className = "" }: { children: ReactNode; label: string; autoPlay?: boolean; className?: string }) {
+export function MobileScrollGrid({ children, label, autoPlay = false, className = "", testId = "scroll-rail" }: { children: ReactNode; label: string; autoPlay?: boolean; className?: string; testId?: string }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const interactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [position, setPosition] = useState({ left: 0, full: 0, width: 0 });
@@ -82,7 +82,7 @@ export function MobileScrollGrid({ children, label, autoPlay = false, className 
 
   return <div
     className={`mobile-scroll-grid${autoPlay ? " mobile-scroll-grid--autoplay" : ""}${className ? ` ${className}` : ""}`}
-    data-testid="project-rail"
+    data-testid={testId}
     data-auto-play={autoPlay ? "true" : undefined}
     onMouseEnter={() => { if (autoPlay) setHovered(true); }}
     onMouseLeave={() => { if (autoPlay) setHovered(false); }}
