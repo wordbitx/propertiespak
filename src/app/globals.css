@@ -976,7 +976,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .property-rail-track { display: flex; gap: 14px; width: max-content; align-items: stretch; }
 .property-rail-item { flex: 0 0 auto; width: 264px; scroll-snap-align: start; }
 /* Recently viewed listings read as full cards rather than thumbnails. */
-.property-rail--roomy .property-rail-item { width: 300px; }
+.property-rail--roomy .property-rail-item { width: 320px; }
 .property-rail-end { flex: 0 0 1px; width: 1px; }
 .property-rail-status { font-size: .75rem; line-height: 1.6; color: var(--color-ink-muted); }
 .property-rail-status:not(:empty) { margin-top: 8px; }
@@ -1195,7 +1195,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .property-search-form { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; align-items: end; padding: 14px 18px 16px; }
   .property-search-buttons { grid-column: 1 / -1; justify-content: flex-end; }
   .property-rail-item { width: 280px; }
-  .property-rail--roomy .property-rail-item { width: 340px; }
+  .property-rail--roomy .property-rail-item { width: 360px; }
 }
 @media (min-width: 1024px) {
   :root { --site-header-height: calc(100px + env(safe-area-inset-top, 0px)); }
