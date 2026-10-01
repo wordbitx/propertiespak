@@ -408,7 +408,8 @@ export function InsightsPreview({ posts }: { posts: Post[] }) {
           description="Practical advice on buying, renting and property documents."
           action={{ label: "All insights", href: "/blog" }}
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        {/* Phones swipe the guides horizontally; tablets and desktops keep a three-up grid. */}
+        <MobileScrollGrid label="Property guides" className="guides-rail">
           {posts.slice(0, 3).map((post, index) => (
             <Reveal key={post.slug} delay={index * 60}>
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
@@ -442,7 +443,7 @@ export function InsightsPreview({ posts }: { posts: Post[] }) {
               </article>
             </Reveal>
           ))}
-        </div>
+        </MobileScrollGrid>
       </div>
     </Section>
   );

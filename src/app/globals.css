@@ -950,14 +950,16 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .home-page .home-dealers { padding-block: 18px 22px; }
 .home-section-topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .home-section-topline > a { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; flex-shrink: 0; font-size: .8125rem; font-weight: 600; color: var(--color-forest-700); }
-.dealer-showcase-card { display: flex; align-items: center; gap: 10px; height: 112px; width: 234px; padding: 12px; border: 1px solid var(--color-soft); border-radius: 10px; background: white; box-shadow: var(--shadow-soft); }
+.dealer-showcase-card { display: flex; align-items: center; gap: 12px; height: 124px; width: 264px; padding: 13px; border: 1px solid var(--color-soft); border-radius: 12px; background: white; box-shadow: var(--shadow-soft); }
 .dealer-showcase-card:hover { border-color: var(--color-forest-600); }
-.dealer-showcase-avatar { display: grid; place-items: center; width: 52px; height: 52px; flex-shrink: 0; overflow: hidden; border-radius: 10px; background: var(--color-mist); border: 1px solid var(--color-soft); font-size: 1.05rem; font-weight: 700; color: var(--color-navy-900); }
+.dealer-showcase-avatar { display: grid; place-items: center; width: 58px; height: 58px; flex-shrink: 0; overflow: hidden; border-radius: 11px; background: var(--color-mist); border: 1px solid var(--color-soft); font-size: 1.1rem; font-weight: 700; color: var(--color-navy-900); }
 .dealer-showcase-info { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
-.dealer-showcase-name { display: flex; align-items: center; gap: 4px; font-family: var(--font-sans); font-size: .8125rem; font-weight: 650; color: var(--color-navy-900); }
+.dealer-showcase-name { display: flex; align-items: center; gap: 5px; font-family: var(--font-sans); font-size: .875rem; font-weight: 650; color: var(--color-navy-900); }
 .dealer-showcase-name > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.dealer-showcase-person, .dealer-showcase-city { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .6875rem; color: var(--color-ink-muted); }
-.dealer-showcase-listings { display: flex; align-items: center; gap: 5px; margin-top: 2px; font-size: .6875rem; font-weight: 600; color: var(--color-forest-700); }
+.dealer-showcase-person, .dealer-showcase-city { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .75rem; color: var(--color-ink-muted); }
+.dealer-showcase-listings { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: .75rem; font-weight: 600; color: var(--color-forest-700); }
+/* The belt scrolls by touch, arrows and keyboard — say so on phones. */
+.dealer-scroll-hint { display: none; margin-top: 2px; font-size: .75rem; font-weight: 600; color: var(--color-ink-muted); }
 .home-desktop-map-section { display: none; }
 .home-map-placeholder { display: grid; place-items: center; min-height: 420px; border: 1px solid var(--color-soft); border-radius: 12px; background: var(--color-mist); color: var(--color-ink-muted); }
 
@@ -973,6 +975,8 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .property-rail-viewport { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scroll-snap-type: x proximity; scroll-padding-inline: 1px; scrollbar-width: thin; scrollbar-color: #b8c7d3 #eef2f5; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .property-rail-track { display: flex; gap: 14px; width: max-content; align-items: stretch; }
 .property-rail-item { flex: 0 0 auto; width: 264px; scroll-snap-align: start; }
+/* Recently viewed listings read as full cards rather than thumbnails. */
+.property-rail--roomy .property-rail-item { width: 300px; }
 .property-rail-end { flex: 0 0 1px; width: 1px; }
 .property-rail-status { font-size: .75rem; line-height: 1.6; color: var(--color-ink-muted); }
 .property-rail-status:not(:empty) { margin-top: 8px; }
@@ -1191,6 +1195,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .property-search-form { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; align-items: end; padding: 14px 18px 16px; }
   .property-search-buttons { grid-column: 1 / -1; justify-content: flex-end; }
   .property-rail-item { width: 280px; }
+  .property-rail--roomy .property-rail-item { width: 340px; }
 }
 @media (min-width: 1024px) {
   :root { --site-header-height: calc(100px + env(safe-area-inset-top, 0px)); }
@@ -1242,8 +1247,8 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .clear-recent:hover { border-color: var(--color-forest-600); color: var(--color-forest-700); }
 .recent-properties-status { padding-block: 20px; font-size: .8125rem; color: var(--color-ink-muted); }
 .recent-properties-status button { color: var(--color-forest-700); text-decoration: underline; }
-.dealer-showcase-card { width: 250px; }
-.dealer-showcase-avatar { width: 64px; height: 64px; }
+.dealer-showcase-card { width: 280px; }
+.dealer-showcase-avatar { width: 68px; height: 68px; }
 @media (max-width: 767px) {
   .home-page #markets { display: none; }
   .home-explore-grid { display: flex; overflow-x: auto; gap: 14px; scroll-snap-type: x proximity; padding-bottom: 10px; }
@@ -1275,20 +1280,34 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .ewx-cluster-list a { color: var(--color-forest-700); text-decoration: underline; }
 
 /* A quiet, branded contact shortcut keeps WhatsApp available without competing with page content. */
-.floating-whatsapp { position: fixed; z-index: 60; right: max(16px, calc(env(safe-area-inset-right, 0px) + 16px)); bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px)); display: grid; width: 52px; height: 52px; place-items: center; border: 1px solid #d8e7de; border-radius: 999px; background: #fff; color: var(--color-navy-900); box-shadow: 0 8px 22px rgba(3,18,30,.16); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease; }
-.floating-whatsapp:hover { transform: translateY(-2px); border-color: #acd7bd; background: #f8fcf9; box-shadow: 0 12px 26px rgba(3,18,30,.2); }
-.floating-whatsapp:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(26,128,73,.28), 0 8px 22px rgba(3,18,30,.16); }
-.floating-whatsapp-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 999px; background: #25d366; color: #fff; }
-.floating-whatsapp-icon svg { width: 22px; height: 22px; }
+/* The WhatsApp shortcut reads as the green WhatsApp button itself, so it is
+   never mistaken for decoration. */
+.floating-whatsapp { position: fixed; z-index: 60; right: max(16px, calc(env(safe-area-inset-right, 0px) + 16px)); bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px)); display: grid; width: 56px; height: 56px; place-items: center; border-radius: 999px; color: #fff; transition: transform .18s ease, box-shadow .18s ease; }
+.floating-whatsapp:hover { transform: translateY(-2px); }
+.floating-whatsapp:active { transform: scale(.96); }
+.floating-whatsapp:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(37,211,102,.45), 0 10px 24px rgba(3,18,30,.24); }
+.floating-whatsapp-icon { position: relative; display: grid; width: 56px; height: 56px; place-items: center; border-radius: 999px; background: #25d366; color: #fff; box-shadow: 0 8px 20px rgba(18,140,72,.34); }
+.floating-whatsapp-icon::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid rgba(37,211,102,.55); animation: floating-whatsapp-ping 2.6s ease-out infinite; }
+.floating-whatsapp-icon svg { width: 30px; height: 30px; }
 .floating-whatsapp-label { display: none; }
+@keyframes floating-whatsapp-ping { 0% { transform: scale(1); opacity: .7; } 70%, 100% { transform: scale(1.45); opacity: 0; } }
+/* A property detail page pins its own Call/WhatsApp bar to the bottom edge on
+   phones; the floating button would sit on top of it, so it stands down. */
+@media (max-width: 1023px) {
+  .floating-whatsapp[data-sticky-bar="true"] { display: none; }
+}
 @media (min-width: 1024px) {
-  .floating-whatsapp { right: 24px; bottom: 96px; display: inline-flex; width: auto; height: 48px; gap: 9px; padding: 5px 14px 5px 6px; border-radius: 999px; font-size: .8125rem; font-weight: 650; }
-  .floating-whatsapp-icon { width: 34px; height: 34px; }
+  .floating-whatsapp { right: 24px; bottom: 96px; display: inline-flex; width: auto; height: 52px; gap: 10px; padding: 5px 16px 5px 6px; border: 1px solid #b9e6cb; border-radius: 999px; background: #fff; font-size: .8125rem; font-weight: 650; color: var(--color-navy-900); box-shadow: 0 10px 26px rgba(3,18,30,.16); }
+  .floating-whatsapp:hover { box-shadow: 0 14px 30px rgba(3,18,30,.2); }
+  .floating-whatsapp-icon { width: 40px; height: 40px; box-shadow: none; }
+  .floating-whatsapp-icon::after { display: none; }
+  .floating-whatsapp-icon svg { width: 24px; height: 24px; }
   .floating-whatsapp-label { display: inline; }
 }
 @media (prefers-reduced-motion: reduce) {
   .floating-whatsapp { transition: none; }
   .floating-whatsapp:hover { transform: none; }
+  .floating-whatsapp-icon::after { animation: none; }
 }
 .home-page .hero-photograph-shade { background: linear-gradient(90deg,rgba(3,18,30,.67) 0%,rgba(3,18,30,.25) 100%),linear-gradient(180deg,rgba(3,18,30,.22) 0%,rgba(3,18,30,.08) 60%,rgba(3,18,30,.55) 100%); }
 
@@ -1317,6 +1336,9 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .dealer-rail-controls { display: flex; gap: 5px; }
 .dealer-rail-controls button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--color-soft); border-radius: 8px; background: white; color: var(--color-navy-900); }
 .dealer-rail-controls button:hover { border-color: var(--color-forest-600); color: var(--color-forest-700); }
+@media (max-width: 767px) {
+  .dealer-scroll-hint { display: block; }
+}
 @media (max-width: 374px) {
   .dealer-heading-actions > a { display: none; }
 }
@@ -1345,12 +1367,14 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .mobile-scroll-track { display: flex; gap: 14px; overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scroll-snap-type: x proximity; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #b8c7d3 #eef2f5; }
 .mobile-scroll-track > div { flex: 0 0 276px; scroll-snap-align: start; }
 .mobile-scroll-track:focus-visible { outline: 2px solid var(--color-forest-600); outline-offset: 4px; border-radius: 10px; }
+/* Property Guides stay three-up from the tablet breakpoint upwards. */
 @media (min-width: 768px) {
   .mobile-scroll-toolbar { display: none; }
   .mobile-scroll-track { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; overflow: visible; padding-bottom: 0; }
   .mobile-scroll-grid--autoplay .mobile-scroll-toolbar { display: flex; }
   .mobile-scroll-grid--autoplay .mobile-scroll-track { display: flex; gap: 14px; overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
   .mobile-scroll-grid--autoplay .mobile-scroll-track > div { flex: 0 0 310px; }
+  .guides-rail .mobile-scroll-track { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (min-width: 1280px) {
   .mobile-scroll-track { grid-template-columns: repeat(4,minmax(0,1fr)); }
@@ -1462,7 +1486,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 @keyframes header-sell-flag-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 @media (prefers-reduced-motion: reduce) { .header-list-property-flag { animation: none; } }
 
-/* The Zameen-inspired utility strip stays a calm, manually scrollable horizontal rail. */
+/* Tools, guides and resources from this site, in a calm manually scrollable horizontal rail. */
 .home-page > section.home-explore-more { padding-block: 24px 28px; background: #fff; border-bottom: 1px solid #eef1f3; }
 .home-explore-more .home-section-topline { margin-bottom: 12px; }
 .explore-more-subtitle { margin-top: 4px; font-size: .75rem; color: var(--color-ink-muted); }

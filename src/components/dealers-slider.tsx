@@ -62,7 +62,10 @@ export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) release("focus");
       }}>
         <div className="home-section-topline">
-          <h2>{"Dealers & Agencies"}</h2>
+          <div>
+            <h2>{"Dealers & Agencies"}</h2>
+            <p className="dealer-scroll-hint">Swipe to explore every agency</p>
+          </div>
           <div className="dealer-heading-actions">
             <Link href="/dealers">View all<IconArrowRight className="h-4 w-4" /></Link>
             {dealers.length > 0 && <div className="dealer-rail-controls">

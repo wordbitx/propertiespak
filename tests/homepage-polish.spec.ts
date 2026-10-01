@@ -137,26 +137,28 @@ test("Explore more tools and guides follow Dealers in a manual horizontal rail",
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const explore = page.locator("#explore-more:visible");
-  await expect(explore.getByRole("heading", { name: "Explore more on Zameen", exact: true })).toBeVisible();
+  await expect(explore.getByRole("heading", { name: "Explore more on Properties Pak", exact: true })).toBeVisible();
   expect(await explore.evaluate((element) => element.previousElementSibling?.id)).toBe("home-dealers");
   const cards = explore.locator(".explore-more-card");
   await expect(cards).toHaveCount(8);
+  // Every card stays on this website — nothing links out to another portal.
   const expected = [
-    ["New Projects", "The best investment opportunities", "https://www.zameen.com/new-projects/"],
-    ["Construction Cost Calculator", "Get construction cost estimate", "https://www.zameen.com/tools/construction-cost-calculator/"],
-    ["Home Loan Calculator", "Find affordable loan packages", "https://www.zameen.com/tools/home-loan-calculator/"],
-    ["Area Guides", "Explore housing societies in Pakistan", "https://www.zameen.com/area-guides/"],
-    ["Plot Finder", "Find plots in any housing society", "https://www.zameen.com/plotfinder/?logoEnabled=1"],
-    ["Property Index", "Track changes in real estate prices", "https://www.zameen.com/index/"],
-    ["Area Unit Converter", "Convert any area unit instantly", "https://www.zameen.com/tools/area-unit-converter/"],
-    ["Property Trends", "Find popular areas to buy property", "https://www.zameen.com/trends.html"],
+    ["New Projects", "The best investment opportunities", "/properties/new-projects"],
+    ["Construction Cost Calculator", "Get construction cost estimate", "/tools/construction-cost-calculator"],
+    ["Home Loan Calculator", "Find affordable loan packages", "/tools/mortgage-calculator"],
+    ["Area Guides", "Explore housing societies in Pakistan", "/towns"],
+    ["Plot Finder", "Find plots in any housing society", "/properties?category=plot"],
+    ["Property Trends", "Find popular areas to buy property", "/blog"],
+    ["All Calculators", "Every investment tool in one place", "/tools"],
+    ["Compare Listings", "Line up shortlisted homes side by side", "/compare"],
   ];
   for (const [index, [label, description, href]] of expected.entries()) {
     await expect(cards.nth(index).locator(".explore-more-title")).toHaveText(label);
     await expect(cards.nth(index).locator(".explore-more-description")).toHaveText(description);
     await expect(cards.nth(index)).toHaveAttribute("href", href);
-    await expect(cards.nth(index)).toHaveAttribute("target", "_blank");
+    await expect(cards.nth(index)).not.toHaveAttribute("target", "_blank");
   }
+  expect(await page.evaluate(() => document.documentElement.innerHTML.includes("zameen.com"))).toBe(false);
   await explore.getByRole("button", { name: "Scroll to more resources", exact: true }).click();
   await expect.poll(() => explore.locator(".explore-more-viewport").evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   await expect(page.locator("#tools")).toHaveCount(0);

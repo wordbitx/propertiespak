@@ -3,10 +3,10 @@ import Link from "next/link";
 /**
  * Verification marks used across the marketplace.
  *
- * The blue tick is only ever rendered for accounts an administrator has
- * verified in the admin workspace (`users.is_verified`), so the badge means the
- * same thing everywhere it appears: identity checked, phone confirmed and at
- * least one property published on Properties Pak.
+ * The blue tick marks something the Properties Pak team has checked: a dealer
+ * account verified in the admin workspace (`users.is_verified` — identity,
+ * phone and published inventory), or a listing flagged verified in the
+ * catalogue. It means the same thing everywhere it appears.
  */
 
 export function BlueTick({ className = "h-4 w-4", title = "Verified account" }: { className?: string; title?: string }) {

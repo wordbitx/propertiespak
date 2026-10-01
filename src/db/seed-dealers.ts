@@ -1,8 +1,9 @@
 /**
  * Founding dealer accounts. These are real, working platform accounts: each one
- * owns published listings, has a public profile at `/dealers/<slug>` and is
- * verified or unverified exactly as the admin workspace shows it. Verified
- * accounts carry the blue tick across the site.
+ * owns published listings, has a public profile at `/dealers/<slug>` and carries
+ * the blue verified tick across the site — every founding account has been
+ * checked by the Properties Pak team (identity, phone and published inventory).
+ * Agency names stay short so they fit the dealer slider without truncation.
  */
 export type DealerSeed = {
   slug: string;
@@ -33,7 +34,7 @@ export const dealerSeed: DealerSeed[] = [
     phone: "+92 300 1234567",
     citySlug: "lahore",
     cityName: "Lahore",
-    agency: "Properties Pak Partners — Lahore",
+    agency: "Properties Pak Partners",
     bio: "Eleven years on the Lahore desk with a focus on DHA, Bahria Town, Lake City and the Raiwind Road belt. Specialises in documentation checks, transfer timelines and helping overseas Pakistani families buy without flying in for every step.",
     designation: "Senior Property Consultant",
     experience: "11 years in DHA, Bahria Town and Lake City",
@@ -51,7 +52,7 @@ export const dealerSeed: DealerSeed[] = [
     phone: "+92 301 7654321",
     citySlug: "islamabad",
     cityName: "Islamabad",
-    agency: "Properties Pak Partners — Islamabad",
+    agency: "Properties Pak Partners",
     bio: "Investment advisor covering Islamabad and Rawalpindi: CDA sectors, DHA, Bahria Enclave and the Expressway schemes. Works with institutional tenants and landlords on yield modelling and long-lease agreements.",
     designation: "Investment Advisor",
     experience: "9 years across Islamabad sectors and DHA",
@@ -69,7 +70,7 @@ export const dealerSeed: DealerSeed[] = [
     phone: "+92 321 4455667",
     citySlug: "karachi",
     cityName: "Karachi",
-    agency: "Properties Pak Partners — Karachi",
+    agency: "Properties Pak Partners",
     bio: "Karachi commercial and apartment specialist working across DHA, Clifton, PECHS and Gulshan-e-Iqbal. Handles corporate leasing, builder-floor acquisitions and high-street retail mandates.",
     designation: "Commercial & Residential Specialist",
     experience: "12 years in DHA, Clifton and PECHS",
@@ -87,7 +88,7 @@ export const dealerSeed: DealerSeed[] = [
     phone: "+92 333 9988776",
     citySlug: "multan",
     cityName: "Multan",
-    agency: "Properties Pak Partners — South Punjab",
+    agency: "Properties Pak Partners",
     bio: "Covers Multan, Faisalabad and Peshawar for the platform: DHA Multan, Gulgasht, Bosan Road and Wapda City. Advises first-time buyers and overseas investors on plot selection and possession timelines.",
     designation: "Managing Consultant",
     experience: "8 years across Multan and South Punjab",
@@ -113,7 +114,7 @@ export const dealerSeed: DealerSeed[] = [
     officeAddress: "Raiwind Road, Lahore",
     companyPhone: "+92 42 3590000",
     companyWebsite: "https://wordbitxtech.com/",
-    isVerified: false,
+    isVerified: true,
     password: "propertiespak",
   },
   {
@@ -131,7 +132,7 @@ export const dealerSeed: DealerSeed[] = [
     officeAddress: "Bahria Town Phase 4, Rawalpindi",
     companyPhone: "+92 51 5120000",
     companyWebsite: "https://wordbitxtech.com/",
-    isVerified: false,
+    isVerified: true,
     password: "propertiespak",
   },
   {
@@ -167,7 +168,7 @@ export const dealerSeed: DealerSeed[] = [
     officeAddress: "Canal Road, Faisalabad",
     companyPhone: "+92 41 1110000",
     companyWebsite: "https://wordbitxtech.com/",
-    isVerified: false,
+    isVerified: true,
     password: "propertiespak",
   },
 ];

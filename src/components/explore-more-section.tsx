@@ -1,73 +1,78 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/components/language-provider";
 import {
-  IconArea,
   IconArrowRight,
+  IconArea,
   IconBuilding,
   IconCalculator,
   IconChart,
   IconCompass,
+  IconLayers,
   IconMap,
-  IconSpark,
 } from "@/components/icons";
 
+/**
+ * Tools, guides and resources that live on Properties Pak itself — every card
+ * opens a page of this website rather than sending visitors to another portal.
+ */
 const LINKS = [
   {
     title: "New Projects",
     description: "The best investment opportunities",
-    href: "https://www.zameen.com/new-projects/",
+    href: "/properties/new-projects",
     icon: IconBuilding,
     color: "sand",
   },
   {
     title: "Construction Cost Calculator",
     description: "Get construction cost estimate",
-    href: "https://www.zameen.com/tools/construction-cost-calculator/",
+    href: "/tools/construction-cost-calculator",
     icon: IconBuilding,
     color: "blue",
   },
   {
     title: "Home Loan Calculator",
     description: "Find affordable loan packages",
-    href: "https://www.zameen.com/tools/home-loan-calculator/",
+    href: "/tools/mortgage-calculator",
     icon: IconCalculator,
     color: "mint",
   },
   {
     title: "Area Guides",
     description: "Explore housing societies in Pakistan",
-    href: "https://www.zameen.com/area-guides/",
+    href: "/towns",
     icon: IconCompass,
     color: "rose",
   },
   {
     title: "Plot Finder",
     description: "Find plots in any housing society",
-    href: "https://www.zameen.com/plotfinder/?logoEnabled=1",
+    href: "/properties?category=plot",
     icon: IconMap,
     color: "green",
   },
   {
-    title: "Property Index",
-    description: "Track changes in real estate prices",
-    href: "https://www.zameen.com/index/",
+    title: "Property Trends",
+    description: "Find popular areas to buy property",
+    href: "/blog",
     icon: IconChart,
     color: "lavender",
   },
   {
-    title: "Area Unit Converter",
-    description: "Convert any area unit instantly",
-    href: "https://www.zameen.com/tools/area-unit-converter/",
+    title: "All Calculators",
+    description: "Every investment tool in one place",
+    href: "/tools",
     icon: IconArea,
     color: "aqua",
   },
   {
-    title: "Property Trends",
-    description: "Find popular areas to buy property",
-    href: "https://www.zameen.com/trends.html",
-    icon: IconSpark,
+    title: "Compare Listings",
+    description: "Line up shortlisted homes side by side",
+    href: "/compare",
+    icon: IconLayers,
     color: "violet",
   },
 ] as const;
@@ -87,7 +92,7 @@ export function ExploreMoreSection() {
       <div className="ui-container">
         <div className="home-section-topline">
           <div>
-            <h2 id="explore-more-heading">{t("Explore more on Zameen")}</h2>
+            <h2 id="explore-more-heading">{t("Explore more on Properties Pak")}</h2>
             <p className="explore-more-subtitle">{t("Tools, guides and property resources")}</p>
           </div>
           <div className="explore-more-controls" aria-label={t("Explore more resources")}>
@@ -104,13 +109,7 @@ export function ExploreMoreSection() {
             {LINKS.map((item) => {
               const Icon = item.icon;
               return (
-                <a
-                  key={item.title}
-                  className="explore-more-card"
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
+                <Link key={item.title} className="explore-more-card" href={item.href}>
                   <span className={`explore-more-icon explore-more-icon--${item.color}`} aria-hidden="true">
                     <Icon className="h-7 w-7" />
                   </span>
@@ -118,7 +117,7 @@ export function ExploreMoreSection() {
                     <span className="explore-more-title">{t(item.title)}</span>
                     <span className="explore-more-description">{t(item.description)}</span>
                   </span>
-                </a>
+                </Link>
               );
             })}
           </div>

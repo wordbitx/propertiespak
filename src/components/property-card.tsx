@@ -30,6 +30,7 @@ export function PropertyCard({
   propertyTypeBelowPrice?: boolean;
 }) {
   const dealerVerified = Boolean((property as PropertyWithDealer).dealerVerified);
+  const listingVerified = dealerVerified || Boolean(property.verified);
   const badge = purposeBadge(property);
   const score = computePropertyScore(property);
   const pps = pricePerSqft(property);
@@ -60,13 +61,13 @@ export function PropertyCard({
         >
           {badge.label}
         </span>
-        {dealerVerified ? (
+        {listingVerified ? (
           <span className="inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-[#0b6fb8] shadow-soft">
-            <BlueTick className="h-3.5 w-3.5" /> {compact ? "Verified" : "Verified dealer"}
+            <BlueTick className="h-3.5 w-3.5" /> {dealerVerified ? (compact ? "Verified" : "Verified dealer") : "Verified"}
           </span>
         ) : (
           <span className="rounded-md bg-navy-950/70 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
-            {property.verified ? "Checked listing" : "Owner listing"}
+            Owner listing
           </span>
         )}
       </div>

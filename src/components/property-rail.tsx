@@ -10,9 +10,9 @@ type RailProperty = Property | PropertyWithDealer;
 const PAGE_SIZE = 8;
 
 /** Native horizontal scrolling with optional, user-friendly paused auto-advancement. */
-export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false }: {
+export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false, size = "compact" }: {
   initialProperties: RailProperty[]; initialTotal: number; query?: string; label: string;
-  autoPlay?: boolean; pageSize?: number; propertyTypeBelowPrice?: boolean;
+  autoPlay?: boolean; pageSize?: number; propertyTypeBelowPrice?: boolean; size?: "compact" | "roomy";
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLLIElement | null>(null);
@@ -138,7 +138,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
   }
 
   return (
-    <div className="property-rail" data-testid="property-rail" data-rail-label={label} data-auto-play={autoPlay ? "true" : undefined}
+    <div className={`property-rail${size === "roomy" ? " property-rail--roomy" : ""}`} data-testid="property-rail" data-rail-label={label} data-auto-play={autoPlay ? "true" : undefined}
       onMouseEnter={() => { if (autoPlay) setHovered(true); }}
       onMouseLeave={() => { if (autoPlay) setHovered(false); }}
       onFocusCapture={() => { if (autoPlay) setFocused(true); }}
@@ -156,7 +156,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
       </div>
       <div ref={viewportRef} className="property-rail-viewport" role="region" aria-label={label} tabIndex={0} onScroll={measure}>
         <ul className="property-rail-track">
-          {items.map((property) => <li key={property.id} className="property-rail-item" data-property-featured={property.featured ? "true" : "false"} data-property-verified={property.verified ? "true" : "false"}><PropertyCard property={property} compact propertyTypeBelowPrice={propertyTypeBelowPrice} /></li>)}
+          {items.map((property) => <li key={property.id} className="property-rail-item" data-property-featured={property.featured ? "true" : "false"} data-property-verified={property.verified ? "true" : "false"}><PropertyCard property={property} compact={size === "compact"} propertyTypeBelowPrice={propertyTypeBelowPrice} /></li>)}
           <li ref={endRef} aria-hidden="true" className="property-rail-end" />
         </ul>
       </div>
