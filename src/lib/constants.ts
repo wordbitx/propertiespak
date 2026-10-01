@@ -2,7 +2,7 @@ export const SITE = {
   name: "Properties Pak",
   /** Brand name with the country suffix used in titles and structured data. */
   fullName: "Properties Pak — Pakistan Real Estate Marketplace",
-  tagline: "Buy · Rent · Invest in Pakistan",
+  tagline: "Buy · Sell · Rent in Pakistan",
   url: "https://propertiespak.com",
   /** Apex host is canonical; www and legacy hosts 301 to it (see next.config.ts). */
   host: "propertiespak.com",
@@ -67,6 +67,7 @@ export const COMPANY_SOCIAL_LINKS: string[] = Object.values(SITE.companySocial).
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Buy", href: "/properties/for-sale" },
+  { label: "Sell", href: "/list-property" },
   { label: "Rent", href: "/properties/for-rent" },
   { label: "New Projects", href: "/projects" },
   { label: "Towns", href: "/towns" },
@@ -91,6 +92,8 @@ export const PROPERTY_TYPES = [
   "Apartment",
   "Penthouse",
   "Upper Portion",
+  "Lower Portion",
+  "Room",
   "Plot",
   "Farmhouse",
   "Office",
@@ -101,7 +104,7 @@ export const PROPERTY_TYPES = [
 
 export const CATEGORIES = [
   { value: "house", label: "Houses", types: ["House", "Villa"] },
-  { value: "apartment", label: "Apartments", types: ["Apartment", "Penthouse", "Upper Portion"] },
+  { value: "apartment", label: "Apartments", types: ["Apartment", "Penthouse", "Upper Portion", "Lower Portion", "Room"] },
   { value: "plot", label: "Plots", types: ["Plot"] },
   { value: "commercial", label: "Commercial", types: ["Commercial Building", "Warehouse"] },
   { value: "office", label: "Offices", types: ["Office"] },

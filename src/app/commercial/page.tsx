@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IconArrowRight, IconBuilding, IconCheck, IconMap } from "@/components/icons";
@@ -189,7 +190,7 @@ export default async function CommercialPage() {
           </div>
 
           <div className="overflow-hidden rounded-panel bg-soft">
-            <img
+            <ResilientImage
               src={photo(sectionPhotos.commercialFeature, 1200, 1400)}
               alt="Glass office towers in a financial district"
               width={1200}

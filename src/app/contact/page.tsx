@@ -25,8 +25,8 @@ export default async function ContactPage() {
     <>
       <PageHero
         eyebrow="Contact"
-        title="Talk to a Property Advisor Who Knows the Society"
-        description="Share your requirement — city, budget, timeline — and the right desk will respond with matched options, including off-market files where available."
+        title="Help & Support"
+        description="Get help with your account, listings, buying or selling a property. Contact the Properties Pak team below."
         crumbs={[
           { name: "Home", href: "/" },
           { name: "Contact", href: "/contact" },

@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconClose, IconLayers } from "@/components/icons";
@@ -44,7 +46,7 @@ export function CompareBar() {
           {items.map((item) => (
             <li key={item.id} className="relative shrink-0">
               <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.06] p-1.5 pr-3">
-                <img
+                <ResilientImage
                   src={item.coverImage}
                   alt=""
                   width={120}

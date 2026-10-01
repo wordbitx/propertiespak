@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { IconArrowRight, IconClose, IconLayers } from "@/components/icons";
@@ -48,7 +50,7 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
           className="zoom-frame group relative col-span-1 row-span-2 aspect-[4/3] overflow-hidden rounded-panel bg-soft sm:col-span-3 sm:aspect-auto"
           aria-label={`Open image gallery — ${title}`}
         >
-          <img
+          <ResilientImage
             src={images[0]}
             alt={`${title} — main view`}
             width={1600}
@@ -71,7 +73,7 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
             className="zoom-frame group relative hidden aspect-[4/3] overflow-hidden rounded-panel bg-soft sm:block"
             aria-label={`View photo ${position + 2} of ${total}`}
           >
-            <img
+            <ResilientImage
               src={image}
               alt={`${title} — photo ${position + 2}`}
               width={700}
@@ -99,7 +101,7 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
             className="relative h-[86px] w-[120px] shrink-0 snap-start overflow-hidden rounded-lg bg-soft"
             aria-label={`View photo ${position + 2} of ${total}`}
           >
-            <img src={image} alt="" width={240} height={172} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <ResilientImage src={image} alt="" width={240} height={172} loading="lazy" decoding="async" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
@@ -149,7 +151,7 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
               >
                 <IconArrowRight className="h-5 w-5 rotate-180" />
               </button>
-              <img
+              <ResilientImage
                 key={images[index]}
                 src={images[index]}
                 alt={`${title} — photo ${index + 1} of ${total}`}
@@ -183,7 +185,7 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
                         : "border-transparent opacity-60 hover:opacity-100",
                     ].join(" ")}
                   >
-                    <img src={image} alt="" width={160} height={112} loading="lazy" className="h-full w-full object-cover" />
+                    <ResilientImage src={image} alt="" width={160} height={112} loading="lazy" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>

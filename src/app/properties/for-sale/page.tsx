@@ -1,3 +1,4 @@
+import { SEARCH_FILTER_KEYS } from "@/lib/property-search";
 import type { Metadata } from "next";
 import { ListingView, type RawSearchParams } from "@/components/listing-view";
 import { PROPERTY_TYPES } from "@/lib/constants";
@@ -11,7 +12,7 @@ const baseMetadata: Metadata = buildMetadata({
   keywords: ["houses for sale Lahore", "property for sale Pakistan", "apartments for sale Islamabad", "plots for sale"],
 });
 
-const FILTER_KEYS = ["q", "city", "town", "type", "category", "beds", "baths", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
+const FILTER_KEYS = SEARCH_FILTER_KEYS;
 
 export async function generateMetadata({
   searchParams,
@@ -42,7 +43,7 @@ export default async function ForSalePage({ searchParams }: { searchParams: Prom
       raw={raw}
       fixed={{ purpose: "buy" }}
       purposeKind="buy"
-      typeOptions={PROPERTY_TYPES.filter((type) => !["Office", "Shop", "Commercial Building", "Warehouse"].includes(type))}
+      typeOptions={[...PROPERTY_TYPES]}
     />
   );
 }

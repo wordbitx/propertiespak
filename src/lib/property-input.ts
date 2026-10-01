@@ -61,6 +61,17 @@ function validImage(url: string): boolean {
   return /^https?:\/\//i.test(url) || /^\/api\/media\/\d+$/.test(url) || /^\/images\//.test(url);
 }
 
+/** A public video link must never accept javascript/data URLs. */
+export function normaliseVideoUrl(value: unknown): string | null {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return "";
+  if (raw.length > 2000) return null;
+  try {
+    const url = new URL(raw);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password ? url.href : null;
+  } catch { return null; }
+}
+
 export type ValidatedProperty = { ok: true; data: Omit<PropertyInsert, "slug"> } | { ok: false; error: string };
 
 /** Validates and normalises an admin property payload (create or edit). */
@@ -76,6 +87,10 @@ export function validatePropertyPayload(body: Record<string, unknown>): Validate
   const lat = num(body.lat, 31.5204);
   const lng = num(body.lng, 74.3587);
   const images = list(body.images).filter(validImage).slice(0, 12);
+  const videoUrl = normaliseVideoUrl(body.videoUrl);
+  const paymentType = String(body.paymentType ?? "");
+  if (videoUrl === null) return { ok: false, error: "Please enter a valid HTTP or HTTPS video link." };
+  if (!["", "cash", "installments"].includes(paymentType)) return { ok: false, error: "Choose cash or installments as the payment type." };
 
   if (title.length < 6) return { ok: false, error: "Title must be at least 6 characters." };
   if (!locationArea) return { ok: false, error: "Society / area is required." };
@@ -104,6 +119,8 @@ export function validatePropertyPayload(body: Record<string, unknown>): Validate
       lng,
       price,
       priceUnit: purpose === "rent" ? "month" : "total",
+      paymentType,
+      videoUrl,
       negotiable: Boolean(body.negotiable),
       bedrooms: Math.max(0, Math.round(num(body.bedrooms))),
       bathrooms: Math.max(0, Math.round(num(body.bathrooms))),

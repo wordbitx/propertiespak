@@ -1,4 +1,4 @@
-import { IconArrowRight, IconMail, IconPin, IconWhatsApp } from "@/components/icons";
+import { IconWhatsApp } from "@/components/icons";
 import { SITE } from "@/lib/constants";
 
 const CONTACTS = [
@@ -26,25 +26,10 @@ export function WordbitxContacts({ light = false }: { light?: boolean }) {
 /** The company behind Properties Pak, deliberately placed BEFORE the closing property CTA. */
 export function WordbitxSection() {
   return (
-    <section id="wordbitx" className="wordbitx-section" aria-labelledby="wordbitx-heading" data-testid="wordbitx-company">
-      <div className="ui-container">
-        <div className="wordbitx-feature">
-          <div className="min-w-0">
-            <p className="eyebrow text-forest-700">Designed & engineered by</p>
-            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" aria-label="WordbitX Software Company" className="wordbitx-wordmark">Wordbit<span className="text-forest-700">X</span></a>
-            <h2 id="wordbitx-heading" className="mt-5 max-w-lg font-sans text-[clamp(1.35rem,2.6vw,2rem)] font-bold leading-tight text-navy-900">The technology behind Properties Pak.</h2>
-            <p className="mt-4 max-w-xl text-[0.9375rem] leading-7 text-ink-muted">Properties Pak is the official real-estate platform engineered by WordbitX Software Company. For a property marketplace, custom business software or digital solutions, talk to the team that built it.</p>
-            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-navy-800 hover:text-forest-700">Explore WordbitX <IconArrowRight className="h-4 w-4" /></a>
-          </div>
-          <div className="wordbitx-contact-panel">
-            <h3 className="font-sans text-lg font-semibold text-white">Let’s talk about your next project.</h3>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-white/65">Pakistan and international company enquiries.</p>
-            <div className="mt-6"><WordbitxContacts light /></div>
-            <a href={`mailto:${SITE.companyEmail}`} className="mt-5 flex min-h-11 items-center gap-2.5 text-[0.8125rem] text-white/85 hover:text-forest-400"><IconMail className="h-4 w-4 shrink-0 text-forest-400" /><span className="break-all">{SITE.companyEmail}</span></a>
-            <p className="mt-2 flex items-start gap-2.5 text-[0.75rem] leading-6 text-white/55"><IconPin className="mt-1 h-4 w-4 shrink-0 text-forest-400" /><span>{SITE.companyAddress.city}, {SITE.companyAddress.country}</span></p>
-            <p className="mt-5 border-t border-white/10 pt-4 text-[0.6875rem] leading-5 text-white/50">For a property enquiry, please use that listing’s owner or agent contact. These numbers connect you to WordbitX.</p>
-          </div>
-        </div>
+    <section id="wordbitx" className="wordbitx-section wordbitx-credit-section" aria-label="Platform technology credit" data-testid="wordbitx-company">
+      <div className="ui-container wordbitx-credit-bar">
+        <span>Designed &amp; developed by</span>
+        <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="wordbitx-credit-link">Wordbit<span>X</span> <span className="wordbitx-company-suffix">| SMC- Pvt. Ltd.</span></a>
       </div>
     </section>
   );

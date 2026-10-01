@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -258,7 +260,7 @@ export function AccountListings({
             <article key={`live-${item.id}`} className="rounded-xl border border-soft bg-white p-3">
               <div className="flex items-start gap-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <ResilientImage
                   src={item.coverImage}
                   alt={`${item.title}, ${item.locationArea}`}
                   width={280}
@@ -332,8 +334,7 @@ export function AccountListings({
             <article key={`sub-${item.id}`} className="rounded-xl border border-soft bg-white p-3">
               <div className="flex items-start gap-4">
                 {item.imageUrls[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                        <ResilientImage
                     src={item.imageUrls[0]}
                     alt={item.title}
                     width={280}

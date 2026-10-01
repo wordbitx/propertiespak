@@ -123,6 +123,9 @@ const SCHEMA_SQL = `
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_whatsapp text NOT NULL DEFAULT '';
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS listed_by_user_id integer;
     ALTER TABLE properties ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT true;
+    ALTER TABLE properties ADD COLUMN IF NOT EXISTS payment_type text NOT NULL DEFAULT '';
+    ALTER TABLE properties ALTER COLUMN payment_type SET DEFAULT '';
+    ALTER TABLE properties ADD COLUMN IF NOT EXISTS video_url text NOT NULL DEFAULT '';
     CREATE INDEX IF NOT EXISTS properties_listed_by_user_idx ON properties (listed_by_user_id);
     CREATE INDEX IF NOT EXISTS properties_published_idx ON properties (published);
     CREATE INDEX IF NOT EXISTS properties_location_area_idx ON properties (location_area);
@@ -279,6 +282,9 @@ const SCHEMA_SQL = `
       reviewed_at timestamptz
     );
     ALTER TABLE listing_submissions ADD COLUMN IF NOT EXISTS user_id integer;
+    ALTER TABLE listing_submissions ADD COLUMN IF NOT EXISTS payment_type text NOT NULL DEFAULT '';
+    ALTER TABLE listing_submissions ALTER COLUMN payment_type SET DEFAULT '';
+    ALTER TABLE listing_submissions ADD COLUMN IF NOT EXISTS video_url text NOT NULL DEFAULT '';
     UPDATE properties p
     SET listed_by_name = s.name,
         listed_by_email = s.email,

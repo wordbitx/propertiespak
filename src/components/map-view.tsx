@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
@@ -20,7 +22,7 @@ export type MapProperty = {
 };
 
 /** Category colour coding for map pins (the selected pin always renders green). */
-const APARTMENT_TYPE = /(apartment|penthouse|portion|studio|flat\b)/i;
+const APARTMENT_TYPE = /(apartment|penthouse|portion|studio|flat\b|room\b)/i;
 const COMMERCIAL_TYPE = /(office|shop|warehouse|industrial|commercial|plaza|factory|building)/i;
 const PLOT_TYPE = /\b(plot|file|agricultural)\b/i;
 export function pinColorFor(propertyType: string): string {
@@ -55,15 +57,16 @@ function PinLegend() {
 }
 
 export function MapView({
-  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false,
+  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false, fullScreen = false,
 }: {
   properties: MapProperty[];
   center: { lat: number; lng: number };
-  zoom?: number; className?: string; mapTitle?: string; mapSubtitle?: string; nearby?: boolean; autoFit?: boolean;
+  zoom?: number; className?: string; mapTitle?: string; mapSubtitle?: string; nearby?: boolean; autoFit?: boolean; fullScreen?: boolean;
 }) {
-  const [selected, setSelected] = useState<number | null>(nearby ? null : properties[0]?.id ?? null);
-  const [focus, setFocus] = useState(center);
-  const [focusZoom, setFocusZoom] = useState(zoom);
+  const [selected, setSelected] = useState<number | null>(nearby || fullScreen ? null : properties[0]?.id ?? null);
+  const datasetKey = useMemo(() => properties.map((property) => `${property.id}:${property.lat}:${property.lng}`).join("|"), [properties]);
+  const [focus, setFocus] = useState<{ key: string; lat: number; lng: number; zoom: number } | null>(null);
+  const focused = focus?.key === datasetKey ? focus : null;
   const active = properties.find((property) => property.id === selected);
   const society = useMemo(() => {
     if (!active) return null;
@@ -80,23 +83,25 @@ export function MapView({
   })), [properties, selected]);
 
   return (
-    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)] ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
-      <div className="min-w-0">
+    <div className={`grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)] ${fullScreen ? "map-view-fullscreen" : ""} ${className}`} data-testid={nearby ? "nearby-property-map" : "property-market-map"}>
+      <div className="map-view-canvas min-w-0">
         <LeafletMap
-          center={focus}
-          zoom={focusZoom}
-          heightClass="h-[420px] sm:h-[580px]"
+          center={focused ?? center}
+          zoom={focused?.zoom ?? zoom}
+          clusterPins={fullScreen && properties.length > 20}
+          heightClass={fullScreen ? "h-[45dvh] lg:h-[calc(100dvh-190px)]" : "h-[420px] sm:h-[580px]"}
+          allowFullscreen={!fullScreen}
           pins={pins}
           fitToPins={nearby || autoFit}
           autoOpenActive
           society={society}
-          header={{ label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
+          header={fullScreen ? null : { label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
           onPinSelect={(id) => setSelected(Number(id))}
         />
         {!nearby && properties.length > 1 && <PinLegend />}
-        {active && (
+        {active && !fullScreen && (
           <div className="mt-3 flex min-w-0 gap-3 rounded-xl border border-soft bg-white p-3">
-            <img src={active.coverImage} alt={active.title} width={160} height={120} loading="lazy" className="h-16 w-20 shrink-0 rounded-lg object-cover" />
+            <ResilientImage src={active.coverImage || "/images/property-placeholder.svg"} alt={active.title} width={160} height={120} loading="lazy" className="h-16 w-20 shrink-0 rounded-lg object-cover" />
             <div className="min-w-0 flex-1">
               <p className="font-sans text-[0.9375rem] font-bold text-navy-900">{formatPrice(active.price, active.priceUnit)}</p>
               <Link href={`/property/${active.slug}`} className="mt-1 block text-[0.8125rem] font-semibold leading-5 text-navy-900 hover:text-forest-700">{active.title}</Link>
@@ -105,7 +110,7 @@ export function MapView({
           </div>
         )}
       </div>
-      <div className="flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-2 shadow-soft">
+      <div className="map-view-list flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-2 shadow-soft">
         <div className="flex items-center justify-between gap-2 px-3 py-3">
           <p className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-navy-900">
             <IconMap className="h-4 w-4 shrink-0 text-forest-600" />
@@ -117,11 +122,11 @@ export function MapView({
           {properties.map((property) => (
             <li
               key={property.id}
-              onMouseEnter={() => setSelected(property.id)}
+              onMouseEnter={fullScreen ? undefined : () => setSelected(property.id)}
               className={`min-w-0 rounded-lg border p-2 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
             >
               <div className="flex min-w-0 items-start gap-3">
-                <img src={property.coverImage} alt="" width={140} height={110} loading="lazy" className="h-14 w-[4.25rem] shrink-0 rounded-md object-cover" />
+                <ResilientImage src={property.coverImage || "/images/property-placeholder.svg"} alt="" width={140} height={110} loading="lazy" className="h-14 w-[4.25rem] shrink-0 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
                   <Link href={`/property/${property.slug}`} className="block text-[0.8125rem] font-semibold leading-5 text-navy-900 hover:text-forest-700">{property.title}</Link>
                   <p className="mt-1 text-[0.75rem] leading-5 text-ink-muted">{property.locationArea}, {property.cityName}</p>
@@ -130,7 +135,7 @@ export function MapView({
               </div>
               <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-soft pt-1.5">
                 <span className="text-[0.6875rem] text-ink-muted">{typeof property.distanceKm === "number" ? `${property.distanceKm < 0.1 ? "Under 100 m" : `${property.distanceKm.toFixed(1)} km`} away · approximate` : formatArea(property.areaValue, property.areaUnit)}</span>
-                <button type="button" onClick={() => { setSelected(property.id); setFocus({ lat: property.lat, lng: property.lng }); setFocusZoom(16); }} className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-[0.75rem] font-semibold text-forest-700 hover:bg-forest-50">
+                <button type="button" onClick={() => { setSelected(property.id); setFocus({ key: datasetKey, lat: property.lat, lng: property.lng, zoom: 16 }); }} className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-[0.75rem] font-semibold text-forest-700 hover:bg-forest-50">
                   <IconPin className="h-3.5 w-3.5" /> Show on map
                 </button>
               </div>

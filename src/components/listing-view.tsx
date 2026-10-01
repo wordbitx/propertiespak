@@ -6,10 +6,12 @@ import { PageHero } from "@/components/page-hero";
 import { PropertyCard } from "@/components/property-card";
 import { Reveal } from "@/components/reveal";
 import type { Crumb } from "@/components/breadcrumbs";
+import { RecentSearchResultsTracker } from "@/components/recent-properties-tracker";
 import { JsonLd } from "@/components/json-ld";
 import { getCities, getListingAreasByCity, getMapProperties, searchProperties, type PropertyFilters } from "@/lib/queries";
 import { townFilterOptions, townMatchFor } from "@/lib/towns";
 import { collectionPageJsonLd, itemListJsonLd } from "@/lib/seo";
+import { propertyQueryFromParams, SEARCH_FILTER_KEYS } from "@/lib/property-search";
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -18,34 +20,25 @@ function first(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
-function numeric(value: string | string[] | undefined): number | undefined {
-  const raw = first(value);
-  if (!raw) return undefined;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
 export function parseListingFilters(raw: RawSearchParams, fixed: PropertyFilters = {}): PropertyFilters {
-  const townParam = first(raw.town);
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(raw)) {
+    const selected = first(value);
+    if (selected !== undefined) params.set(key, selected);
+  }
+  const parsed = propertyQueryFromParams(params);
+  // Optional URL fields must not erase fixed scope (e.g. commercialOnly).
+  const selected = Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
   return {
-    ...fixed,
-    city: first(raw.city) ?? fixed.city,
-    // A town slug (lake-city-lahore) or a raw society name both resolve to the
-    // text fragment matched against the listing's area.
-    town: townParam ? townMatchFor(townParam) : fixed.town,
-    type: first(raw.type) ?? fixed.type,
-    category: first(raw.category) ?? fixed.category,
-    q: first(raw.q) ?? undefined,
-    beds: numeric(raw.beds),
-    baths: numeric(raw.baths),
-    purpose: first(raw.purpose) ?? fixed.purpose,
-    minPrice: numeric(raw.minPrice),
-    maxPrice: numeric(raw.maxPrice),
-    minArea: numeric(raw.minArea),
-    featured: first(raw.featured) === "1" ? true : fixed.featured,
-    isNewProject: first(raw.newProjects) === "1" ? true : fixed.isNewProject,
-    sort: first(raw.sort) ?? "newest",
-    page: numeric(raw.page) ?? 1,
+    ...fixed, ...selected,
+    purpose: fixed.purpose ?? parsed.purpose,
+    city: parsed.city ?? fixed.city,
+    town: parsed.town ? parsed.townExact ? parsed.town : townMatchFor(parsed.town) : fixed.town,
+    type: parsed.type ?? fixed.type,
+    category: parsed.category ?? fixed.category,
+    featured: parsed.featured ?? fixed.featured,
+    verified: parsed.verified ?? fixed.verified,
+    isNewProject: parsed.isNewProject ?? fixed.isNewProject,
     pageSize: fixed.pageSize ?? 12,
   };
 }
@@ -123,44 +116,15 @@ export async function ListingView({
 
   // Structured data only on the canonical, unfiltered view of the page, so
   // Google reads one ItemList per URL instead of per filter combination.
-  const hasActiveFilters =
-    filters.page !== 1 ||
-    Boolean(first(raw.sort)) ||
-    Boolean(first(raw.town)) ||
-    Boolean(
-      filters.q ||
-        filters.beds ||
-        filters.baths ||
-        filters.purpose ||
-        filters.minPrice ||
-        filters.maxPrice ||
-        filters.minArea ||
-        filters.type ||
-        filters.category,
-    ) ||
-    (Boolean(filters.city) && filters.city !== fixed?.city) ||
-    Boolean(filters.featured) !== Boolean(fixed?.featured) ||
-    Boolean(filters.isNewProject) !== Boolean(fixed?.isNewProject);
-
-  const paramRecord: Record<string, string | undefined> = {
-    city: first(raw.city),
-    town: first(raw.town),
-    type: first(raw.type),
-    baths: first(raw.baths),
-    purpose: first(raw.purpose),
-    category: first(raw.category),
-    q: first(raw.q),
-    beds: first(raw.beds),
-    minPrice: first(raw.minPrice),
-    maxPrice: first(raw.maxPrice),
-    minArea: first(raw.minArea),
-    featured: first(raw.featured),
-    newProjects: first(raw.newProjects),
-    sort: first(raw.sort),
-  };
+  const hasActiveFilters = SEARCH_FILTER_KEYS.some((key) => Boolean(first(raw[key])));
+  // Keep every advanced filter when moving between result pages.
+  const paramRecord: Record<string, string | undefined> = Object.fromEntries(
+    SEARCH_FILTER_KEYS.filter((key) => key !== "page").map((key) => [key, first(raw[key])]),
+  );
 
   return (
     <>
+      <RecentSearchResultsTracker ids={result.items.map((item) => item.id)} path={basePath} />
       {!hasActiveFilters && (
         <>
           <JsonLd data={collectionPageJsonLd({ name: title, description, path: basePath })} />

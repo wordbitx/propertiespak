@@ -121,7 +121,7 @@ export function SiteFooter() {
         <div className="footer-company-credit">
           <div className="min-w-0">
             <p className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">A WordbitX Product</p>
-            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400">WordbitX Software Company</a>
+            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400">WordbitX <span className="text-[0.8125rem] font-normal">| SMC- Pvt. Ltd.</span></a>
             <a href={`mailto:${SITE.companyEmail}`} className="mt-2 flex items-center gap-2 text-[0.75rem] text-white/60 hover:text-white"><IconMail className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{SITE.companyEmail}</span></a>
             {COMPANY_SOCIAL.length > 0 && (
               <div className="mt-5">

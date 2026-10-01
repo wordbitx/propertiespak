@@ -88,6 +88,8 @@ export const properties = pgTable(
     lng: doublePrecision("lng").notNull().default(74.3587),
     price: bigint("price", { mode: "number" }).notNull(),
     priceUnit: text("price_unit").notNull().default("total"), // total | month
+    paymentType: text("payment_type").notNull().default(""),
+    videoUrl: text("video_url").notNull().default(""),
     negotiable: boolean("negotiable").notNull().default(false),
     bedrooms: integer("bedrooms").notNull().default(0),
     bathrooms: integer("bathrooms").notNull().default(0),
@@ -288,6 +290,8 @@ export const listingSubmissions = pgTable("listing_submissions", {
   // Price & size
   price: bigint("price", { mode: "number" }).notNull().default(0),
   priceUnit: text("price_unit").notNull().default("total"), // total | month
+  paymentType: text("payment_type").notNull().default(""),
+  videoUrl: text("video_url").notNull().default(""),
   negotiable: boolean("negotiable").notNull().default(false),
   bedrooms: integer("bedrooms").notNull().default(0),
   bathrooms: integer("bathrooms").notNull().default(0),

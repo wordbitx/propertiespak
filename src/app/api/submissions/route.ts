@@ -5,6 +5,7 @@ import { ensureSeeded } from "@/db/seed";
 import { listingSubmissions, users } from "@/db/schema";
 import { createSession, getSessionUserId } from "@/lib/auth";
 import { buildProfileSlug, hashPassword, verifyPassword } from "@/lib/password";
+import { normaliseVideoUrl } from "@/lib/property-input";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const videoUrl = normaliseVideoUrl(body.videoUrl);
+    const paymentType = String(body.paymentType ?? "");
+    if (videoUrl === null || !["", "cash", "installments"].includes(paymentType)) {
+      return NextResponse.json({ ok: false, error: "Check your payment type and video link." }, { status: 400 });
+    }
     await ensureSeeded();
 
     /**
@@ -164,6 +170,8 @@ export async function POST(request: Request) {
         lng,
         price,
         priceUnit: purpose === "rent" ? "month" : "total",
+        paymentType,
+        videoUrl,
         negotiable: Boolean(body.negotiable),
         bedrooms: Math.max(0, Math.round(toNumber(body.bedrooms, 0))),
         bathrooms: Math.max(0, Math.round(toNumber(body.bathrooms, 0))),

@@ -26,6 +26,7 @@ import { LeadForm } from "@/components/lead-form";
 import { MapView, type MapProperty } from "@/components/map-view";
 import { SinglePropertyMap } from "@/components/single-property-map";
 import { PropertyCard, purposeBadge } from "@/components/property-card";
+import { RecentPropertyTracker } from "@/components/recent-properties-tracker";
 import { PropertyGallery } from "@/components/property-gallery";
 import { Reveal } from "@/components/reveal";
 import { ShareButton } from "@/components/share-button";
@@ -129,6 +130,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     { label: "Furnishing", value: property.furnishing },
     { label: "Possession", value: property.possession, icon: IconCalendar },
     { label: "Price basis", value: property.negotiable ? "Negotiable" : "Fixed" },
+    { label: "Payment type", value: property.paymentType === "installments" ? "Installments" : property.paymentType === "cash" ? "Cash / full payment" : "Not specified" },
     { label: "Reference", value: `EWX-${String(property.id).padStart(5, "0")}` },
   ];
 
@@ -150,6 +152,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <RecentPropertyTracker id={property.id} path={`/property/${property.slug}`} />
       {/* Detail header band */}
       <section className="relative isolate overflow-hidden bg-navy-950 pb-40 pt-28 lg:pb-48 lg:pt-36">
         <div
@@ -249,6 +252,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   <IconWhatsApp className="h-4 w-4" /> WhatsApp
                 </a>
               </div>
+
+              {property.videoUrl && /^https?:\/\//i.test(property.videoUrl) && <a href={property.videoUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">Watch property video <IconArrowRight className="h-4 w-4" /></a>}
 
               {/* Key facts */}
               <div className="mt-8 grid grid-cols-2 gap-3.5 sm:grid-cols-4">

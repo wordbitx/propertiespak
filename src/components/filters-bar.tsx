@@ -4,6 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { IconClose, IconSearch, IconSliders } from "@/components/icons";
 import { BUDGETS_BUY, BUDGETS_RENT, SORT_OPTIONS } from "@/lib/constants";
+import { beginRecentSearch } from "@/lib/recent-properties";
+import { NavigationDialog } from "@/components/navigation-dialog";
+import { PropertySearchFilters } from "@/components/property-search-filters";
+import { propertySearchFromParams, propertySearchHref, SEARCH_FILTER_KEYS } from "@/lib/property-search";
 
 type Option = { label: string; value: string };
 export type TownGroup = { citySlug: string; cityName: string; towns: Option[] };
@@ -17,7 +21,7 @@ const AREA_OPTIONS = [
   { label: "2 Kanal +", value: "9000" },
 ];
 
-const BATH_OPTIONS = ["1", "2", "3", "4", "5"];
+const BATH_OPTIONS = ["1", "2", "3", "4", "5", "6"];
 
 export function FiltersBar({
   basePath,
@@ -37,6 +41,7 @@ export function FiltersBar({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
 
   const budgets = purposeKind === "rent" ? BUDGETS_RENT : BUDGETS_BUY;
@@ -65,6 +70,7 @@ export function FiltersBar({
       if (slug) params.set("city", slug);
       else params.delete("city");
       params.delete("town");
+      params.delete("townExact");
       params.delete("page");
       const query = params.toString();
       router.push(query ? `${basePath}?${query}` : basePath);
@@ -85,7 +91,7 @@ export function FiltersBar({
     [selectedCity, townGroups],
   );
 
-  const activeCount = ["q", "city", "town", "type", "beds", "baths", "minPrice", "maxPrice", "category", "minArea"].filter(
+  const activeCount = SEARCH_FILTER_KEYS.filter((key) => !["page", "sort", "areaUnit", "townExact"].includes(key)).filter(
     (key) => searchParams.get(key),
   ).length;
 
@@ -153,7 +159,7 @@ export function FiltersBar({
           id="filter-town"
           className="field mt-2"
           value={searchParams.get("town") ?? ""}
-          onChange={(event) => update("town", event.target.value)}
+          onChange={(event) => update("town", event.target.value, { townExact: "" })}
         >
           <option value="">All towns &amp; societies</option>
           {selectedCity
@@ -184,7 +190,7 @@ export function FiltersBar({
           id="filter-type"
           className="field mt-2"
           value={searchParams.get("type") ?? ""}
-          onChange={(event) => update("type", event.target.value)}
+          onChange={(event) => update("type", event.target.value, { category: "" })}
         >
           <option value="">All types</option>
           {typeOptions.map((option) => (
@@ -216,6 +222,7 @@ export function FiltersBar({
           }}
         >
           <option value="">Any budget</option>
+          {budgetValue && !budgets.some((item) => item.value === budgetValue) && <option value={budgetValue}>Custom price range</option>}
           {budgets.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -235,7 +242,8 @@ export function FiltersBar({
           onChange={(event) => update("beds", event.target.value)}
         >
           <option value="">Any</option>
-          {["1", "2", "3", "4", "5", "6"].map((value) => (
+          <option value="0">Studio</option>
+          {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map((value) => (
             <option key={value} value={value}>
               {value}+
             </option>
@@ -272,6 +280,7 @@ export function FiltersBar({
           value={searchParams.get("minArea") ?? ""}
           onChange={(event) => update("minArea", event.target.value)}
         >
+          {searchParams.get("minArea") && !AREA_OPTIONS.some((item) => item.value === searchParams.get("minArea")) && <option value={searchParams.get("minArea")!}>Custom area range</option>}
           {AREA_OPTIONS.map((option) => (
             <option key={option.label} value={option.value}>
               {option.label}
@@ -324,6 +333,8 @@ export function FiltersBar({
             </span>
           )}
         </p>
+        <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => setAdvancedOpen(true)} className="btn btn-outline px-3.5 py-2 text-[0.8125rem]"><IconSliders className="h-4 w-4" />All filters</button>
         <button
           type="button"
           onClick={() => setMobileOpen((open) => !open)}
@@ -332,8 +343,15 @@ export function FiltersBar({
         >
           <IconSliders className="h-4 w-4" /> {mobileOpen ? "Hide filters" : "Filters & sort"}
         </button>
+        </div>
       </div>
       <div className={`${mobileOpen ? "mt-4 block" : "hidden"} xl:mt-4 xl:block`}>{fields}</div>
+      {advancedOpen && <NavigationDialog label="Search properties" className="property-filter-dialog" onDismiss={() => setAdvancedOpen(false)}>
+        <PropertySearchFilters initialState={{ ...propertySearchFromParams(searchParams, purposeKind === "rent" ? "rent" : "buy"),
+          ...(basePath.includes("/commercial") ? { group: "commercial" as const } : {}),
+          ...(basePath.includes("/new-projects") ? { newProjects: true } : {}),
+        }} onClose={() => setAdvancedOpen(false)} onSearch={(state) => { setAdvancedOpen(false); const href = propertySearchHref(state); beginRecentSearch(href); router.push(href); }} />
+      </NavigationDialog>}
     </div>
   );
 }

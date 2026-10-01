@@ -1,9 +1,9 @@
+import { ResilientImage } from "@/components/resilient-image";
 import Link from "next/link";
 import {
   IconArrowRight,
   IconArea,
   IconBuilding,
-  IconCheck,
   IconCompass,
   IconKey,
   IconLayers,
@@ -11,8 +11,10 @@ import {
   IconShield,
   IconSpark,
 } from "@/components/icons";
-import { PropertyCard } from "@/components/property-card";
-import { MapView, type MapProperty } from "@/components/map-view";
+import { MobileScrollGrid } from "@/components/mobile-scroll-grid";
+import { PropertyRail } from "@/components/property-rail";
+import type { MapProperty } from "@/components/map-view";
+import { ResponsiveHomeMap } from "@/components/responsive-home-map";
 import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import type { City, Post, Project, Property } from "@/db/schema";
@@ -40,7 +42,7 @@ export function CategoryGrid() {
         <SectionHeading
           eyebrow="Browse by intent"
           title="Every property category, in one place"
-          description="Move from browsing to shortlisting with categories built around how you actually search — buy, rent, invest or lease commercial space."
+          description="Houses, flats, plots and commercial properties."
           action={{ label: "View all listings", href: "/properties" }}
         />
         <div className="mt-10 grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
@@ -52,7 +54,7 @@ export function CategoryGrid() {
                   href={tile.href}
                   className="zoom-frame group relative flex h-full min-h-[168px] flex-col justify-between overflow-hidden rounded-panel bg-navy-900 p-5 lg:min-h-[196px]"
                 >
-                  <img
+                  <ResilientImage
                     src={photo(tile.image, 700, 560)}
                     alt=""
                     width={700}
@@ -92,7 +94,7 @@ export function CityDiscovery({ cities, counts }: { cities: City[]; counts: Map<
         <SectionHeading
           eyebrow="Explore the market"
           title="Explore Pakistan's Property Markets"
-          description="Six cities carry most of the country's transaction volume. Compare area pricing, rental demand and new supply before you commit capital."
+          description="Find properties in Lahore, Karachi, Islamabad and other major cities."
           action={{ label: "Browse all cities", href: "/properties" }}
         />
         <div className="mt-10 grid grid-cols-2 gap-3.5 sm:gap-4 lg:auto-rows-[184px] lg:grid-cols-4">
@@ -110,7 +112,7 @@ export function CityDiscovery({ cities, counts }: { cities: City[]; counts: Map<
                   href={`/city/${city.slug}`}
                   className="zoom-frame group relative flex h-full min-h-[170px] flex-col justify-end overflow-hidden rounded-panel bg-navy-900 p-5"
                 >
-                  <img
+                  <ResilientImage
                     src={city.imageUrl}
                     alt={city.imageAlt || `${city.name} property market`}
                     width={isHero ? 1000 : 700}
@@ -167,7 +169,7 @@ export function MarketHub({
         <SectionHeading
           eyebrow="Browse by market"
           title="Property across Pakistan's major markets"
-          description="Jump straight into the market or property type you are researching — every link below is a curated page with listings, indicative price bands and area notes."
+          description="Browse city markets, property types and area guides."
           action={{ label: "All listings", href: "/properties" }}
         />
         <div className="mt-10 grid gap-8 lg:grid-cols-3">
@@ -257,24 +259,13 @@ export function MarketHub({
   );
 }
 
-export function FeaturedProperties({ properties }: { properties: Property[] }) {
+export function FeaturedProperties({ properties, total }: { properties: Property[]; total: number }) {
   if (properties.length === 0) return null;
   return (
     <Section tone="light" id="featured">
       <div className="ui-container">
-        <SectionHeading
-          eyebrow="Featured inventory"
-          title="Featured properties, hand-picked this week"
-          description="Curated listings across premium Lahore, Islamabad and Karachi addresses."
-          action={{ label: "See all featured", href: "/properties?featured=1" }}
-        />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {properties.map((property, index) => (
-            <Reveal key={property.id} delay={index * 60}>
-              <PropertyCard property={property} />
-            </Reveal>
-          ))}
-        </div>
+        <SectionHeading title="Featured Properties" action={{ label: "View all", href: "/properties?featured=1&verified=1" }} />
+        <PropertyRail initialProperties={properties} initialTotal={total} query="featured=1&verified=1" label="Featured properties" />
       </div>
     </Section>
   );
@@ -287,16 +278,16 @@ export function NewProjectsSection({ projects }: { projects: Project[] }) {
       <div className="ui-container">
         <SectionHeading
           eyebrow="New developments"
-          title="New projects worth watching"
-          description="Launch pricing, payment plans and handover timelines from developers active in Lahore, Islamabad, Karachi, Faisalabad and Multan."
+          title="New Housing Projects"
+          description="Compare locations, payment plans and handover details."
           action={{ label: "Explore all projects", href: "/projects" }}
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {projects.slice(0, 4).map((project, index) => (
-            <Reveal key={project.slug} delay={index * 60}>
+        <MobileScrollGrid label="New housing projects">
+          {projects.slice(0, 4).map((project) => (
+            <div key={project.slug} className="home-project-item">
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                 <Link href={`/projects/${project.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">
-                  <img
+                  <ResilientImage
                     src={project.coverImage}
                     alt={`${project.name} — ${project.projectType} in ${project.location}`}
                     width={1200}
@@ -348,91 +339,21 @@ export function NewProjectsSection({ projects }: { projects: Project[] }) {
                   </div>
                 </div>
               </article>
-            </Reveal>
+            </div>
           ))}
-        </div>
+        </MobileScrollGrid>
       </div>
     </Section>
   );
 }
 
-const COMMERCIAL_TYPES = [
-  { label: "Office spaces", detail: "Fitted floors and managed suites" },
-  { label: "Retail shops", detail: "Boulevard and market frontage" },
-  { label: "Commercial buildings", detail: "Income-ready multi-floor assets" },
-  { label: "Warehouses", detail: "Clear-span logistics facilities" },
-];
-
-export function CommercialSection({ properties }: { properties: Property[] }) {
+export function CommercialSection({ properties, total }: { properties: Property[]; total: number }) {
   return (
     <Section tone="light" id="commercial">
       <div className="ui-container">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <Reveal>
-            <p className="eyebrow text-forest-700">
-              <span className="h-[1px] w-6 bg-current opacity-70" />
-              Commercial property
-            </p>
-            <h2 className="display-2 mt-4 text-navy-900">Spaces Built for Business</h2>
-            <p className="lede mt-4">
-              Office floors, retail units, commercial buildings and warehousing — reviewed on frontage, footfall, parking
-              and building services, not just rent.
-            </p>
-            <ul className="mt-7 grid gap-3.5 sm:grid-cols-2">
-              {COMMERCIAL_TYPES.map((type) => (
-                <li key={type.label} className="flex items-start gap-3">
-                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-forest-50 text-forest-700">
-                    <IconCheck className="h-3.5 w-3.5" />
-                  </span>
-                  <span>
-                    <span className="block font-sans text-[0.9375rem] font-semibold text-navy-900">{type.label}</span>
-                    <span className="mt-0.5 block text-[0.8125rem] text-ink-muted">{type.detail}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/commercial" className="btn btn-primary">
-                Explore Commercial Properties
-                <IconArrowRight className="h-[1.05rem] w-[1.05rem]" />
-              </Link>
-              <Link href="/properties/commercial" className="btn btn-outline">
-                Browse all commercial listings
-              </Link>
-            </div>
-          </Reveal>
-
-          <Reveal delay={120} className="relative">
-            {/* Locally served, premium dusk photography (AVIF with WebP fallback). */}
-            <div className="relative overflow-hidden rounded-panel bg-navy-950 shadow-card ring-1 ring-navy-900/10">
-              <SitePicture
-                image={siteImages.commercialTower}
-                sizes="(min-width: 1024px) 620px, 100vw"
-                className="h-[320px] w-full object-cover object-[50%_40%] lg:h-[420px]"
-              />
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/35 via-transparent to-transparent" />
-            </div>
-            <div className="absolute -bottom-8 left-6 hidden w-[240px] overflow-hidden rounded-panel border border-soft bg-white p-3 shadow-card sm:block">
-              <SitePicture
-                image={siteImages.commercialLobby}
-                sizes="216px"
-                className="h-[130px] w-full rounded-lg object-cover"
-              />
-              <p className="mt-3 font-sans text-[0.8125rem] font-semibold text-navy-900">Prime corridor assets</p>
-              <p className="mt-1 text-[0.75rem] text-ink-muted">Gulberg · Blue Area · Shahrah-e-Faisal</p>
-            </div>
-          </Reveal>
-        </div>
-
-        {properties.length > 0 && (
-          <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {properties.slice(0, 4).map((property, index) => (
-              <Reveal key={property.id} delay={index * 60}>
-                <PropertyCard property={property} />
-              </Reveal>
-            ))}
-          </div>
-        )}
+        <SectionHeading title="Commercial Properties" action={{ label: "View all", href: "/properties/commercial" }} />
+        {properties.length ? <PropertyRail initialProperties={properties} initialTotal={total} query="category=commercial" label="Commercial properties" /> :
+          <p className="mt-4 text-sm text-ink-muted">No commercial listings available yet.</p>}
       </div>
     </Section>
   );
@@ -450,12 +371,11 @@ export function MapSection({
   zoom?: number;
 }) {
   return (
-    <Section tone="mist" id="map">
+    <Section tone="mist" id="map" className="home-desktop-map-section">
       <div className="ui-container">
         <SectionHeading
-          eyebrow="Location intelligence"
           title="Discover Properties by Location"
-          description="Pan the map, compare neighbourhoods and open any pin to see price, size and availability — a faster way to judge distance from schools, offices and main arteries."
+          description="Browse areas and tap a pin to see the property."
           action={{ label: "Open listings with map", href: "/properties" }}
         />
         <div className="mt-6 flex flex-wrap gap-2">
@@ -466,7 +386,7 @@ export function MapSection({
           ))}
         </div>
         <div className="mt-6">
-          <MapView properties={properties} center={center} zoom={zoom} autoFit />
+          <ResponsiveHomeMap properties={properties} center={center} zoom={zoom} />
         </div>
         <p className="mt-4 text-[0.75rem] leading-relaxed text-ink-muted">
           Imagery © Google · Society layouts © ioi Technologies / DHA Plus. Markers are positioned at society level and
@@ -484,8 +404,8 @@ export function InsightsPreview({ posts }: { posts: Post[] }) {
       <div className="ui-container">
         <SectionHeading
           eyebrow="Property insights"
-          title="Research worth reading before you decide"
-          description="Area comparisons, documentation checklists and investment notes written by our research and advisory desks."
+          title="Property Guides"
+          description="Practical advice on buying, renting and property documents."
           action={{ label: "All insights", href: "/blog" }}
         />
         <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -493,7 +413,7 @@ export function InsightsPreview({ posts }: { posts: Post[] }) {
             <Reveal key={post.slug} delay={index * 60}>
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                 <Link href={`/blog/${post.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">
-                  <img
+                  <ResilientImage
                     src={post.coverImage}
                     alt={post.title}
                     width={1200}

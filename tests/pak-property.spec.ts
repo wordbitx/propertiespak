@@ -96,7 +96,8 @@ test("enquiry and visit forms persist full details in the private admin inbox", 
   await card.getByRole("button", { name: "Save follow-up" }).click();
   expect((await update).status()).toBe(200);
   await expect(page.getByText("Follow-up saved.", { exact: true })).toBeVisible();
-  const inboxResponse = await page.request.get(`/api/admin/inquiries?q=${marker}`);
+  const inboxResponse = await page.request.get(`/api/admin/inquiries?q=${marker}`, { headers: { Cookie: login.headers()["set-cookie"].split(";")[0] } });
+  expect(inboxResponse.ok()).toBeTruthy();
   expect(inboxResponse.headers()["cache-control"]).toContain("no-store");
   const inbox = await inboxResponse.json();
   expect(inbox.total).toBe(2);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import {
   IconCalculator,
   IconChart,
@@ -70,17 +70,19 @@ function NumberField({
   suffix?: string;
   hint?: string;
 }) {
+  const prefix = useId();
+  const fieldId = `${prefix}-${id}`;
   return (
-    <div>
+    <div className="calculator-number-field">
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-[0.8125rem] font-semibold text-navy-900">
+        <label htmlFor={fieldId} className="text-[0.8125rem] font-semibold text-navy-900">
           {label}
         </label>
         {hint && <span className="text-[0.75rem] text-ink-muted">{hint}</span>}
       </div>
       <div className="mt-2 flex items-center gap-2">
         <input
-          id={id}
+          id={fieldId}
           type="number"
           value={Number.isFinite(value) ? value : 0}
           min={min}
@@ -118,9 +120,9 @@ function Result({
   note?: string;
 }) {
   return (
-    <div className="rounded-panel bg-navy-950 p-6 text-white">
+    <div className="calculator-result rounded-panel bg-navy-950 p-6 text-white">
       <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-forest-400">{emphasis.label}</p>
-      <p className="mt-2 font-sans text-[clamp(1.55rem,3vw,2.1rem)] font-bold leading-none tracking-[-0.03em]">
+      <p className="calculator-result-value mt-2 font-sans text-[clamp(1.55rem,3vw,2.1rem)] font-bold leading-none tracking-[-0.03em]" aria-live="polite">
         {emphasis.value}
       </p>
       <dl className="mt-6 space-y-3 border-t border-white/12 pt-5 text-[0.875rem]">
@@ -143,11 +145,14 @@ export function Calculators({
   defaultPrice = 25000000,
   initialTool = "mortgage",
   defaultRent = 180000,
+  variant = "default",
 }: {
   defaultPrice?: number;
   initialTool?: ToolKey;
   defaultRent?: number;
+  variant?: "default" | "home";
 }) {
+  const prefix = useId();
   const [tool, setTool] = useState<ToolKey>(initialTool);
 
   const [price, setPrice] = useState(defaultPrice);
@@ -275,9 +280,10 @@ export function Calculators({
   const showPriceField = tool !== "construction";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
-      <div className="rounded-panel border border-soft bg-white p-3 shadow-soft">
-        <div role="tablist" aria-label="Property tools" className="flex flex-col gap-1.5">
+    <div className={`calculators ${variant === "home" ? "calculators--home" : "grid gap-6 lg:grid-cols-[0.82fr_1.18fr]"}`}>
+      <div className="calculator-navigation rounded-panel border border-soft bg-white p-3 shadow-soft">
+        {variant === "home" && <p className="calculator-navigation-caption">Choose a calculator<span>Swipe for more tools</span></p>}
+        <div role="tablist" aria-label="Property tools" className="calculator-tool-tabs flex flex-col gap-1.5">
           {TOOL_DEFINITIONS.map((item) => {
             const Icon = item.icon;
             const active = item.key === tool;
@@ -286,10 +292,29 @@ export function Calculators({
                 key={item.key}
                 type="button"
                 role="tab"
+                id={`${prefix}-tab-${item.key}`}
+                aria-controls={`${prefix}-panel`}
+                aria-label={item.label}
                 aria-selected={active}
+                tabIndex={active ? 0 : -1}
+                data-tool={item.key}
                 onClick={() => setTool(item.key)}
+                onKeyDown={(event) => {
+                  const index = TOOL_DEFINITIONS.findIndex((definition) => definition.key === item.key);
+                  let next = index;
+                  if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % TOOL_DEFINITIONS.length;
+                  else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index + TOOL_DEFINITIONS.length - 1) % TOOL_DEFINITIONS.length;
+                  else if (event.key === "Home") next = 0;
+                  else if (event.key === "End") next = TOOL_DEFINITIONS.length - 1;
+                  else return;
+                  event.preventDefault();
+                  setTool(TOOL_DEFINITIONS[next].key);
+                  const button = event.currentTarget.closest('[role="tablist"]')?.querySelector<HTMLButtonElement>(`[data-tool="${TOOL_DEFINITIONS[next].key}"]`);
+                  button?.focus({ preventScroll: true });
+                  button?.scrollIntoView({ block: "nearest", inline: "nearest" });
+                }}
                 className={[
-                  "flex w-full items-start gap-3.5 rounded-xl border p-3 text-left transition-colors",
+                  "calculator-tool-button flex w-full items-start gap-3.5 rounded-xl border p-3 text-left transition-colors",
                   active ? "border-navy-800 bg-mist" : "border-transparent hover:bg-mist/70",
                 ].join(" ")}
               >
@@ -303,7 +328,7 @@ export function Calculators({
                 </span>
                 <span>
                   <span className="block font-sans text-[0.9375rem] font-semibold text-navy-900">{item.label}</span>
-                  <span className="mt-0.5 block text-[0.8125rem] leading-snug text-ink-muted">{item.blurb}</span>
+                  <span className="calculator-tool-description mt-0.5 block text-[0.8125rem] leading-snug text-ink-muted">{item.blurb}</span>
                 </span>
               </button>
             );
@@ -311,10 +336,11 @@ export function Calculators({
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-panel border border-soft bg-white p-6 shadow-soft">
-          <h3 className="font-sans text-[1.0625rem] font-semibold text-navy-900">{activeTool.label} inputs</h3>
-          <div className="mt-5 space-y-5">
+      <div id={`${prefix}-panel`} role="tabpanel" aria-labelledby={`${prefix}-tab-${tool}`} className="calculator-workspace grid gap-6 md:grid-cols-2">
+        <div className="calculator-inputs rounded-panel border border-soft bg-white p-6 shadow-soft">
+          <div className="calculator-input-heading"><h3 className="font-sans text-[1.0625rem] font-semibold text-navy-900">{activeTool.label} inputs</h3>
+          {variant === "home" && <p>Enter your figures. Your estimate updates as you make changes.</p>}</div>
+          <div className="calculator-fields mt-5 space-y-5">
             {showPriceField && (
               <NumberField
                 id={`calc-price-${tool}`}
@@ -405,11 +431,11 @@ export function Calculators({
                   hint="all floors combined"
                 />
                 <div>
-                  <label htmlFor="calc-tier" className="text-[0.8125rem] font-semibold text-navy-900">
+                  <label htmlFor={`${prefix}-tier`} className="text-[0.8125rem] font-semibold text-navy-900">
                     Construction tier
                   </label>
                   <select
-                    id="calc-tier"
+                    id={`${prefix}-tier`}
                     value={tier}
                     onChange={(event) => setTier(Number(event.target.value))}
                     className="field mt-2"
@@ -434,11 +460,11 @@ export function Calculators({
                 <NumberField id="calc-hold-tax" label="Holding period" value={holdYears} onChange={setHoldYears} min={1} max={20} suffix="years" />
                 <NumberField id="calc-sale" label="Expected sale value" value={saleValue} onChange={setSaleValue} min={0} max={800000000} step={500000} suffix="PKR" />
                 <div className="flex items-center justify-between gap-4 rounded-xl border border-soft bg-mist/60 px-4 py-3">
-                  <label htmlFor="calc-cgt" className="text-[0.8125rem] font-semibold text-navy-900">
+                  <label htmlFor={`${prefix}-cgt`} className="text-[0.8125rem] font-semibold text-navy-900">
                     Apply indicative gain charge
                   </label>
                   <input
-                    id="calc-cgt"
+                    id={`${prefix}-cgt`}
                     type="checkbox"
                     checked={cgtApplied}
                     onChange={(event) => setCgtApplied(event.target.checked)}

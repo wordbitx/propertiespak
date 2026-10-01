@@ -133,7 +133,8 @@ export default async function HtmlSitemapPage() {
                 <li><Link href="/compare" className="hover:text-forest-700">Property Comparison Tool</Link></li>
                 <li><Link href="/list-property" className="hover:text-forest-700">List Your Property</Link></li>
                 <li><Link href="/about" className="hover:text-forest-700">About Properties Pak</Link></li>
-                <li><Link href="/contact" className="hover:text-forest-700">Contact Us</Link></li>
+                <li><Link href="/contact" className="hover:text-forest-700">Help &amp; Support</Link></li>
+                <li><Link href="/advertise" className="hover:text-forest-700">Advertise on Properties Pak</Link></li>
               </ul>
             </div>
 

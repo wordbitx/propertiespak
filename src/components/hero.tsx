@@ -1,71 +1,36 @@
-import Link from "next/link";
-import { IconArrowRight } from "@/components/icons";
+import { ResilientImage } from "@/components/resilient-image";
 import { SearchPanel } from "@/components/search-panel";
-import { SITE } from "@/lib/constants";
-import { heroImage } from "@/lib/images";
+import { siteImages } from "@/lib/site-images";
 
-/**
- * Architectural hero only: individual listings belong in the marketplace below.
- * Kept deliberately quiet — photograph, one headline, one supporting line, two
- * actions and the search panel. No counters, no keyword cloud: the marketplace
- * sections below carry that weight.
- */
+/** A generous photograph, with the introduction attached to the search rather than floating in its centre. */
 export function Hero() {
   return (
-    <>
-      {/* React hoists this into <head>: the CDN connection opens before the hero <img> is parsed. */}
-      <link rel="preconnect" href={heroImage.origin} />
-      <section id="home-hero" className="home-hero" aria-labelledby="hero-heading" data-testid="home-hero">
-        <picture className="hero-photograph">
-          <source media="(max-width: 767px)" srcSet={heroImage.mobileSrcSet} sizes="100vw" />
-          <img
-            src={heroImage.desktop}
-            srcSet={heroImage.desktopSrcSet}
-            sizes="100vw"
-            width={2400}
-            height={1601}
-            alt={heroImage.alt}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className="hero-background-image"
-            data-testid="hero-photograph"
-          />
-        </picture>
-        <div className="hero-photograph-shade" aria-hidden="true" />
-        <div className="ui-container hero-content">
-          <p className="hero-eyebrow">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-forest-400" />
-            Pakistan’s Premium Property Marketplace
-          </p>
-          <h1 id="hero-heading" className="hero-headline">
-            <span className="block">Find Your Future.</span>
-            <span className="block">
-              Invest With <span className="text-forest-400">Clarity.</span>
-            </span>
-          </h1>
-          <p className="hero-description">
-            Discover premium houses, apartments, plots, commercial properties, new developments and investment
-            opportunities across Lahore, Islamabad, Karachi and major property markets in Pakistan.
-          </p>
-          <div className="hero-actions">
-            <Link href="/properties" className="btn btn-green">
-              Explore Properties <IconArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
-            <Link href="/list-property" className="btn btn-ghost-light">
-              List Your Property
-            </Link>
-          </div>
-          <p className="hero-signature">Better Homes. Bigger Dreams.</p>
-          <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="hero-credit">
-            Official platform by WordbitX Software Company
-          </a>
+    <section id="home-hero" className="home-hero" aria-labelledby="hero-heading" data-testid="home-hero">
+      <ResilientImage
+        pictureClassName="hero-photograph"
+        pictureSources={[{ type: "image/avif", srcSet: siteImages.aboutVilla.avif[0].src, sizes: "100vw" }]}
+        fallbackSrc={siteImages.aboutVilla.webp[0].src}
+        src={siteImages.aboutVilla.webp[0].src}
+        sizes="100vw"
+        width={siteImages.aboutVilla.webp[0].width}
+        height={siteImages.aboutVilla.webp[0].height}
+        alt={siteImages.aboutVilla.alt}
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+        className="hero-background-image"
+        data-testid="hero-photograph"
+      />
+      <div className="hero-photograph-shade" aria-hidden="true" />
+      <div className="ui-container hero-content">
+        <div className="hero-search-intro">
+          <h1 id="hero-heading" className="hero-headline">{"Find Property for Sale & Rent in Pakistan"}</h1>
+          <p className="hero-description">Buy, sell or rent homes, plots and commercial properties.</p>
         </div>
-      </section>
-
-      <div className="home-search-wrap ui-container" id="property-search" data-testid="hero-search">
-        <SearchPanel initialTab="buy" />
+        <div className="home-search-wrap" id="property-search" data-testid="hero-search">
+          <SearchPanel />
+        </div>
       </div>
-    </>
+    </section>
   );
 }

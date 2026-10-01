@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -233,6 +235,7 @@ export function AdminDashboard() {
               {item.description && (
                 <p className="mt-3 line-clamp-3 text-[0.875rem] leading-relaxed text-ink">{item.description}</p>
               )}
+              <p className="mt-3 text-sm text-ink-muted">Payment: {item.paymentType === "installments" ? "Installments" : item.paymentType === "cash" ? "Cash / full payment" : "Not specified"}{item.videoUrl && <a href={item.videoUrl} target="_blank" rel="noopener noreferrer" className="ml-3 font-semibold text-forest-700 hover:underline">Review property video</a>}</p>
               {(item.features.length > 0 || item.amenities.length > 0) && (
                 <p className="mt-2 text-[0.75rem] text-ink-muted">
                   {[...item.features, ...item.amenities].slice(0, 8).join(" · ")}
@@ -242,7 +245,7 @@ export function AdminDashboard() {
                 <div className="mt-3 flex gap-2 overflow-x-auto">
                   {item.imageUrls.slice(0, 6).map((url) => (
                     <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                      <img src={url} alt="" width={160} height={120} loading="lazy" className="h-[68px] w-[96px] rounded-lg border border-soft object-cover" />
+                      <ResilientImage src={url} alt="" width={160} height={120} loading="lazy" className="h-[68px] w-[96px] rounded-lg border border-soft object-cover" />
                     </a>
                   ))}
                 </div>

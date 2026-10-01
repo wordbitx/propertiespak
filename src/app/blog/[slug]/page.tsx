@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -73,7 +74,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div className="ui-container grid gap-10 lg:grid-cols-[1.5fr_1fr]">
           <article>
             <div className="overflow-hidden rounded-panel bg-soft">
-              <img
+              <ResilientImage
                 src={post.coverImage}
                 alt={post.title}
                 width={1400}

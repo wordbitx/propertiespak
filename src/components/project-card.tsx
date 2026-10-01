@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import Link from "next/link";
 import { IconArrowRight, IconPin } from "@/components/icons";
 import type { Project } from "@/db/schema";
@@ -7,7 +8,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
       <Link href={`/projects/${project.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">
-        <img
+        <ResilientImage
           src={project.coverImage}
           alt={`${project.name} — ${project.projectType} in ${project.location}`}
           width={1200}
