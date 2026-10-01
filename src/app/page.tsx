@@ -2,19 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { Section, SectionHeading } from "@/components/section";
-import { Calculators } from "@/components/calculators";
-import { IconArrowRight, IconCalculator } from "@/components/icons";
+import { ExploreMoreSection } from "@/components/explore-more-section";
 import {
   CategoryGrid,
   CityDiscovery,
   CommercialSection,
   FeaturedProperties,
   InsightsPreview,
-  MarketHub,
   NewProjectsSection,
 } from "@/components/sections-discovery";
 
-import { CtaSection, InvestmentSection, TestimonialsSection, WhyEstateWx } from "@/components/sections-editorial";
+import { CtaSection, InvestmentSection, WhyEstateWx } from "@/components/sections-editorial";
 import { DealersSlider } from "@/components/dealers-slider";
 import { PopularSearches } from "@/components/popular-searches";
 import {
@@ -25,7 +23,6 @@ import {
   getPosts,
   getPopularSearches,
   getProjects,
-  getTestimonials,
   searchProperties,
 } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
@@ -69,21 +66,19 @@ export default async function HomePage() {
     commercialCount,
     rentalCount,
     posts,
-    testimonials,
     showcaseDealers,
     popularSearches,
   ] = await Promise.all([
     getPlatformStats(),
     searchProperties({ featured: true, verified: true, pageSize: 8 }),
-    searchProperties({ sort: "newest", pageSize: 8 }),
+    searchProperties({ sort: "newest", pageSize: 16 }),
     getCities(),
     getCityListingCounts(),
-    getProjects(4),
+    getProjects(8),
     searchProperties({ category: "commercial", pageSize: 8 }),
     searchProperties({ category: "commercial", pageSize: 1 }),
     searchProperties({ purpose: "rent", pageSize: 1 }),
     getPosts(3),
-    getTestimonials(),
     getDealerShowcase(48),
     getPopularSearches(),
   ]);
@@ -92,8 +87,9 @@ export default async function HomePage() {
     <div className="home-page">
       <Hero />
 
-      {/* Dealer belt sits under the hero; the category tiles sit just above the commercial section. */}
+      {/* Dealer profiles and Zameen-inspired tools follow the hero in one compact run. */}
       <DealersSlider dealers={showcaseDealers} />
+      <ExploreMoreSection />
 
       {/* Featured inventory leads the marketplace: the strongest listings first, then full discovery. */}
       <FeaturedProperties properties={featured.items} total={featured.total} />
@@ -133,18 +129,6 @@ export default async function HomePage() {
       <NewProjectsSection projects={projects} />
       <CityDiscovery cities={cities} counts={cityCounts} />
 
-      {/* Smart calculators */}
-      <Section tone="light" id="tools" className="home-decision-tools">
-        <div className="ui-container">
-          <div className="decision-tools-heading">
-            <span className="decision-tools-icon"><IconCalculator className="h-6 w-6" /></span>
-            <div><p className="decision-tools-kicker">Plan before you decide</p><h2>Make Smarter Property Decisions</h2><p className="decision-tools-description">Work out your budget, monthly payments and potential returns.</p></div>
-            <Link href="/tools" className="decision-tools-link">All property tools<IconArrowRight className="h-4 w-4" /></Link>
-          </div>
-          <Calculators variant="home" defaultPrice={25000000} />
-        </div>
-      </Section>
-
       <WhyEstateWx listings={stats.listings} cities={stats.cities} />
 
       <InvestmentSection
@@ -157,29 +141,6 @@ export default async function HomePage() {
       />
 
       <InsightsPreview posts={posts} />
-      <TestimonialsSection testimonials={testimonials} />
-      <MarketHub
-        cities={cities.slice(0, 8).map((city) => ({ name: city.name, slug: city.slug }))}
-        typeLinks={[
-          { label: "Houses for sale in Lahore", href: "/houses-for-sale-in-lahore" },
-          { label: "Apartments for sale in Lahore", href: "/apartments-for-sale-in-lahore" },
-          { label: "Plots for sale in Lahore", href: "/plots-for-sale-in-lahore" },
-          { label: "Houses for sale in Islamabad", href: "/houses-for-sale-in-islamabad" },
-          { label: "Apartments for sale in Islamabad", href: "/apartments-for-sale-in-islamabad" },
-          { label: "Commercial property in Lahore", href: "/commercial-property-in-lahore" },
-          { label: "Commercial property in Islamabad", href: "/commercial-property-in-islamabad" },
-          { label: "Commercial property in Karachi", href: "/commercial-property-in-karachi" },
-        ]}
-        societyLinks={[
-          { label: "DHA Lahore", href: "/property-for-sale/dha-lahore" },
-          { label: "DHA Phase 5 Lahore", href: "/property-for-sale/dha-phase-5-lahore" },
-          { label: "Bahria Town Lahore", href: "/property-for-sale/bahria-town-lahore" },
-          { label: "Gulberg Lahore", href: "/property-for-sale/gulberg-lahore" },
-          { label: "DHA Islamabad", href: "/property-for-sale/dha-islamabad" },
-          { label: "Clifton Karachi", href: "/property-for-sale/clifton-karachi" },
-          { label: "DHA Multan", href: "/property-for-sale/dha-multan" },
-        ]}
-      />
       <CtaSection />
     </div>
   );

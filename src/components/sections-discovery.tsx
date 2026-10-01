@@ -265,7 +265,7 @@ export function FeaturedProperties({ properties, total }: { properties: Property
     <Section tone="light" id="featured">
       <div className="ui-container">
         <SectionHeading title="Featured Properties" action={{ label: "View all", href: "/properties?featured=1&verified=1" }} />
-        <PropertyRail initialProperties={properties} initialTotal={total} query="featured=1&verified=1" label="Featured properties" />
+        <PropertyRail initialProperties={properties} initialTotal={total} query="featured=1&verified=1" label="Featured properties" autoPlay />
       </div>
     </Section>
   );
@@ -282,8 +282,8 @@ export function NewProjectsSection({ projects }: { projects: Project[] }) {
           description="Compare locations, payment plans and handover details."
           action={{ label: "Explore all projects", href: "/projects" }}
         />
-        <MobileScrollGrid label="New housing projects">
-          {projects.slice(0, 4).map((project) => (
+        <MobileScrollGrid label="New housing projects" autoPlay>
+          {projects.slice(0, 8).map((project) => (
             <div key={project.slug} className="home-project-item">
               <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                 <Link href={`/projects/${project.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">
@@ -352,7 +352,7 @@ export function CommercialSection({ properties, total }: { properties: Property[
     <Section tone="light" id="commercial">
       <div className="ui-container">
         <SectionHeading title="Commercial Properties" action={{ label: "View all", href: "/properties/commercial" }} />
-        {properties.length ? <PropertyRail initialProperties={properties} initialTotal={total} query="category=commercial" label="Commercial properties" /> :
+        {properties.length ? <PropertyRail initialProperties={properties} initialTotal={total} query="category=commercial" label="Commercial properties" autoPlay /> :
           <p className="mt-4 text-sm text-ink-muted">No commercial listings available yet.</p>}
       </div>
     </Section>

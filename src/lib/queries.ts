@@ -47,7 +47,8 @@ export type PropertyFilters = {
   ids?: number[];
 };
 
-const COMMERCIAL_CATEGORIES = ["office", "shop", "building", "warehouse", "commercial"];
+const COMMERCIAL_CATEGORIES = ["office", "shop", "building", "warehouse", "commercial", "factory", "other"];
+const PLOT_CATEGORIES = ["plot", "land", "plot_file", "plot_form", "agricultural_land", "commercial_plot", "industrial_land"];
 const HOME_CATEGORIES = ["house", "apartment", "farmhouse", "penthouse"];
 
 /** A listing with its owning account's verification state resolved. */
@@ -111,6 +112,8 @@ export function buildConditions(filters: PropertyFilters): SQL[] {
   if (typeof filters.maxArea === "number") conditions.push(lte(properties.areaSqft, filters.maxArea));
   if (filters.category === "homes") {
     conditions.push(inArray(properties.category, HOME_CATEGORIES));
+  } else if (filters.category === "plot") {
+    conditions.push(inArray(properties.category, PLOT_CATEGORIES));
   } else if (filters.category === "commercial" || filters.commercialOnly) {
     conditions.push(inArray(properties.category, COMMERCIAL_CATEGORIES));
   } else if (filters.category) {

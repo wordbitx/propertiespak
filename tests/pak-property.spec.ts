@@ -111,16 +111,16 @@ test("enquiry and visit forms persist full details in the private admin inbox", 
   expect(storedEnquiry.cityName).toBe("Lahore");
 });
 
-test("Pak Property branding and WhatsApp footer fit at every breakpoint", async ({ page }, testInfo) => {
+test("Properties Pak branding and WhatsApp footer fit at every breakpoint", async ({ page }, testInfo) => {
   await page.goto("/contact", { waitUntil: "domcontentloaded" });
   await page.evaluate(async () => { await document.fonts.ready; });
   for (const width of [1440, 1280, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
-    const footer = page.getByRole("contentinfo", { name: "Pak Property footer" });
+    const footer = page.getByRole("contentinfo", { name: "Properties Pak footer" });
     await footer.scrollIntoViewIfNeeded();
-    await expect(footer.getByText("WordbitX group of companies", { exact: true })).toBeVisible();
+    await expect(footer.getByText("WordbitX | Group of Companies", { exact: true })).toBeVisible();
     const pakistan = footer.getByRole("link", { name: "Contact WordbitX Pakistan on WhatsApp: +92 325 1888841" });
-    const usa = footer.getByRole("link", { name: "Contact WordbitX USA & Intl on WhatsApp: +1 (929) 619-7699" });
+    const usa = footer.getByRole("link", { name: "Contact WordbitX New York, USA on WhatsApp: +1 (929) 619-7699" });
     await expect(pakistan).toHaveAttribute("href", /^https:\/\/wa.me\/923251888841\?/);
     await expect(usa).toHaveAttribute("href", /^https:\/\/wa.me\/19296197699\?/);
     for (const link of [pakistan, usa]) {

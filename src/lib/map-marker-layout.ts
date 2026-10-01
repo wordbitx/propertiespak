@@ -24,7 +24,7 @@ export function mapMarkerLayout(pins: LeafletPin[], zoom: number, bounds: Bounds
     else layout.push({
       id: `@cluster:${key}`, lat: group.reduce((sum, pin) => sum + pin.lat, 0) / group.length,
       lng: group.reduce((sum, pin) => sum + pin.lng, 0) / group.length,
-      title: `${group.length} properties — click to zoom into this area`, members: group,
+      title: "Nearby property locations — click to zoom in", members: group,
     });
   }
   return layout;

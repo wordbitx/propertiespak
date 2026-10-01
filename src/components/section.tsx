@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { IconArrowRight } from "@/components/icons";
+import { useLanguage } from "@/components/language-provider";
 
 export function SectionHeading({
   eyebrow,
@@ -18,6 +21,7 @@ export function SectionHeading({
   align?: "left" | "center";
   as?: "h1" | "h2" | "h3";
 }) {
+  const { t } = useLanguage();
   const isDark = tone === "dark";
   return (
     <div
@@ -30,7 +34,7 @@ export function SectionHeading({
         {eyebrow && (
           <p className={`eyebrow ${isDark ? "text-forest-400" : "text-forest-700"}`}>
             <span className="h-[1px] w-6 bg-current opacity-70" />
-            {eyebrow}
+            {t(eyebrow)}
           </p>
         )}
         <Tag
@@ -39,10 +43,10 @@ export function SectionHeading({
             isDark ? "text-white" : "text-navy-900",
           ].join(" ")}
         >
-          {title}
+          {t(title)}
         </Tag>
         {description && (
-          <p className={["lede mt-4", isDark ? "text-white/70" : ""].join(" ")}>{description}</p>
+          <p className={["lede mt-4", isDark ? "text-white/70" : ""].join(" ")}>{t(description)}</p>
         )}
       </div>
       {action && align !== "center" && (
@@ -53,7 +57,7 @@ export function SectionHeading({
             isDark ? "text-white hover:text-forest-400" : "text-navy-800 hover:text-forest-700",
           ].join(" ")}
         >
-          {action.label}
+          {t(action.label)}
           <IconArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
       )}

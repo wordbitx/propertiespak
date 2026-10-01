@@ -13,11 +13,11 @@ function subscribe(listener: () => void) {
   return () => media.removeEventListener("change", listener);
 }
 
-/** Keep the desktop's original eight-card grid, with one manual swipe rail on phones. */
+/** Show four rows of desktop discovery cards and a paginated, single-row swipe rail on phones. */
 export function HomeExploreProperties({ properties, total }: { properties: PropertyWithDealer[]; total: number }) {
   const mobile = useSyncExternalStore(subscribe, () => window.matchMedia(PHONE).matches, () => false);
-  return mobile ? <PropertyRail initialProperties={properties} initialTotal={total} query="sort=newest" label="Explore properties" /> :
+  return mobile ? <PropertyRail initialProperties={properties} initialTotal={total} query="sort=newest" label="Explore properties" pageSize={16} propertyTypeBelowPrice /> :
     <div className="home-explore-grid mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {properties.map((property, index) => <Reveal key={property.id} delay={index * 50}><PropertyCard property={property} priority={index < 4} /></Reveal>)}
+      {properties.map((property, index) => <Reveal key={property.id} delay={index * 50}><PropertyCard property={property} priority={index < 4} propertyTypeBelowPrice /></Reveal>)}
     </div>;
 }

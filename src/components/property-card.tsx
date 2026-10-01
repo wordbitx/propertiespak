@@ -21,11 +21,13 @@ export function PropertyCard({
   priority = false,
   className = "",
   compact = false,
+  propertyTypeBelowPrice = false,
 }: {
   property: Property | PropertyWithDealer;
   priority?: boolean;
   className?: string;
   compact?: boolean;
+  propertyTypeBelowPrice?: boolean;
 }) {
   const dealerVerified = Boolean((property as PropertyWithDealer).dealerVerified);
   const badge = purposeBadge(property);
@@ -75,11 +77,11 @@ export function PropertyCard({
       </div>
 
       <div className={`flex min-w-0 flex-1 flex-col ${compact ? "p-3.5" : "p-5"}`}>
-        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+        <div className={`property-card-price-block flex min-w-0 ${propertyTypeBelowPrice ? "flex-col items-start gap-1.5" : "flex-wrap items-start justify-between gap-3"}`} data-property-type-stack={propertyTypeBelowPrice ? "true" : undefined}>
           <p className={`font-sans font-bold leading-tight tracking-[-0.03em] text-navy-900 ${compact ? "text-[1.0625rem]" : "text-[1.28rem]"}`}>
             {formatPrice(property.price, property.priceUnit)}
           </p>
-          <span className="mt-0.5 max-w-full rounded-md bg-mist px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          <span className={`max-w-full rounded-md bg-mist px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted ${propertyTypeBelowPrice ? "" : "mt-0.5"}`}>
             {property.propertyType}
           </span>
         </div>
@@ -90,7 +92,7 @@ export function PropertyCard({
           <span className="font-semibold text-forest-700">Score {score.overall}/10</span>
         </p>}
 
-        <h3 className={`mt-2.5 line-clamp-2 font-sans font-semibold leading-snug text-navy-900 ${compact ? "min-h-[2.6em] text-[0.9375rem]" : "text-[1.0625rem]"}`}>
+        <h3 className={`mt-2.5 line-clamp-2 font-sans font-semibold leading-snug text-navy-900 ${compact ? "min-h-[2.6em] text-[0.9375rem]" : propertyTypeBelowPrice ? "min-h-[2.75em] text-[1.0625rem]" : "text-[1.0625rem]"}`}>
           <Link href={`/property/${property.slug}`} className="transition-colors hover:text-forest-700">
             {property.title}
           </Link>
@@ -103,7 +105,7 @@ export function PropertyCard({
           </span>
         </p>
 
-        <div className={`mt-auto ${compact ? "pt-3" : "pt-4"}`}>
+        <div className={compact ? "mt-2 pt-2" : "mt-auto pt-4"}>
           <div className="hairline" />
           <div className={`flex flex-wrap items-center gap-y-2 font-medium text-ink ${compact ? "mt-3 gap-x-3 text-[0.75rem]" : "mt-3.5 gap-x-4 text-[0.8125rem]"}`}>
             {property.bedrooms > 0 && (

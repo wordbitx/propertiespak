@@ -47,16 +47,21 @@ export const SEARCH_GROUPS: { value: SearchGroup; label: string }[] = [
   { value: "plot", label: "Plots" },
   { value: "commercial", label: "Commercial" },
 ];
-export const HOME_SEARCH_TYPES = ["House", "Villa", "Upper Portion", "Lower Portion", "Farmhouse", "Penthouse", "Apartment", "Room"];
-export const COMMERCIAL_SEARCH_TYPES = ["Office", "Shop", "Commercial Building", "Warehouse"];
+export const HOME_SEARCH_TYPES = ["House", "Upper Portion", "Farmhouse", "Penthouse", "Apartment", "Lower Portion", "Room"] as const;
+export const PLOT_SEARCH_TYPES = ["Plot", "Agricultural Land", "Plot File", "Commercial Plot", "Industrial Land", "Plot Form"] as const;
+export const COMMERCIAL_SEARCH_TYPES = ["Office", "Warehouse", "Commercial Building", "Shop", "Factory", "Other"] as const;
 export function typesForGroup(group: SearchGroup) {
-  if (group === "homes") return HOME_SEARCH_TYPES;
-  if (group === "plot") return ["Plot"];
-  if (group === "commercial") return COMMERCIAL_SEARCH_TYPES;
-  return [...HOME_SEARCH_TYPES, "Plot", ...COMMERCIAL_SEARCH_TYPES];
+  if (group === "homes") return [...HOME_SEARCH_TYPES];
+  if (group === "plot") return [...PLOT_SEARCH_TYPES];
+  if (group === "commercial") return [...COMMERCIAL_SEARCH_TYPES];
+  return [...HOME_SEARCH_TYPES, ...PLOT_SEARCH_TYPES, ...COMMERCIAL_SEARCH_TYPES];
 }
 export function searchTypeLabel(type: string) {
-  return type === "Apartment" ? "Flat / Apartment" : type === "Farmhouse" ? "Farm House" : type;
+  if (type === "Apartment") return "Flat / Apartment";
+  if (type === "Farmhouse") return "Farm House";
+  if (type === "Plot") return "Residential Plot";
+  if (type === "Commercial Building") return "Building";
+  return type;
 }
 export function areaFactor(unit: SearchAreaUnit) {
   return unit === "marla" ? 225 : unit === "kanal" ? 4500 : 1;
