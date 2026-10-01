@@ -11,7 +11,6 @@ import {
 } from "@/components/icons";
 import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/section";
-import { WordbitxSection } from "@/components/wordbitx-section";
 import type { Testimonial } from "@/db/schema";
 import { investmentImage } from "@/lib/images";
 import { siteImages } from "@/lib/site-images";
@@ -280,25 +279,22 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
 
 export function CtaSection() {
   return (
-    <>
-      <WordbitxSection />
-      <section className="relative isolate overflow-hidden bg-navy-900 py-14 sm:py-16 lg:py-20" aria-labelledby="closing-cta-heading" data-testid="closing-cta">
-        <ResilientImage src={investmentImage.src} alt="" width={1440} height={810} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/90 to-navy-900/70" />
-        <div className="ui-container relative z-10">
-          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="min-w-0 max-w-2xl">
-              <p className="eyebrow text-forest-400">Make your next move</p>
-              <h2 id="closing-cta-heading" className="display-2 mt-4 text-white">Find the Right Property. Make the Smarter Move.</h2>
-              <p className="mt-4 text-base leading-7 text-white/70">Explore properties, compare opportunities and make more informed real-estate decisions across Pakistan.</p>
-            </div>
-            <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <Link href="/properties" className="btn btn-green min-h-12">Explore Properties <IconArrowRight className="h-4 w-4 shrink-0" /></Link>
-              <Link href="/properties?featured=1" className="btn btn-ghost-light min-h-12">Start Your Search</Link>
-            </div>
+    <section className="relative isolate overflow-hidden bg-navy-900 py-14 sm:py-16 lg:py-20" aria-labelledby="closing-cta-heading" data-testid="closing-cta">
+      <ResilientImage src={investmentImage.src} alt="" width={1440} height={810} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+      <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/90 to-navy-900/70" />
+      <div className="ui-container relative z-10">
+        <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="min-w-0 max-w-2xl">
+            <p className="eyebrow text-forest-400">Make your next move</p>
+            <h2 id="closing-cta-heading" className="display-2 mt-4 text-white">Find the Right Property. Make the Smarter Move.</h2>
+            <p className="mt-4 text-base leading-7 text-white/70">Explore properties, compare opportunities and make more informed real-estate decisions across Pakistan.</p>
+          </div>
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <Link href="/properties" className="btn btn-green min-h-12">Explore Properties <IconArrowRight className="h-4 w-4 shrink-0" /></Link>
+            <Link href="/properties?featured=1" className="btn btn-ghost-light min-h-12">Start Your Search</Link>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

@@ -6,7 +6,7 @@ const CONTACTS = [
   { label: "New York, USA", number: SITE.companyPhoneUs, digits: "19296197699" },
 ];
 
-/** Compact contacts reused in the elevated company section and site-wide footer. */
+/** Company WhatsApp contacts shown in the site-wide footer. */
 export function WordbitxContacts({ light = false }: { light?: boolean }) {
   const message = encodeURIComponent("Hi WordbitX, I would like to know more about the Properties Pak platform.");
   return (
@@ -20,17 +20,5 @@ export function WordbitxContacts({ light = false }: { light?: boolean }) {
         </div>
       ))}
     </div>
-  );
-}
-
-/** The company behind Properties Pak, deliberately placed BEFORE the closing property CTA. */
-export function WordbitxSection() {
-  return (
-    <section id="wordbitx" className="wordbitx-section wordbitx-credit-section" aria-label="Platform technology credit" data-testid="wordbitx-company">
-      <div className="ui-container wordbitx-credit-bar">
-        <span>Designed &amp; developed by</span>
-        <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="wordbitx-credit-link">Wordbit<span>X</span> <span className="wordbitx-company-suffix">| SMC- Pvt. Ltd.</span></a>
-      </div>
-    </section>
   );
 }

@@ -9,15 +9,20 @@ import type { PropertyWithDealer } from "@/lib/queries";
 type RailProperty = Property | PropertyWithDealer;
 const PAGE_SIZE = 8;
 
-/** Native horizontal scrolling: no timer, animation loop or automatic advancement. */
-export function PropertyRail({ initialProperties, initialTotal, query, label }: {
+/** Native horizontal scrolling with optional, user-friendly paused auto-advancement. */
+export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false }: {
   initialProperties: RailProperty[]; initialTotal: number; query?: string; label: string;
+  autoPlay?: boolean; pageSize?: number; propertyTypeBelowPrice?: boolean;
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLLIElement | null>(null);
   const requestRef = useRef<AbortController | null>(null);
+  const interactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pageRef = useRef(1);
   const busyRef = useRef(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [interactionPaused, setInteractionPaused] = useState(false);
   const [items, setItems] = useState(initialProperties);
   const [total, setTotal] = useState(initialTotal);
   const [loading, setLoading] = useState(false);
@@ -29,6 +34,15 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
     if (viewport) setPosition({ left: viewport.scrollLeft, width: viewport.clientWidth, full: viewport.scrollWidth });
   }, []);
 
+  const pauseForUser = useCallback(() => {
+    setInteractionPaused(true);
+    if (interactionTimerRef.current) clearTimeout(interactionTimerRef.current);
+    interactionTimerRef.current = setTimeout(() => {
+      interactionTimerRef.current = null;
+      setInteractionPaused(false);
+    }, 5000);
+  }, []);
+
   const loadMore = useCallback(async () => {
     if (!query || busyRef.current || items.length >= total) return false;
     busyRef.current = true;
@@ -38,7 +52,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
     try {
       const params = new URLSearchParams(query);
       params.set("page", String(pageRef.current + 1));
-      params.set("pageSize", String(PAGE_SIZE));
+      params.set("pageSize", String(pageSize));
       const response = await fetch(`/api/properties?${params}`, { signal: controller.signal });
       const payload = await response.json() as { ok?: boolean; items?: RailProperty[]; total?: number; error?: string };
       if (!response.ok || !payload.ok || !Array.isArray(payload.items)) throw new Error("Unable to load more properties.");
@@ -54,9 +68,12 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
       busyRef.current = false;
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, [items.length, total, query]);
+  }, [items.length, total, query, pageSize]);
 
-  useEffect(() => () => requestRef.current?.abort(), []);
+  useEffect(() => () => {
+    requestRef.current?.abort();
+    if (interactionTimerRef.current) clearTimeout(interactionTimerRef.current);
+  }, []);
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -75,6 +92,39 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
     return () => observer.disconnect();
   }, [items.length, total, error, loadMore, query]);
 
+  useEffect(() => {
+    if (!autoPlay || !query || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    let visible = false;
+    const visibility = new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting);
+    }, { threshold: 0.15 });
+    visibility.observe(viewport);
+
+    const timer = window.setInterval(() => {
+      const rail = viewportRef.current;
+      if (!rail || !visible || document.hidden || hovered || focused || interactionPaused || error || busyRef.current) return;
+      const maxScroll = rail.scrollWidth - rail.clientWidth;
+      if (maxScroll <= 2) return;
+      const atEnd = rail.scrollLeft >= maxScroll - 2;
+      if (atEnd) {
+        if (items.length < total) void loadMore();
+        else rail.scrollTo({ left: 0, behavior: "smooth" });
+        return;
+      }
+      const track = rail.querySelector<HTMLElement>(".property-rail-track");
+      const card = rail.querySelector<HTMLElement>(".property-rail-item");
+      const gap = track ? parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 14 : 14;
+      rail.scrollBy({ left: (card?.getBoundingClientRect().width ?? 280) + gap, behavior: "smooth" });
+    }, 4200);
+
+    return () => {
+      window.clearInterval(timer);
+      visibility.disconnect();
+    };
+  }, [autoPlay, query, items.length, total, loadMore, hovered, focused, interactionPaused, error]);
+
   async function advance(direction: -1 | 1) {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -88,9 +138,17 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
   }
 
   return (
-    <div className="property-rail" data-testid="property-rail" data-rail-label={label}>
+    <div className="property-rail" data-testid="property-rail" data-rail-label={label} data-auto-play={autoPlay ? "true" : undefined}
+      onMouseEnter={() => { if (autoPlay) setHovered(true); }}
+      onMouseLeave={() => { if (autoPlay) setHovered(false); }}
+      onFocusCapture={() => { if (autoPlay) setFocused(true); }}
+      onBlurCapture={(event) => {
+        if (autoPlay && !event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
+      }}
+      onPointerDown={() => { if (autoPlay) pauseForUser(); }}
+      onWheel={() => { if (autoPlay) pauseForUser(); }}>
       <div className="property-rail-toolbar">
-        <p>{total.toLocaleString("en-PK")} {total === 1 ? "property" : "properties"}<span> · Swipe or use the arrows</span></p>
+        <p>{total.toLocaleString("en-PK")} {total === 1 ? "property" : "properties"}<span> · {autoPlay ? "Auto-advances with pauses; swipe or use the arrows" : "Swipe or use the arrows"}</span></p>
         <div className="property-rail-controls">
           <button type="button" aria-label={`Previous ${label.toLowerCase()}`} disabled={position.left < 2} onClick={() => void advance(-1)}><IconArrowRight className="h-4 w-4 rotate-180" /></button>
           <button type="button" aria-label={`Next ${label.toLowerCase()}`} disabled={position.width > 0 && position.left + position.width >= position.full - 2 && items.length >= total} onClick={() => void advance(1)}><IconArrowRight className="h-4 w-4" /></button>
@@ -98,7 +156,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label }: 
       </div>
       <div ref={viewportRef} className="property-rail-viewport" role="region" aria-label={label} tabIndex={0} onScroll={measure}>
         <ul className="property-rail-track">
-          {items.map((property) => <li key={property.id} className="property-rail-item"><PropertyCard property={property} compact /></li>)}
+          {items.map((property) => <li key={property.id} className="property-rail-item" data-property-featured={property.featured ? "true" : "false"} data-property-verified={property.verified ? "true" : "false"}><PropertyCard property={property} compact propertyTypeBelowPrice={propertyTypeBelowPrice} /></li>)}
           <li ref={endRef} aria-hidden="true" className="property-rail-end" />
         </ul>
       </div>

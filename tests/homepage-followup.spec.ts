@@ -25,28 +25,34 @@ test("generous local hero, header-only map, relocated popular searches and respo
     } else {
       await expect(page.locator("#markets")).toBeVisible();
       await expect(page.locator("#explore .home-explore-grid")).toBeVisible();
-      await expect(page.locator("#explore article")).toHaveCount(8);
+      await expect(page.locator("#explore article")).toHaveCount(16);
+      if (width === 1440) {
+        const rows = await page.locator("#explore article").evaluateAll((cards) =>
+          new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
+        );
+        expect(rows).toBe(4);
+      }
     }
   }
   await expect.poll(() => page.getByTestId("hero-photograph").evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   expect(failures).toEqual([]);
 });
 
-test("mobile Explore is one manual row and loads beyond its first eight listings", async ({ page }) => {
+test("mobile Explore is one manual row with four desktop rows and paginates further listings", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const rail = page.locator('#explore [data-testid="property-rail"]');
   const viewport = rail.getByRole("region", { name: "Explore properties", exact: true });
   await viewport.scrollIntoViewIfNeeded();
-  await expect(rail.locator("article")).toHaveCount(8);
+  await expect(rail.locator("article")).toHaveCount(16);
   expect(await rail.locator(".property-rail-track").evaluate((element) => getComputedStyle(element).flexWrap)).toBe("nowrap");
   const start = await viewport.evaluate((element) => element.scrollLeft);
   await page.waitForTimeout(450);
   expect(await viewport.evaluate((element) => element.scrollLeft)).toBe(start);
   await viewport.evaluate((element) => { element.scrollLeft = element.scrollWidth; });
-  await expect.poll(() => rail.locator("article").count()).toBeGreaterThan(8);
+  await expect.poll(() => rail.locator("article").count()).toBeGreaterThan(16);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(page.locator("#explore article")).toHaveCount(8);
+  await expect(page.locator("#explore article")).toHaveCount(16);
 });
 
 test("viewed properties persist in ordered, deduplicated history; Clear Recent only clears history", async ({ page }) => {
@@ -114,12 +120,20 @@ test("header map clusters large datasets and mouse dragging never triggers hover
   const dialog = page.getByRole("dialog", { name: "Property map", exact: true });
   const map = dialog.locator(".leaflet-container");
   await expect(map).toBeVisible();
+  await expect(dialog.locator(".header-map-status")).not.toContainText(/[0-9]/);
   await expect.poll(async () => Number(await map.getAttribute("data-map-rendered-markers"))).toBeGreaterThan(0);
   await expect.poll(() => dialog.locator(".ewx-cluster").count()).toBeGreaterThan(0);
   const count = await map.getAttribute("data-map-rendered-markers");
   expect(Number(count)).toBeLessThan(50);
+  const zoomBeforeWheel = Number(await map.getAttribute("data-map-zoom"));
+  await map.hover();
+  await page.mouse.wheel(0, 160);
+  await expect.poll(() => map.getAttribute("data-map-zoom")).not.toBe(String(zoomBeforeWheel));
   await map.evaluate((element) => { element.dataset.mapInstanceCheck = "same"; });
   const cluster = dialog.locator(".ewx-cluster").first();
+  await expect(cluster.locator(".ewx-cluster-pin svg")).toHaveCount(1);
+  await expect(cluster).not.toContainText(/[0-9]/);
+  await expect(cluster).toHaveAttribute("title", /nearby property locations/i);
   await cluster.hover();
   await expect(map.locator(".leaflet-popup")).toHaveCount(0);
   const before = await map.getAttribute("data-map-center");

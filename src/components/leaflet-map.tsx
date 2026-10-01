@@ -66,6 +66,11 @@ function pinSvg(color: string) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="41" viewBox="0 0 30 41"><path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill="${color}"/><circle cx="15" cy="15" r="6" fill="#fff"/></svg>`;
 }
 
+/** Count-free location marker for nearby listings, styled like a small premium pin. */
+function clusterPinSvg() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="41" viewBox="0 0 30 41"><path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill="#06274a"/><circle cx="15" cy="15" r="8.5" fill="#fff"/><circle cx="10.5" cy="15" r="1.5" fill="#0e7490"/><circle cx="15" cy="15" r="1.5" fill="#0e7490"/><circle cx="19.5" cy="15" r="1.5" fill="#0e7490"/></svg>`;
+}
+
 /** 1×1 transparent pixel — failed tiles vanish instead of showing broken art. */
 const TRANSPARENT_TILE =
   "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>');
@@ -259,17 +264,20 @@ export function LeafletMap({
         zoomControl: true,
         // In picker mode the map tap moves the pin, so the pin's popup must stay open.
         closePopupOnClick: !onPick,
+        // Smooth, direct mouse-wheel zoom alongside drag, touch and on-map controls.
+        dragging: true,
         scrollWheelZoom: true,
-        wheelDebounceTime: 80,
-        wheelPxPerZoomLevel: 100,
+        wheelDebounceTime: 55,
+        wheelPxPerZoomLevel: 80,
         zoomSnap: 0,            // Full fractional continuous zoom without discrete jumping
-        zoomDelta: 1,
+        zoomDelta: 0.5,
         touchZoom: true,
         doubleClickZoom: true,
         bounceAtZoomLimits: false,
         inertia: true,
-        inertiaDeceleration: 3000,
-        inertiaMaxSpeed: 2500,
+        inertiaDeceleration: 2200,
+        inertiaMaxSpeed: 1800,
+        easeLinearity: 0.2,
         zoomAnimation: true,
         fadeAnimation: false,
         markerZoomAnimation: true,
@@ -507,10 +515,10 @@ export function LeafletMap({
       let activeId: string | number | null = null;
       for (const pin of visible as LayoutPin[]) {
         const clustered = !!pin.members;
-        const html = clustered ? `<span class="ewx-cluster-count">${pin.members!.length}</span>` : `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price"${!pin.active && pin.color ? ` style="border-left:3px solid ${pin.color}"` : ""}>${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`;
+        const html = clustered ? `<div class="ewx-cluster-pin">${clusterPinSvg()}</div>` : `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price"${!pin.active && pin.color ? ` style="border-left:3px solid ${pin.color}"` : ""}>${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`;
         const popup = clustered ? "" : pinPopupHtml(pin);
         const icon = () => Lmod.divIcon({ className: clustered ? "ewx-cluster" : "ewx-pin", html,
-          iconSize: clustered ? [44, 44] : [30, 41], iconAnchor: clustered ? [22, 22] : [15, 41], popupAnchor: [0, -38] });
+          iconSize: [30, 41], iconAnchor: [15, 41], popupAnchor: [0, -38] });
         let record = records.get(pin.id);
         if (!record) {
           const marker = Lmod.marker([pin.lat, pin.lng], { icon: icon(), title: pin.title, riseOnHover: !clusterPins }).addTo(layer);
@@ -527,7 +535,7 @@ export function LeafletMap({
                 const links = live.pin.members.filter((item) => item.href?.startsWith("/property/")).slice(0, 5)
                   .map((item) => `<li><a href="${escapeText(item.href!)}">${escapeText(item.title)}</a></li>`).join("");
                 Lmod.popup({ autoPan: false, maxWidth: 290 }).setLatLng([live.pin.lat, live.pin.lng])
-                  .setContent(`<div class="ewx-popup"><b>${live.pin.members.length} properties in this area</b><ul class="ewx-cluster-list">${links}</ul><span class="ewx-muted">Use the property list to browse all matching listings.</span></div>`).openOn(map);
+                  .setContent(`<div class="ewx-popup"><b>Nearby listings</b><ul class="ewx-cluster-list">${links}</ul><span class="ewx-muted">Pin locations are approximate. Use the property list to explore matching listings.</span></div>`).openOn(map);
                 return;
               }
               map.fitBounds(grouped.pad(0.2), { padding: [44, 44], maxZoom: Math.min(19, map.getZoom() + 3), animate: true });

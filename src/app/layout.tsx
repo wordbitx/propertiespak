@@ -4,9 +4,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LanguageProvider } from "@/components/language-provider";
 import { FavoritesProvider } from "@/components/favorites-provider";
 import { CompareProvider } from "@/components/compare-provider";
 import { CompareBar } from "@/components/compare-bar";
+import { FloatingWhatsApp } from "@/components/floating-whatsapp";
 import { JsonLd } from "@/components/json-ld";
 import { getSessionUserId } from "@/lib/auth";
 import { SITE } from "@/lib/constants";
@@ -162,16 +164,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="bg-white text-ink antialiased" suppressHydrationWarning>
         {/* Runs straight from the HTML, before and independently of React, so the header turns solid on scroll even if hydration is slow or a JS chunk fails. */}
         <script dangerouslySetInnerHTML={{ __html: HEADER_SCROLL_SCRIPT }} />
-        <FavoritesProvider>
-          <CompareProvider>
-            <SiteHeader isAuthenticated={userId !== null} />
-            <main id="main" className="min-h-screen">
-              {children}
-            </main>
-            <SiteFooter />
-            <CompareBar />
-          </CompareProvider>
-        </FavoritesProvider>
+        <LanguageProvider>
+          <FavoritesProvider>
+            <CompareProvider>
+              <SiteHeader isAuthenticated={userId !== null} />
+              <main id="main" className="min-h-screen">
+                {children}
+              </main>
+              <SiteFooter />
+              <CompareBar />
+              <FloatingWhatsApp />
+            </CompareProvider>
+          </FavoritesProvider>
+        </LanguageProvider>
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
       </body>

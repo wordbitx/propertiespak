@@ -67,10 +67,15 @@ test("homepage is compact, retains Explore, removes duplicate dealers and never 
   page.on("pageerror", (error) => failures.push(error.message));
   page.on("console", (message) => { if (message.type() === "error" && /hydrat|React|runtime/i.test(message.text())) failures.push(message.text()); });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(visibleTestId(page, "home-hero").getByRole("heading", { level: 1 })).toHaveText("Find Property for Sale & Rent in Pakistan");
+  await expect(visibleTestId(page, "home-hero").locator(".hero-headline-desktop")).toHaveText(/Find Your Future\.\s*Invest With Clarity\./);
+  await expect(visibleTestId(page, "home-hero").getByText("Pakistan’s Premium Property Marketplace", { exact: true })).toBeVisible();
+  await expect(visibleTestId(page, "home-hero").getByRole("link", { name: "List Your Property", exact: true })).toHaveAttribute("href", "/list-property");
   await expect(page.getByRole("heading", { name: "Dealers & Agencies", exact: true })).toHaveCount(1);
   await expect(page.getByRole("heading", { name: /Dealers & agencies behind/ })).toHaveCount(0);
-  await expect(page.locator("#explore article")).toHaveCount(8);
+  await expect(page.getByRole("heading", { name: "How different buyers would use Properties Pak", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Property across Pakistan's major markets", exact: true })).toHaveCount(0);
+  await expect(page.getByText("Browse city markets, property types and area guides.", { exact: true })).toHaveCount(0);
+  await expect(page.locator("#explore article")).toHaveCount(16);
   await expect(page.locator("#explore .ui-container > .grid")).toHaveClass(/xl:grid-cols-4/);
   for (const width of [1440, 1280, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
@@ -86,20 +91,27 @@ test("homepage is compact, retains Explore, removes duplicate dealers and never 
   expect(failures).toEqual([]);
 });
 
-test("featured and commercial rails are manual and paginate all their inventory", async ({ page }) => {
+test("featured rail auto-advances with pauses while both rails remain manually controllable", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   for (const section of ["featured", "commercial"]) {
     const rail = page.locator(`#${section} [data-testid="property-rail"]`);
     const viewport = rail.getByRole("region");
     await viewport.scrollIntoViewIfNeeded();
+    await expect(rail).toHaveAttribute("data-auto-play", "true");
+    await rail.hover();
     const start = await viewport.evaluate((element) => element.scrollLeft);
     await page.waitForTimeout(700);
     expect(await viewport.evaluate((element) => element.scrollLeft)).toBe(start);
     expect(await viewport.evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
     const initial = await rail.locator("article").count();
     expect(initial).toBe(8);
+    if (section === "featured") {
+      await expect(rail.locator('.property-rail-item[data-property-featured="false"]')).toHaveCount(0);
+      await expect(rail.locator('.property-rail-item[data-property-verified="false"]')).toHaveCount(0);
+    }
     const query = section === "featured" ? "featured=1&verified=1" : "category=commercial";
     const inventory = await (await page.request.get(`/api/properties?${query}&pageSize=48`)).json();
+    if (section === "featured") expect(inventory.items.every((property: { featured: boolean; verified: boolean }) => property.featured && property.verified)).toBe(true);
     expect(inventory.total).toBeGreaterThan(8);
     await rail.getByRole("button", { name: /^Next/ }).click();
     await expect.poll(() => viewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
@@ -214,11 +226,11 @@ test("range validation, area conversion, reset and short-screen focus/scroll cle
   expect(await page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
 });
 
-test("popular sale/rent city and type browsing sits above tools with real counts", async ({ page }) => {
+test("popular sale/rent city and type browsing sits above projects with real counts", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const popular = page.locator("#popular-searches:visible");
   await popular.scrollIntoViewIfNeeded();
-  expect(await popular.evaluate((element) => !!(element.compareDocumentPosition(element.closest(".home-page")!.querySelector("#tools")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+  expect(await popular.evaluate((element) => !!(element.compareDocumentPosition(element.closest(".home-page")!.querySelector("#projects")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
   await popular.getByRole("group", { name: "Popular cities", exact: true }).getByRole("button", { name: "Karachi", exact: true }).click();
   await popular.getByRole("button", { name: "To Rent", exact: true }).click();
   await popular.getByRole("group", { name: "Popular property types", exact: true }).getByRole("button", { name: "Flats", exact: true }).click();
@@ -248,7 +260,20 @@ test("mobile header map opens real properties, pinches in place and closes clean
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await visibleTestId(page, "header-map").click();
   const dialog = page.getByRole("dialog", { name: "Property map", exact: true });
+  await expect(dialog.getByRole("group", { name: "Choose property map location", exact: true })).toBeVisible();
+  await dialog.getByRole("button", { name: "Explore Pakistan", exact: true }).click();
+  await expect(dialog.getByRole("group", { name: "Choose property map location", exact: true })).toHaveCount(0);
   await dialog.getByLabel("City", { exact: true }).selectOption("lahore");
+  const list = dialog.locator(".map-view-list-track--horizontal");
+  await expect(dialog.getByText("Properties on map", { exact: true })).toBeVisible();
+  expect(await list.evaluate((element) => getComputedStyle(element).display)).toBe("flex");
+  expect(await list.evaluate((element) => element.scrollWidth)).toBeGreaterThan(await list.evaluate((element) => element.clientWidth));
+  const firstCard = list.locator("li").first();
+  expect(await firstCard.evaluate((element) => getComputedStyle(element).borderTopColor)).toBe("rgb(23, 58, 93)");
+  expect(await firstCard.evaluate((element) => parseFloat(getComputedStyle(element).borderTopWidth))).toBeGreaterThan(1);
+  expect(await firstCard.evaluate((element) => getComputedStyle(element).backgroundImage)).toContain("linear-gradient");
+  await dialog.getByRole("button", { name: "Next properties on map", exact: true }).click();
+  await expect.poll(() => list.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   const map = dialog.locator(".leaflet-container");
   await expect(map).toBeVisible();
   await expect.poll(() => dialog.locator(".ewx-pin, .ewx-cluster").count()).toBeGreaterThan(0);
@@ -269,6 +294,18 @@ test("mobile header map opens real properties, pinches in place and closes clean
   await expect(dialog).toHaveCount(0);
   expect(await page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
   await expect(visibleTestId(page, "header-map")).toBeFocused();
+});
+
+test("header map location permission focuses the nearest supported city", async ({ page }) => {
+  await page.context().grantPermissions(["geolocation"]);
+  await page.context().setGeolocation({ latitude: 31.5204, longitude: 74.3587, accuracy: 30 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await visibleTestId(page, "header-map").click();
+  const dialog = page.getByRole("dialog", { name: "Property map", exact: true });
+  await dialog.getByRole("button", { name: "Use my location", exact: true }).click();
+  await expect(dialog.getByLabel("City", { exact: true })).toHaveValue("lahore");
+  await expect(dialog.locator(".header-map-status")).toContainText("Showing Lahore around your location.");
+  await expect.poll(async () => Number(await dialog.locator(".leaflet-container").getAttribute("data-map-zoom"))).toBeGreaterThan(8);
 });
 
 test("desktop utility links, mobile support/advertise and genuine Sell entry are functional", async ({ page }) => {

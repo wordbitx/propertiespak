@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand-lockup";
+import { useLanguage } from "@/components/language-provider";
 import {
   IconArrowRight,
   IconFacebook,
@@ -78,37 +81,37 @@ const COLUMNS = [
 ];
 
 export function SiteFooter() {
+  const { t } = useLanguage();
   return (
-    <footer className="border-t border-white/10 bg-navy-950 text-white/65" aria-label="Properties Pak footer">
+    <footer className="border-t border-white/10 bg-navy-950 text-white/65" aria-label={t("Properties Pak footer")}>
       <div className="ui-container py-12 sm:py-16">
         <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,2fr)] lg:gap-14">
           <div className="min-w-0">
             <Link href="/" aria-label={`${SITE.name} — ${SITE.tagline}`} className="inline-block">
-              <BrandLockup light large />
+              <BrandLockup light large transparent />
             </Link>
             <p className="mt-5 max-w-sm text-[0.875rem] leading-7">
-              Property discovery, location intelligence and investment tools for Pakistan. Find a place for the way you
-              live, work and invest.
+              {t("Property discovery, location intelligence and investment tools for Pakistan. Find a place for the way you live, work and invest.")}
             </p>
             <Link href="/list-property" className="mt-4 inline-flex items-center gap-2 text-[0.875rem] font-semibold text-forest-400 transition-colors hover:text-white">
-              List your property <IconArrowRight className="h-4 w-4" />
+              {t("List your property")} <IconArrowRight className="h-4 w-4" />
             </Link>
             <div className="mt-8 max-w-sm">
-              <h2 className="font-sans text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-white/90">Market updates</h2>
-              <p className="mt-2 text-[0.8125rem] leading-relaxed">Register your interest in property news and guides.</p>
+              <h2 className="font-sans text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-white/90">{t("Market updates")}</h2>
+              <p className="mt-2 text-[0.8125rem] leading-relaxed">{t("Register your interest in property news and guides.")}</p>
               <NewsletterForm />
             </div>
           </div>
 
-          <nav aria-label="Footer navigation" className="grid min-w-0 grid-cols-2 gap-x-6 gap-y-8 xl:grid-cols-4">
+          <nav aria-label={t("Footer navigation")} className="grid min-w-0 grid-cols-2 gap-x-6 gap-y-8 xl:grid-cols-4">
             {COLUMNS.map((column) => (
               <div key={column.title} className="min-w-0">
-                <h2 className="font-sans text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-white/90">{column.title}</h2>
+                <h2 className="font-sans text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-white/90">{t(column.title)}</h2>
                 <ul className="mt-4 space-y-2.5">
                   {column.links.map((link) => (
                     <li key={link.href}>
                       <Link href={link.href} className="block break-words text-[0.8125rem] leading-6 transition-colors hover:text-forest-400">
-                        {link.label}
+                        {t(link.label)}
                       </Link>
                     </li>
                   ))}
@@ -120,12 +123,12 @@ export function SiteFooter() {
 
         <div className="footer-company-credit">
           <div className="min-w-0">
-            <p className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">A WordbitX Product</p>
-            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400">WordbitX <span className="text-[0.8125rem] font-normal">| SMC- Pvt. Ltd.</span></a>
+            <p className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">{t("A WordbitX Product")}</p>
+            <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer" aria-label="WordbitX | Group of Companies" className="mt-2 inline-block font-sans text-[0.9375rem] font-semibold text-white hover:text-forest-400"><span>Wordbit<span className="footer-wordbitx-x text-forest-400">X</span></span> <span className="text-[0.8125rem] font-normal">| {t("Group of Companies")}</span></a>
             <a href={`mailto:${SITE.companyEmail}`} className="mt-2 flex items-center gap-2 text-[0.75rem] text-white/60 hover:text-white"><IconMail className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{SITE.companyEmail}</span></a>
             {COMPANY_SOCIAL.length > 0 && (
               <div className="mt-5">
-                <h2 className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">Follow WordbitX</h2>
+                <h2 className="text-[0.625rem] font-semibold uppercase tracking-[0.13em] text-white/50">{t("Follow WordbitX")}</h2>
                 <ul className="mt-3 flex flex-wrap items-center gap-2.5">
                   {COMPANY_SOCIAL.map(({ platform, href, Icon }) => (
                     <li key={platform}>
@@ -156,9 +159,9 @@ export function SiteFooter() {
         <div className="mt-6 flex min-w-0 flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:flex-wrap md:items-center md:justify-between">
           <p className="text-[0.75rem] text-white/50">© {new Date().getFullYear()} {SITE.name}. A WordbitX Product.</p>
           <div className="flex min-w-0 flex-wrap gap-x-5 gap-y-3 text-[0.75rem]">
-            <Link href="/contact" className="hover:text-white">Contact</Link>
-            <a href={SITE.url} className="hover:text-white">Official platform</a>
-            <Link href="/admin" className="hover:text-white">Admin</Link>
+            <Link href="/contact" className="hover:text-white">{t("Contact")}</Link>
+            <a href={SITE.url} className="hover:text-white">{t("Official platform")}</a>
+            <Link href="/admin" className="hover:text-white">{t("Admin")}</Link>
           </div>
         </div>
       </div>

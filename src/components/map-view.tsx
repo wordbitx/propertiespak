@@ -4,8 +4,9 @@ import { ResilientImage } from "@/components/resilient-image";
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
-import { IconClose, IconMap, IconPin } from "@/components/icons";
+import { useMemo, useRef, useState } from "react";
+import { IconArrowRight, IconClose, IconMap, IconPin } from "@/components/icons";
+import { useLanguage } from "@/components/language-provider";
 import { formatArea, formatPrice, formatPriceShort } from "@/lib/format";
 import { findSocietyMap, layersContaining } from "@/lib/society-maps";
 
@@ -34,6 +35,7 @@ export function pinColorFor(propertyType: string): string {
 
 /** Legend for the category colours, shown under multi-pin overview maps. */
 function PinLegend() {
+  const { t } = useLanguage();
   const items = [
     { color: "#06274a", label: "Houses & villas" },
     { color: "#7c3aed", label: "Apartments" },
@@ -49,7 +51,7 @@ function PinLegend() {
             <path d="M15 0C6.7 0 0 6.7 0 15c0 10.6 15 26 15 26s15-15.4 15-26C30 6.7 23.3 0 15 0z" fill={item.color} />
             <circle cx="15" cy="15" r="6" fill="#fff" />
           </svg>
-          {item.label}
+          {t(item.label)}
         </span>
       ))}
     </div>
@@ -57,13 +59,16 @@ function PinLegend() {
 }
 
 export function MapView({
-  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false, fullScreen = false,
+  properties, center, zoom = 14, className = "", mapTitle, mapSubtitle, nearby = false, autoFit = false, fullScreen = false, onLocate,
 }: {
   properties: MapProperty[];
   center: { lat: number; lng: number };
   zoom?: number; className?: string; mapTitle?: string; mapSubtitle?: string; nearby?: boolean; autoFit?: boolean; fullScreen?: boolean;
+  onLocate?: (lat: number, lng: number, accuracy: number) => void;
 }) {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<number | null>(nearby || fullScreen ? null : properties[0]?.id ?? null);
+  const listRef = useRef<HTMLUListElement | null>(null);
   const datasetKey = useMemo(() => properties.map((property) => `${property.id}:${property.lat}:${property.lng}`).join("|"), [properties]);
   const [focus, setFocus] = useState<{ key: string; lat: number; lng: number; zoom: number } | null>(null);
   const focused = focus?.key === datasetKey ? focus : null;
@@ -89,7 +94,7 @@ export function MapView({
           center={focused ?? center}
           zoom={focused?.zoom ?? zoom}
           clusterPins={fullScreen && properties.length > 20}
-          heightClass={fullScreen ? "h-[45dvh] lg:h-[calc(100dvh-190px)]" : "h-[420px] sm:h-[580px]"}
+          heightClass={fullScreen ? "h-[36dvh] min-h-[200px] lg:h-[calc(100dvh-470px)]" : "h-[420px] sm:h-[580px]"}
           allowFullscreen={!fullScreen}
           pins={pins}
           fitToPins={nearby || autoFit}
@@ -97,6 +102,7 @@ export function MapView({
           society={society}
           header={fullScreen ? null : { label: nearby ? "Nearby properties" : "Property map", subtitle: mapSubtitle ?? active?.locationArea, title: mapTitle }}
           onPinSelect={(id) => setSelected(Number(id))}
+          onLocate={onLocate}
         />
         {!nearby && properties.length > 1 && <PinLegend />}
         {active && !fullScreen && (
@@ -110,20 +116,27 @@ export function MapView({
           </div>
         )}
       </div>
-      <div className="map-view-list flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-2 shadow-soft">
+      <div className={`map-view-list flex h-full min-w-0 flex-col rounded-panel border border-soft bg-white p-2 shadow-soft ${fullScreen ? "map-view-list--horizontal" : ""}`}>
         <div className="flex items-center justify-between gap-2 px-3 py-3">
           <p className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-navy-900">
             <IconMap className="h-4 w-4 shrink-0 text-forest-600" />
-            {properties.length} {nearby ? "nearby listings" : "Properties mapped"}
+            {t(nearby ? "Nearby listings" : "Properties on map")}
           </p>
-          {selected !== null && <button type="button" aria-label="Clear map selection" onClick={() => setSelected(null)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-mist"><IconClose className="h-4 w-4" /></button>}
+          {(fullScreen || selected !== null) && <div className="map-view-list-controls">
+            {fullScreen && <>
+              <button type="button" aria-label={t("Previous properties on map")} title={t("Scroll properties left")} onClick={() => listRef.current?.scrollBy({ left: -300, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}><IconArrowRight className="h-4 w-4 rotate-180" /></button>
+              <button type="button" aria-label={t("Next properties on map")} title={t("Scroll properties right")} onClick={() => listRef.current?.scrollBy({ left: 300, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}><IconArrowRight className="h-4 w-4" /></button>
+            </>}
+            {selected !== null && <button type="button" aria-label={t("Clear map selection")} onClick={() => setSelected(null)} title="Clear selected property" className="map-view-list-clear"><IconClose className="h-4 w-4" /></button>}
+          </div>}
         </div>
-        <ul className="max-h-[600px] min-h-0 flex-1 space-y-1.5 overflow-y-auto">
+        <ul ref={listRef} className={`map-view-list-track max-h-[600px] min-h-0 flex-1 space-y-1.5 overflow-y-auto ${fullScreen ? "map-view-list-track--horizontal" : ""}`}>
           {properties.map((property) => (
             <li
               key={property.id}
+              data-selected={property.id === selected ? "true" : undefined}
               onMouseEnter={fullScreen ? undefined : () => setSelected(property.id)}
-              className={`min-w-0 rounded-lg border p-2 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
+              className={`map-view-list-card min-w-0 rounded-lg border p-2 transition-colors duration-150 ${property.id === selected ? "border-forest-600/40 bg-forest-50/60" : "border-soft/70 hover:border-navy-100"}`}
             >
               <div className="flex min-w-0 items-start gap-3">
                 <ResilientImage src={property.coverImage || "/images/property-placeholder.svg"} alt="" width={140} height={110} loading="lazy" className="h-14 w-[4.25rem] shrink-0 rounded-md object-cover" />
@@ -136,7 +149,7 @@ export function MapView({
               <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-soft pt-1.5">
                 <span className="text-[0.6875rem] text-ink-muted">{typeof property.distanceKm === "number" ? `${property.distanceKm < 0.1 ? "Under 100 m" : `${property.distanceKm.toFixed(1)} km`} away · approximate` : formatArea(property.areaValue, property.areaUnit)}</span>
                 <button type="button" onClick={() => { setSelected(property.id); setFocus({ key: datasetKey, lat: property.lat, lng: property.lng, zoom: 16 }); }} className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-[0.75rem] font-semibold text-forest-700 hover:bg-forest-50">
-                  <IconPin className="h-3.5 w-3.5" /> Show on map
+                  <IconPin className="h-3.5 w-3.5" /> {t("Show on map")}
                 </button>
               </div>
             </li>
