@@ -166,11 +166,11 @@ test("Explore more tools and guides follow Dealers in a manual horizontal rail",
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 });
 
-test("footer branding keeps the transparent mark and the floating WhatsApp shortcut stays discreet", async ({ page }) => {
+test("footer branding keeps the transparent mark and the AI assistant stays a compact corner shortcut", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#wordbitx")).toHaveCount(0);
-  const whatsapp = page.getByRole("link", { name: "Chat with Properties Pak on WhatsApp", exact: true });
-  await expect(whatsapp).toHaveAttribute("href", /^https:\/\/wa\.me\/923251888841\?/);
+  const assistant = page.getByRole("button", { name: "Open the Properties Pak AI assistant", exact: true });
+  await expect(assistant).toHaveAttribute("aria-expanded", "false");
   const footer = page.getByRole("contentinfo", { name: "Properties Pak footer" });
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
@@ -187,15 +187,59 @@ test("footer branding keeps the transparent mark and the floating WhatsApp short
     }));
     expect(colors.x).not.toBe(colors.name);
     expect(await brand.textContent()).toBe("X");
-    const box = await whatsapp.boundingBox();
+    const box = await assistant.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
-    const whatsappIcon = whatsapp.locator(".floating-whatsapp-icon");
-    await expect(whatsappIcon).toHaveCSS("background-color", "rgb(37, 211, 102)");
-    const whatsappLabel = whatsapp.locator(".floating-whatsapp-label");
-    await expect(whatsappLabel).toHaveText("Chat on WhatsApp");
-    if (width < 1024) await expect(whatsappLabel).toBeHidden();
-    else await expect(whatsappLabel).toBeVisible();
+    expect(box!.height).toBeLessThanOrEqual(56);
+    const assistantLabel = assistant.locator(".ai-launcher-label");
+    await expect(assistantLabel).toHaveText("AI Assistant");
+    if (width < 1024) await expect(assistantLabel).toBeHidden();
+    else await expect(assistantLabel).toBeVisible();
   }
+});
+
+test("the AI assistant answers property questions from live inventory", async ({ page }) => {
+  const failures: string[] = [];
+  page.on("pageerror", (error) => failures.push(error.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const launcher = page.getByRole("button", { name: "Open the Properties Pak AI assistant", exact: true });
+  await launcher.click();
+  const panel = page.getByRole("dialog", { name: "Properties Pak AI assistant", exact: true });
+  await expect(panel).toBeVisible();
+  await expect(panel.locator(".ai-turn--assistant .ai-bubble").first()).toContainText("Properties Pak assistant");
+
+  // A natural-language question becomes a real, filtered search.
+  await panel.getByRole("textbox").fill("3 bedroom houses for sale in Lahore under 2 crore");
+  await panel.getByRole("button", { name: "Send your question" }).click();
+  await expect(panel.locator(".ai-turn--user").last()).toContainText("3 bedroom houses for sale in Lahore under 2 crore");
+  const answer = panel.locator(".ai-turn--assistant").last();
+  await expect(answer.locator(".ai-bubble")).toContainText("3 bedroom", { timeout: 15_000 });
+  await expect(answer.locator(".ai-bubble")).toContainText("Lahore");
+  const cards = answer.locator(".ai-listings li");
+  await expect(cards.first()).toBeVisible();
+  expect(await cards.count()).toBeGreaterThan(0);
+  for (const price of await cards.locator(".ai-listing-price").allTextContents()) expect(price).toMatch(/PKR/);
+  await expect(answer.locator(".ai-more")).toHaveAttribute("href", /\/properties\?.*city=lahore/);
+
+  // A follow-up refines the same search instead of starting over.
+  await panel.getByRole("textbox").fill("in Islamabad instead");
+  await panel.getByRole("button", { name: "Send your question" }).click();
+  await expect(panel.locator(".ai-turn--assistant").last().locator(".ai-bubble")).toContainText("Islamabad", { timeout: 15_000 });
+
+  // Non-listing questions answer from the site's own tools and pages.
+  await panel.getByRole("textbox").fill("how much will my monthly instalment be");
+  await panel.getByRole("button", { name: "Send your question" }).click();
+  await expect(panel.locator(".ai-turn--assistant").last().getByRole("link", { name: /Mortgage calculator/ })).toHaveAttribute("href", "/tools/mortgage-calculator");
+
+  // A human hand-off is still one tap away.
+  await panel.getByRole("textbox").fill("I want to talk to a human");
+  await panel.getByRole("button", { name: "Send your question" }).click();
+  await expect(panel.locator(".ai-turn--assistant").last().getByRole("link", { name: /Contact Properties Pak/ })).toHaveAttribute("href", "/contact");
+
+  await page.keyboard.press("Escape");
+  await expect(panel).toHaveCount(0);
+  await expect(launcher).toHaveAttribute("aria-expanded", "false");
+  expect(failures).toEqual([]);
 });

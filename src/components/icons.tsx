@@ -238,6 +238,15 @@ export function IconSpark(props: IconProps) {
   );
 }
 
+export function IconAssistant(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
+      <path d="M11.1 3.4 12.8 8.7l5.3 1.7-5.3 1.7-1.7 5.3-1.7-5.3L4.1 10.4l5.3-1.7 1.7-5.3Z" />
+      <path d="M18.3 14.6l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8.8-2.3Z" />
+    </svg>
+  );
+}
+
 export function IconEye(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...base} {...props}>
