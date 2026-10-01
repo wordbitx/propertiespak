@@ -1,50 +1,38 @@
 import { NextResponse } from "next/server";
-import { searchProperties, getPropertiesByIds } from "@/lib/queries";
+import { searchProperties, getPropertiesByIds, getMapProperties } from "@/lib/queries";
+import { propertyQueryFromParams } from "@/lib/property-search";
 import { townMatchFor } from "@/lib/towns";
 
 export const dynamic = "force-dynamic";
 
-function numberParam(value: string | null): number | undefined {
-  if (!value) return undefined;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-
     const idsParam = searchParams.get("ids");
     if (idsParam) {
-      const ids = idsParam
-        .split(",")
-        .map((value) => Number(value.trim()))
-        .filter((value) => Number.isFinite(value) && value > 0);
+      const ids = [...new Set(idsParam.split(",").map(Number).filter((id) => Number.isSafeInteger(id) && id > 0))].slice(0, 100);
       const items = await getPropertiesByIds(ids);
       return NextResponse.json({ ok: true, total: items.length, items });
     }
 
-    const result = await searchProperties({
-      purpose: searchParams.get("purpose") ?? undefined,
-      city: searchParams.get("city") ?? undefined,
-      town: searchParams.get("town") ? townMatchFor(searchParams.get("town") as string) : undefined,
-      type: searchParams.get("type") ?? undefined,
-      category: searchParams.get("category") ?? undefined,
-      q: searchParams.get("q") ?? undefined,
-      minPrice: numberParam(searchParams.get("minPrice")),
-      maxPrice: numberParam(searchParams.get("maxPrice")),
-      beds: numberParam(searchParams.get("beds")),
-      baths: numberParam(searchParams.get("baths")),
-      minArea: numberParam(searchParams.get("minArea")),
-      featured: searchParams.get("featured") === "1" ? true : undefined,
-      verified: searchParams.get("verified") === "1" ? true : undefined,
-      isNewProject: searchParams.get("newProjects") === "1" ? true : undefined,
-      commercialOnly: searchParams.get("commercial") === "1" ? true : undefined,
-      sort: searchParams.get("sort") ?? undefined,
-      page: numberParam(searchParams.get("page")) ?? 1,
-      pageSize: Math.min(48, numberParam(searchParams.get("pageSize")) ?? 12),
-    });
+    const filters = propertyQueryFromParams(searchParams);
+    if (filters.town && !filters.townExact) filters.town = townMatchFor(filters.town);
+    if (searchParams.get("view") === "map") {
+      const [rows, result] = await Promise.all([
+        getMapProperties(filters, 200),
+        searchProperties({ ...filters, page: 1, pageSize: 1 }),
+      ]);
+      // Do not send descriptions, galleries or contact details just to draw pins.
+      const items = rows.map((row) => ({
+        id: row.id, slug: row.slug, title: row.title, citySlug: row.citySlug, cityName: row.cityName,
+        locationArea: row.locationArea, price: row.price, priceUnit: row.priceUnit, lat: row.lat, lng: row.lng,
+        coverImage: row.coverImage, propertyType: row.propertyType, bedrooms: row.bedrooms,
+        bathrooms: row.bathrooms, areaValue: row.areaValue, areaUnit: row.areaUnit,
+      }));
+      return NextResponse.json({ ok: true, items, total: result.total, mapped: items.length });
+    }
 
+    const result = await searchProperties(filters);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     console.error("property search failed", error);

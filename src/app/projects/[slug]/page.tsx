@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -49,7 +50,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     <>
       <section className="relative isolate overflow-hidden bg-navy-950 pb-16 pt-28 lg:pb-20 lg:pt-36">
         <div className="absolute inset-0">
-          <img
+          <ResilientImage
             src={images[0]}
             alt={`${project.name} in ${project.location}`}
             width={1800}
@@ -128,7 +129,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <div className="mt-9 grid gap-4 sm:grid-cols-2">
               {images.slice(1, 5).map((image, index) => (
                 <div key={image} className="overflow-hidden rounded-panel bg-soft">
-                  <img
+                  <ResilientImage
                     src={image}
                     alt={`${project.name} — view ${index + 2}`}
                     width={900}

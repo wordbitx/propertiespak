@@ -1,3 +1,4 @@
+import { SEARCH_FILTER_KEYS } from "@/lib/property-search";
 import type { Metadata } from "next";
 import { ListingView, type RawSearchParams } from "@/components/listing-view";
 import { buildMetadata, listingRobots } from "@/lib/seo";
@@ -10,7 +11,7 @@ const baseMetadata: Metadata = buildMetadata({
   keywords: ["new projects Pakistan", "off plan property Pakistan", "new housing schemes Lahore"],
 });
 
-const FILTER_KEYS = ["q", "city", "town", "type", "category", "beds", "baths", "minPrice", "maxPrice", "minArea", "featured", "newProjects", "sort", "page"];
+const FILTER_KEYS = SEARCH_FILTER_KEYS;
 
 export async function generateMetadata({
   searchParams,

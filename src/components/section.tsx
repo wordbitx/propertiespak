@@ -22,7 +22,7 @@ export function SectionHeading({
   return (
     <div
       className={[
-        "flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between",
+        "section-heading flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between",
         align === "center" ? "items-center text-center lg:flex-col lg:items-center lg:text-center" : "",
       ].join(" ")}
     >

@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import Link from "next/link";
 import {
   IconArrowRight,
@@ -282,7 +283,7 @@ export function CtaSection() {
     <>
       <WordbitxSection />
       <section className="relative isolate overflow-hidden bg-navy-900 py-14 sm:py-16 lg:py-20" aria-labelledby="closing-cta-heading" data-testid="closing-cta">
-        <img src={investmentImage.src} alt="" width={1440} height={810} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+        <ResilientImage src={investmentImage.src} alt="" width={1440} height={810} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-35" />
         <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/90 to-navy-900/70" />
         <div className="ui-container relative z-10">
           <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">

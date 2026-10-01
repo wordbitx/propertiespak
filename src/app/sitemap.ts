@@ -30,6 +30,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/tools/rent-vs-buy-calculator", priority: 0.7, changeFrequency: "monthly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/advertise", priority: 0.6, changeFrequency: "monthly" },
   { path: "/list-property", priority: 0.7, changeFrequency: "monthly" },
   { path: "/sitemap", priority: 0.8, changeFrequency: "daily" },
   { path: "/dealers", priority: 0.9, changeFrequency: "daily" },

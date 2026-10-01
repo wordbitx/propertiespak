@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -114,13 +115,6 @@ export default async function AccountPage() {
         ]}
       />
 
-      {/* First-login prompt: hidden button, auto-opens while the profile is unfinished. */}
-      {!user.profileCompletedAt && (
-        <div className="hidden">
-          <ProfileSetupDialog user={profileUser} autoOpen label="Complete Profile" />
-        </div>
-      )}
-
       <Section tone="light">
         <div className="ui-container">
           <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr]">
@@ -182,7 +176,8 @@ export default async function AccountPage() {
                   </div>
                 </dl>
                 <div className="mt-4">
-                  <ProfileSetupDialog user={profileUser} />
+                  {/* One visible instance handles the first-login prompt and later edits. */}
+                  <ProfileSetupDialog user={profileUser} autoOpen={!user.profileCompletedAt} />
                 </div>
               </div>
 
@@ -256,7 +251,7 @@ export default async function AccountPage() {
                   {saved.map((item) => (
                     <Link key={item.id} href={`/property/${item.slug}`} className="block">
                       <div className="flex items-center gap-4 rounded-xl border border-soft bg-white p-3 transition-all hover:-translate-y-0.5 hover:shadow-card">
-                        <img
+                        <ResilientImage
                           src={item.coverImage}
                           alt={`${item.title}, ${item.locationArea}`}
                           width={280}

@@ -24,6 +24,7 @@ const CORE_PAGES = [
   "/tools/rent-vs-buy-calculator",
   "/about",
   "/contact",
+  "/advertise",
   "/list-property",
   "/sitemap",
 ];

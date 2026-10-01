@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { IconArrowRight, IconCheck, IconClose, IconPin, IconSearch } from "@/components/icons";
@@ -23,7 +25,7 @@ const CITIES = [
 
 const CATEGORIES = [
   { value: "house", label: "House", types: ["House", "Villa"] },
-  { value: "apartment", label: "Apartment / Flat", types: ["Apartment", "Penthouse", "Upper Portion"] },
+  { value: "apartment", label: "Apartment / Flat", types: ["Apartment", "Penthouse", "Upper Portion", "Lower Portion", "Room"] },
   { value: "plot", label: "Plot / File", types: ["Plot"] },
   { value: "office", label: "Office", types: ["Office"] },
   { value: "shop", label: "Shop / Retail", types: ["Shop"] },
@@ -45,6 +47,8 @@ type FormState = {
   lat: number;
   lng: number;
   price: string;
+  paymentType: string;
+  videoUrl: string;
   negotiable: boolean;
   bedrooms: string;
   bathrooms: string;
@@ -76,6 +80,8 @@ const EMPTY: FormState = {
   lat: CITY_CENTERS.lahore.lat,
   lng: CITY_CENTERS.lahore.lng,
   price: "",
+  paymentType: "cash",
+  videoUrl: "",
   negotiable: true,
   bedrooms: "0",
   bathrooms: "0",
@@ -108,6 +114,8 @@ function toForm(property: Property): FormState {
     lat: property.lat,
     lng: property.lng,
     price: String(property.price),
+    paymentType: property.paymentType,
+    videoUrl: property.videoUrl,
     negotiable: property.negotiable,
     bedrooms: String(property.bedrooms),
     bathrooms: String(property.bathrooms),
@@ -415,6 +423,10 @@ export function AdminPropertyManager() {
             <p className="mt-2 text-[0.75rem] text-ink-muted">Leave blank to assign the Properties Pak desk consultant for this city.</p>
           </div>
 
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div><label className={label} htmlFor="ap-payment">Payment type</label><select id="ap-payment" value={form.paymentType} onChange={(event) => set("paymentType", event.target.value)} className="field mt-2"><option value="">Not specified</option><option value="cash">Cash / full payment</option><option value="installments">Installments</option></select></div>
+            <div><label className={label} htmlFor="ap-video">Property video link (optional)</label><input id="ap-video" type="url" maxLength={2000} value={form.videoUrl} onChange={(event) => set("videoUrl", event.target.value)} className="field mt-2" placeholder="https://youtube.com/watch?v=…" /></div>
+          </div>
           <div className="mt-5">
             <p className={label}>Property photos *</p>
             <div className="mt-3">
@@ -470,7 +482,7 @@ export function AdminPropertyManager() {
         <ul className="mt-5 grid gap-3">
           {items.map((property) => (
             <li key={property.id} className="flex flex-col gap-4 rounded-panel border border-soft bg-white p-4 shadow-soft sm:flex-row sm:items-center">
-              <img src={property.coverImage} alt="" width={200} height={150} loading="lazy" className="h-24 w-full rounded-lg object-cover sm:h-20 sm:w-28" />
+              <ResilientImage src={property.coverImage} alt="" width={200} height={150} loading="lazy" className="h-24 w-full rounded-lg object-cover sm:h-20 sm:w-28" />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-sans text-[0.75rem] font-bold text-ink-muted">#{property.id}</span>

@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -163,7 +165,7 @@ export function ComparePageClient() {
               {items.map((property, index) => (
                 <th key={property.id} scope="col" className="border-b border-l border-soft p-4 align-top">
                   <div className="relative">
-                    <img
+                    <ResilientImage
                       src={property.coverImage}
                       alt={`${property.title} in ${property.locationArea}, ${property.cityName}`}
                       width={600}

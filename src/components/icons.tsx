@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { useId, type SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -405,22 +405,28 @@ function LogoMarkShapes({ white }: { white: string }) {
 }
 
 export function IconLogo({ className }: { className?: string }) {
+  // SVG IDs are document-wide. Give each logo its own paint servers so the
+  // sidebar never references gradients inside the header's hidden tile logo.
+  const id = useId();
+  const tileId = `${id}-ppMarkTile`;
+  const whiteId = `${id}-ppMarkWhite`;
+
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id="ppMarkTile" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={tileId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#0A1A3A" />
           <stop offset="1" stopColor="#050E26" />
         </linearGradient>
-        <linearGradient id="ppMarkWhite" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={whiteId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#FFFFFF" />
           <stop offset="1" stopColor="#E4E8EE" />
         </linearGradient>
       </defs>
-      <rect width="48" height="48" rx="13.5" fill="url(#ppMarkTile)" />
+      <rect width="48" height="48" rx="13.5" fill={`url(#${tileId})`} />
       <rect x="0.6" y="0.6" width="46.8" height="46.8" rx="12.9" fill="none" stroke="#FFFFFF" strokeOpacity="0.09" strokeWidth="1.2" />
       <g transform="translate(24 24.4) scale(0.0815) translate(-783.5 -276)">
-        <LogoMarkShapes white="url(#ppMarkWhite)" />
+        <LogoMarkShapes white={`url(#${whiteId})`} />
       </g>
     </svg>
   );
@@ -433,15 +439,17 @@ export function IconLogo({ className }: { className?: string }) {
  * the two never shifts the wordmark.
  */
 export function IconLogoMark({ className }: { className?: string }) {
+  const whiteId = `${useId()}-ppBareWhite`;
+
   return (
     <svg viewBox="553.5 48 460 460" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id="ppBareWhite" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={whiteId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#FFFFFF" />
           <stop offset="1" stopColor="#E4E8EE" />
         </linearGradient>
       </defs>
-      <LogoMarkShapes white="url(#ppBareWhite)" />
+      <LogoMarkShapes white={`url(#${whiteId})`} />
     </svg>
   );
 }

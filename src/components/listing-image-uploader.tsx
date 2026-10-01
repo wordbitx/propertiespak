@@ -1,5 +1,7 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import { useRef, useState } from "react";
 import { IconCheck, IconClose, IconLayers } from "@/components/icons";
 
@@ -93,7 +95,7 @@ export function ListingImageUploader({
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {images.map((image, index) => (
               <div key={image.id} className="group relative overflow-hidden rounded-xl border border-soft bg-white">
-                <img
+                <ResilientImage
                   src={image.url}
                   alt={`Uploaded property photo ${index + 1}`}
                   width={520}

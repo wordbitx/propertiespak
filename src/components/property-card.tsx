@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import Link from "next/link";
 import { IconArea, IconArrowRight, IconBath, IconBed, IconEye, IconPin } from "@/components/icons";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -19,10 +20,12 @@ export function PropertyCard({
   property,
   priority = false,
   className = "",
+  compact = false,
 }: {
   property: Property | PropertyWithDealer;
   priority?: boolean;
   className?: string;
+  compact?: boolean;
 }) {
   const dealerVerified = Boolean((property as PropertyWithDealer).dealerVerified);
   const badge = purposeBadge(property);
@@ -36,9 +39,9 @@ export function PropertyCard({
         className,
       ].join(" ")}
     >
-      <div className="zoom-frame relative block aspect-[4/3] overflow-hidden bg-soft">
-        <img
-          src={property.coverImage}
+      <Link href={`/property/${property.slug}`} className={`zoom-frame relative block overflow-hidden bg-soft ${compact ? "aspect-[16/10]" : "aspect-[4/3]"}`}>
+        <ResilientImage
+          src={property.coverImage || property.images[0] || "/images/property-placeholder.svg"}
           alt={`${property.title} — ${property.propertyType} in ${property.locationArea}, ${property.cityName}`}
           width={1200}
           height={800}
@@ -47,9 +50,9 @@ export function PropertyCard({
           className="h-full w-full object-cover"
         />
         <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/45 via-transparent to-transparent" />
-      </div>
+      </Link>
 
-      <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
+      <div className={`absolute flex flex-wrap items-center gap-1.5 ${compact ? "left-2.5 top-2.5 max-w-[calc(100%-60px)]" : "left-4 top-4"}`}>
         <span
           className={`rounded-md px-2.5 py-1 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.12em] shadow-soft ${badge.className}`}
         >
@@ -57,7 +60,7 @@ export function PropertyCard({
         </span>
         {dealerVerified ? (
           <span className="inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-[#0b6fb8] shadow-soft">
-            <BlueTick className="h-3.5 w-3.5" /> Verified dealer
+            <BlueTick className="h-3.5 w-3.5" /> {compact ? "Verified" : "Verified dealer"}
           </span>
         ) : (
           <span className="rounded-md bg-navy-950/70 px-2 py-1 font-sans text-[0.625rem] font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
@@ -66,14 +69,14 @@ export function PropertyCard({
         )}
       </div>
 
-      <div className="absolute right-4 top-4 flex flex-col gap-2">
+      <div className={`absolute flex flex-col gap-2 ${compact ? "right-2.5 top-2.5" : "right-4 top-4"}`}>
         <FavoriteButton propertyId={property.id} title={property.title} />
         <CompareToggle propertyId={property.id} title={property.title} />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col p-5">
+      <div className={`flex min-w-0 flex-1 flex-col ${compact ? "p-3.5" : "p-5"}`}>
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-          <p className="font-sans text-[1.28rem] font-bold leading-tight tracking-[-0.03em] text-navy-900">
+          <p className={`font-sans font-bold leading-tight tracking-[-0.03em] text-navy-900 ${compact ? "text-[1.0625rem]" : "text-[1.28rem]"}`}>
             {formatPrice(property.price, property.priceUnit)}
           </p>
           <span className="mt-0.5 max-w-full rounded-md bg-mist px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted">
@@ -81,28 +84,28 @@ export function PropertyCard({
           </span>
         </div>
 
-        <p className="mt-2 text-[0.75rem] text-ink-muted">
+        {!compact && <p className="mt-2 text-[0.75rem] text-ink-muted">
           {pps > 0 ? `≈ PKR ${pps.toLocaleString("en-PK")} / sq ft` : CATEGORY_LABELS[property.category] ?? property.propertyType}
           {" · "}
           <span className="font-semibold text-forest-700">Score {score.overall}/10</span>
-        </p>
+        </p>}
 
-        <h3 className="mt-2.5 line-clamp-2 font-sans text-[1.0625rem] font-semibold leading-snug text-navy-900">
+        <h3 className={`mt-2.5 line-clamp-2 font-sans font-semibold leading-snug text-navy-900 ${compact ? "min-h-[2.6em] text-[0.9375rem]" : "text-[1.0625rem]"}`}>
           <Link href={`/property/${property.slug}`} className="transition-colors hover:text-forest-700">
             {property.title}
           </Link>
         </h3>
 
-        <p className="mt-2 flex items-center gap-1.5 text-[0.875rem] text-ink-muted">
+        <p className={`mt-2 flex items-center gap-1.5 text-ink-muted ${compact ? "text-[0.75rem]" : "text-[0.875rem]"}`}>
           <IconPin className="h-4 w-4 shrink-0 text-forest-600" />
           <span className="truncate">
             {property.locationArea}, {property.cityName}
           </span>
         </p>
 
-        <div className="mt-auto pt-4">
+        <div className={`mt-auto ${compact ? "pt-3" : "pt-4"}`}>
           <div className="hairline" />
-          <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.8125rem] font-medium text-ink">
+          <div className={`flex flex-wrap items-center gap-y-2 font-medium text-ink ${compact ? "mt-3 gap-x-3 text-[0.75rem]" : "mt-3.5 gap-x-4 text-[0.8125rem]"}`}>
             {property.bedrooms > 0 && (
               <span className="inline-flex items-center gap-1.5">
                 <IconBed className="h-4 w-4 text-navy-600" /> {property.bedrooms} Beds
@@ -118,11 +121,11 @@ export function PropertyCard({
             </span>
           </div>
 
-          <p className="mt-3 truncate text-[0.75rem] text-ink-muted">
+          {!compact && <p className="mt-3 truncate text-[0.75rem] text-ink-muted">
             {property.amenities.slice(0, 3).join(" · ") || property.furnishing}
-          </p>
+          </p>}
 
-          <div className="mt-4 flex items-center justify-between gap-3">
+          <div className={`${compact ? "mt-3" : "mt-4"} flex items-center justify-between gap-3`}>
             <Link
               href={`/property/${property.slug}`}
               className="inline-flex items-center gap-1.5 font-sans text-[0.875rem] font-semibold text-navy-800 transition-colors hover:text-forest-700"
@@ -130,12 +133,12 @@ export function PropertyCard({
               View Details
               <IconArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
-            <span className="flex items-center gap-3 text-[0.75rem] text-ink-muted">
+            {!compact && <span className="flex items-center gap-3 text-[0.75rem] text-ink-muted">
               {property.negotiable && <span className="hidden sm:inline">Negotiable</span>}
               <span className="inline-flex items-center gap-1">
                 <IconEye className="h-3.5 w-3.5" /> {formatNumber(property.views)}
               </span>
-            </span>
+            </span>}
           </div>
         </div>
       </div>
@@ -151,7 +154,7 @@ export function PropertyRow({ property }: { property: Property }) {
         href={`/property/${property.slug}`}
         className="zoom-frame relative block h-[104px] w-[140px] shrink-0 overflow-hidden rounded-lg bg-soft"
       >
-        <img
+        <ResilientImage
           src={property.coverImage}
           alt={`${property.title}, ${property.locationArea}`}
           width={420}

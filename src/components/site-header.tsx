@@ -4,10 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrandLockup } from "@/components/brand-lockup";
+import { beginRecentSearch } from "@/lib/recent-properties";
 import { NavigationDialog } from "@/components/navigation-dialog";
-import { IconArrowRight, IconChevronDown, IconClose, IconHeart, IconMenu, IconSearch, IconUser } from "@/components/icons";
+import { PropertySearchFilters } from "@/components/property-search-filters";
+import { HeaderPropertyMap } from "@/components/header-property-map";
+import { defaultPropertySearch, propertySearchFromParams, propertySearchHref, type PropertySearchState } from "@/lib/property-search";
+import { IconArrowRight, IconChevronDown, IconClose, IconHeart, IconMenu, IconSearch, IconUser, IconMap } from "@/components/icons";
 import { useFavorites } from "@/components/favorites-provider";
-import { NAV_LINKS, POPULAR_SEARCHES, SITE } from "@/lib/constants";
+import { NAV_LINKS, SITE } from "@/lib/constants";
 
 const CITY_LINKS = ["Lahore", "Islamabad", "Karachi", "Rawalpindi", "Faisalabad", "Multan"];
 const PROPERTY_LINKS = [
@@ -23,24 +27,29 @@ const PROPERTY_LINKS = [
  * homepage and the footer are the only entry points, so the nav never repeats
  * a section that already sits one scroll below the hero.
  */
-const HEADER_HIDDEN_LABELS = ["Home", "Insights", "Dealers"];
+const HEADER_HIDDEN_LABELS = ["Home", "Insights", "Dealers", "Contact"];
 const DESKTOP_LINKS = NAV_LINKS.filter((link) => !HEADER_HIDDEN_LABELS.includes(link.label));
 const MOBILE_LINKS = [
   NAV_LINKS[0],
   { label: "All properties", href: "/properties" },
   ...NAV_LINKS.slice(1).filter((link) => !HEADER_HIDDEN_LABELS.includes(link.label)),
+  { label: "Help & Support", href: "/contact" },
+  { label: "Advertise on Properties Pak", href: "/advertise" },
 ];
 
-type Panel = "menu" | "search" | null;
+type Panel = "menu" | "search" | "map" | null;
 
 export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
+  const [panelPath, setPanelPath] = useState(pathname);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [searchDefaults, setSearchDefaults] = useState<PropertySearchState>(() => defaultPropertySearch());
+  const [mapQuery, setMapQuery] = useState("");
   const megaRef = useRef<HTMLDivElement | null>(null);
+  const dialogTriggerRef = useRef<HTMLElement | null>(null);
   const { count } = useFavorites();
   const solid = scrolled || pathname.startsWith("/admin");
   const accountHref = isAuthenticated ? "/account" : "/login";
@@ -53,10 +62,13 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  useEffect(() => {
+  // Reset route-bound navigation before committing the next page, rather
+  // than mounting an old dialog and then removing it in a cascading effect.
+  if (panelPath !== pathname) {
+    setPanelPath(pathname);
     setPanel(null);
     setMegaOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (!megaOpen) return;
@@ -74,16 +86,27 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
     };
   }, [megaOpen]);
 
-  function openPanel(next: Exclude<Panel, null>) {
+  function openPanel(next: Exclude<Panel, null>, trigger?: HTMLElement) {
+    if (trigger) dialogTriggerRef.current = trigger;
     setMegaOpen(false);
+    const params = new URLSearchParams(window.location.search);
+    if (pathname.includes("/for-rent")) params.set("purpose", "rent");
+    else if (pathname.includes("/for-sale")) params.set("purpose", "buy");
+    if (pathname.includes("/properties/commercial")) params.set("category", "commercial");
+    if (pathname.includes("/properties/new-projects")) params.set("newProjects", "1");
+    if (next === "search") {
+      setSearchDefaults(propertySearchFromParams(params, pathname.includes("/for-rent") ? "rent" : "buy"));
+    } else if (next === "map") {
+      setMapQuery(params.toString());
+    }
     setPanel(next);
   }
 
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    const value = query.trim();
+  function search(state: PropertySearchState) {
     dismiss();
-    router.push(value ? `/properties?q=${encodeURIComponent(value)}` : "/properties");
+    const href = propertySearchHref(state);
+    beginRecentSearch(href);
+    router.push(href);
   }
 
   return (
@@ -94,6 +117,9 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         data-surface={solid ? "solid" : "overlay"}
         className={`site-header ${solid ? "site-header--solid" : "site-header--overlay"}`}
       >
+        <div className="header-utility-bar">
+          <div className="ui-container"><Link href="/contact">Help &amp; Support</Link><span aria-hidden="true">|</span><Link href="/advertise">Advertise on Properties Pak</Link></div>
+        </div>
         <div className="ui-container header-inner">
           <Link href="/" className="header-brand" aria-label={`${SITE.name} — ${SITE.tagline}`}><BrandLockup adaptive compact /></Link>
 
@@ -119,21 +145,22 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
           </nav>
 
           <div className="header-actions">
-            <button type="button" onClick={() => openPanel("search")} aria-label="Search properties" aria-haspopup="dialog" className="header-action header-search-action"><IconSearch className="h-5 w-5" /></button>
+            <button type="button" data-testid="header-map" onClick={(event) => openPanel("map", event.currentTarget)} aria-label="Open property map" aria-haspopup="dialog" className="header-action header-map-action"><IconMap className="h-5 w-5" /></button>
+            <button type="button" onClick={(event) => openPanel("search", event.currentTarget)} aria-label="Search properties" aria-haspopup="dialog" className="header-action header-search-action"><IconSearch className="h-5 w-5" /></button>
             <Link href="/favorites" data-testid="header-saved" aria-label={`Saved properties${count ? `, ${count} saved` : ""}`} className="header-action header-saved-action">
               <IconHeart className="h-5 w-5" />
               <span className="header-action-caption">Saved</span>
               {count > 0 && <span className="header-saved-count">{count > 99 ? "99+" : count}</span>}
             </Link>
             <Link href={accountHref} className="header-account"><IconUser className="h-[18px] w-[18px]" />{isAuthenticated ? "Account" : "Login"}</Link>
-            <Link href="/list-property" className="header-list-property">List Your Property</Link>
-            <button type="button" data-testid="header-menu" onClick={() => openPanel("menu")} aria-label="Open menu" aria-haspopup="dialog" aria-expanded={panel === "menu"} className="header-action header-menu-action"><IconMenu className="h-5 w-5" /><span className="header-action-caption">Menu</span></button>
+            <Link href="/list-property" className="header-list-property">List Property</Link>
+            <button type="button" data-testid="header-menu" onClick={(event) => openPanel("menu", event.currentTarget)} aria-label="Open menu" aria-haspopup="dialog" aria-expanded={panel === "menu"} className="header-action header-menu-action"><IconMenu className="h-5 w-5" /><span className="header-action-caption">Menu</span></button>
           </div>
         </div>
       </header>
 
       {panel === "menu" && (
-        <NavigationDialog key="menu" label="Main menu" onDismiss={dismiss}>
+        <NavigationDialog key="menu" label="Main menu" onDismiss={dismiss} triggerRef={dialogTriggerRef}>
           <div className="navigation-drawer">
             <div className="navigation-panel-heading">
               <Link href="/" onClick={dismiss} aria-label="Properties Pak home"><BrandLockup compact /></Link>
@@ -163,22 +190,16 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
       )}
 
       {panel === "search" && (
-        <NavigationDialog key="search" label="Search properties" onDismiss={dismiss}>
-          <div className="navigation-search-panel">
-            <div className="navigation-panel-heading">
-              <div><p className="eyebrow text-forest-700">Properties Pak</p><h2 className="mt-1.5 font-sans text-xl font-bold text-navy-900">Find your next property</h2></div>
-              <button type="button" onClick={dismiss} aria-label="Close search" className="dialog-close"><IconClose className="h-5 w-5" /></button>
-            </div>
-            <div className="navigation-search-scroll">
-              <form onSubmit={submit} className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]" aria-label="Quick property search">
-                <div className="min-w-0"><label htmlFor="header-search" className="sr-only">Search location, society or property type</label><input id="header-search" data-dialog-initial type="search" enterKeyHint="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Lahore, DHA, apartment…" className="field min-h-12" autoComplete="off" /></div>
-                <button type="submit" className="btn btn-primary min-h-12"><IconSearch className="h-4 w-4" />Search properties</button>
-              </form>
-              <p className="eyebrow mt-6 text-ink-muted">Popular searches</p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">{POPULAR_SEARCHES.map((search) => <Link key={search.href} href={search.href} onClick={dismiss} className="search-suggestion-link"><span>{search.label}</span><IconArrowRight className="h-4 w-4 shrink-0 text-forest-700" /></Link>)}</div>
-              <Link href="/properties" onClick={dismiss} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-forest-700">Browse all properties <IconArrowRight className="h-4 w-4" /></Link>
-            </div>
-          </div>
+        <NavigationDialog key="search" label="Search properties" className="property-filter-dialog" onDismiss={dismiss} triggerRef={dialogTriggerRef}>
+          <PropertySearchFilters initialState={searchDefaults} onClose={dismiss} onSearch={search} />
+        </NavigationDialog>
+      )}
+      {panel === "map" && (
+        <NavigationDialog key="map" label="Property map" className="property-map-dialog" onDismiss={dismiss} triggerRef={dialogTriggerRef}>
+          <HeaderPropertyMap initialQuery={mapQuery} onClose={dismiss} onFilters={(query) => {
+            setSearchDefaults(propertySearchFromParams(new URLSearchParams(query)));
+            setPanel("search");
+          }} />
         </NavigationDialog>
       )}
     </>

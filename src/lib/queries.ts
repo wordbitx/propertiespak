@@ -22,10 +22,14 @@ export type PropertyFilters = {
   city?: string;
   /** Town / society name fragment matched against `location_area`. */
   town?: string;
+  townExact?: boolean;
   type?: string;
   baths?: number;
   furnishing?: string;
   possession?: string;
+  paymentType?: string;
+  withImages?: boolean;
+  withVideos?: boolean;
   maxArea?: number;
   category?: string;
   minPrice?: number;
@@ -43,7 +47,8 @@ export type PropertyFilters = {
   ids?: number[];
 };
 
-const COMMERCIAL_CATEGORIES = ["office", "shop", "building", "warehouse"];
+const COMMERCIAL_CATEGORIES = ["office", "shop", "building", "warehouse", "commercial"];
+const HOME_CATEGORIES = ["house", "apartment", "farmhouse", "penthouse"];
 
 /** A listing with its owning account's verification state resolved. */
 export type PropertyWithDealer = Property & { dealerVerified?: boolean | null };
@@ -91,24 +96,37 @@ export function buildConditions(filters: PropertyFilters): SQL[] {
   if (filters.purpose) conditions.push(eq(properties.purpose, filters.purpose));
   if (filters.city) conditions.push(eq(properties.citySlug, filters.city));
   if (filters.town) {
-    const term = `%${filters.town.trim()}%`;
-    const townMatch = or(ilike(properties.locationArea, term), ilike(properties.address, term));
-    if (townMatch) conditions.push(townMatch);
+    if (filters.townExact) {
+      conditions.push(eq(properties.locationArea, filters.town));
+    } else {
+      const term = `%${filters.town.trim()}%`;
+      const townMatch = or(ilike(properties.locationArea, term), ilike(properties.address, term));
+      if (townMatch) conditions.push(townMatch);
+    }
   }
   if (filters.type) conditions.push(eq(properties.propertyType, filters.type));
-  if (filters.baths) conditions.push(gte(properties.bathrooms, filters.baths));
+  if (typeof filters.baths === "number") conditions.push(gte(properties.bathrooms, filters.baths));
   if (filters.furnishing) conditions.push(eq(properties.furnishing, filters.furnishing));
   if (filters.possession) conditions.push(eq(properties.possession, filters.possession));
   if (typeof filters.maxArea === "number") conditions.push(lte(properties.areaSqft, filters.maxArea));
-  if (filters.category === "commercial" || filters.commercialOnly) {
+  if (filters.category === "homes") {
+    conditions.push(inArray(properties.category, HOME_CATEGORIES));
+  } else if (filters.category === "commercial" || filters.commercialOnly) {
     conditions.push(inArray(properties.category, COMMERCIAL_CATEGORIES));
   } else if (filters.category) {
     conditions.push(eq(properties.category, filters.category));
   }
   if (typeof filters.minPrice === "number") conditions.push(gte(properties.price, filters.minPrice));
   if (typeof filters.maxPrice === "number") conditions.push(lte(properties.price, filters.maxPrice));
-  if (filters.beds) conditions.push(gte(properties.bedrooms, filters.beds));
-  if (filters.minArea) conditions.push(gte(properties.areaSqft, filters.minArea));
+  if (typeof filters.beds === "number") {
+    if (filters.beds === 0) {
+      conditions.push(eq(properties.bedrooms, 0), inArray(properties.propertyType, ["Apartment", "Penthouse", "Upper Portion", "Lower Portion", "Room"]));
+    } else conditions.push(gte(properties.bedrooms, filters.beds));
+  }
+  if (filters.paymentType) conditions.push(eq(properties.paymentType, filters.paymentType));
+  if (filters.withImages) conditions.push(sql`(length(trim(${properties.coverImage})) > 0 or jsonb_array_length(${properties.images}) > 0)`);
+  if (filters.withVideos) conditions.push(sql`length(trim(${properties.videoUrl})) > 0`);
+  if (typeof filters.minArea === "number") conditions.push(gte(properties.areaSqft, filters.minArea));
   if (filters.featured) conditions.push(eq(properties.featured, true));
   if (filters.verified) conditions.push(eq(properties.verified, true));
   if (filters.isNewProject) conditions.push(eq(properties.isNewProject, true));
@@ -131,15 +149,15 @@ export function buildConditions(filters: PropertyFilters): SQL[] {
 export function orderFor(sort?: string) {
   switch (sort) {
     case "price-asc":
-      return [asc(properties.price)];
+      return [asc(properties.price), asc(properties.id)];
     case "price-desc":
-      return [desc(properties.price)];
+      return [desc(properties.price), desc(properties.id)];
     case "area-desc":
-      return [desc(properties.areaSqft)];
+      return [desc(properties.areaSqft), desc(properties.id)];
     case "popular":
-      return [desc(properties.views)];
+      return [desc(properties.views), desc(properties.id)];
     default:
-      return [desc(properties.createdAt)];
+      return [desc(properties.createdAt), desc(properties.id)];
   }
 }
 
@@ -276,6 +294,44 @@ async function getMapPropertiesUncached(filters: PropertyFilters = {}, limit = 2
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(properties.featured), desc(properties.views))
     .limit(limit);
+}
+
+export type PopularSearchGroup = {
+  citySlug: string;
+  cityName: string;
+  purpose: string;
+  type: string;
+  total: number;
+  locations: { name: string; total: number }[];
+};
+
+/** Counts come from published inventory, never invented visitor/search numbers. */
+async function getPopularSearchesUncached(): Promise<PopularSearchGroup[]> {
+  await ensureSeeded();
+  const rows = await db.select({
+    citySlug: properties.citySlug, cityName: properties.cityName, purpose: properties.purpose,
+    type: properties.propertyType, category: properties.category, area: properties.locationArea,
+    total: sql<number>`count(*)::int`,
+  }).from(properties).where(and(isPublished, inArray(properties.purpose, ["buy", "rent"])))
+    .groupBy(properties.citySlug, properties.cityName, properties.purpose, properties.propertyType, properties.category, properties.locationArea);
+  const groups = new Map<string, Omit<PopularSearchGroup, "locations"> & { areas: Map<string, number> }>();
+  for (const row of rows) {
+    const types = ["all", row.type, ...(COMMERCIAL_CATEGORIES.includes(row.category) ? ["commercial"] : [])];
+    for (const type of types) {
+      const key = `${row.citySlug}:${row.purpose}:${type}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = { citySlug: row.citySlug, cityName: row.cityName, purpose: row.purpose, type, total: 0, areas: new Map() };
+        groups.set(key, group);
+      }
+      group.total += row.total;
+      if (row.area.trim()) group.areas.set(row.area, (group.areas.get(row.area) ?? 0) + row.total);
+    }
+  }
+  return [...groups.values()].map(({ areas, ...group }) => ({
+    ...group,
+    locations: [...areas].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8).map(([name, total]) => ({ name, total })),
+  }));
 }
 
 async function getCitiesUncached() {
@@ -773,6 +829,7 @@ export const getMapProperties = cachedQuery("getMapProperties", getMapProperties
 export const getCities = cachedQuery("getCities", getCitiesUncached);
 export const getCityBySlug = cachedQuery("getCityBySlug", getCityBySlugUncached);
 export const getCityListingCounts = cachedQuery("getCityListingCounts", getCityListingCountsUncached);
+export const getPopularSearches = cachedQuery("getPopularSearches", getPopularSearchesUncached);
 export const getProjects = cachedQuery("getProjects", getProjectsUncached);
 export const getProjectBySlug = cachedQuery("getProjectBySlug", getProjectBySlugUncached);
 export const getAllProjectSlugs = cachedQuery("getAllProjectSlugs", getAllProjectSlugsUncached);

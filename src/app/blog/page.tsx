@@ -1,3 +1,4 @@
+import { ResilientImage } from "@/components/resilient-image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IconArrowRight } from "@/components/icons";
@@ -47,7 +48,7 @@ export default async function BlogPage() {
           <div className="ui-container">
             <article className="grid gap-8 overflow-hidden rounded-panel border border-soft bg-white shadow-soft lg:grid-cols-[1.15fr_1fr]">
               <Link href={`/blog/${lead.slug}`} className="zoom-frame relative block aspect-[16/11] overflow-hidden bg-soft lg:aspect-auto">
-                <img
+                <ResilientImage
                   src={lead.coverImage}
                   alt={lead.title}
                   width={1400}
@@ -94,7 +95,7 @@ export default async function BlogPage() {
               <Reveal key={post.slug} delay={index * 50}>
                 <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-soft bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                   <Link href={`/blog/${post.slug}`} className="zoom-frame relative block aspect-[16/10] overflow-hidden bg-soft">
-                    <img
+                    <ResilientImage
                       src={post.coverImage}
                       alt={post.title}
                       width={1200}

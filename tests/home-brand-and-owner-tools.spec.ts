@@ -30,9 +30,10 @@ function sessionToken(userId: number) {
 }
 
 test.beforeAll(async () => {
+  // This established owner's listing controls are tested separately from onboarding.
   const owner = await pool.query(
-    `insert into users (name, email, phone, password_hash, slug, role)
-     values ($1,$2,'03001234567','scrypt$1$qa$qa',$3,'dealer') returning id`,
+    `insert into users (name, email, phone, password_hash, slug, role, profile_completed_at)
+     values ($1,$2,'03001234567','scrypt$1$qa$qa',$3,'dealer',now()) returning id`,
     [ownerName, ownerEmail, `owner-qa-${stamp}`],
   );
   ownerId = owner.rows[0].id;
@@ -94,14 +95,14 @@ test("homepage hero is a clean brand statement followed by the featured, then ex
   await expect(visibleTestId(page, "hero-search")).toBeVisible();
 
   // Featured inventory sits above the Explore Properties discovery block.
-  const featured = page.getByRole("heading", { name: "Featured properties, hand-picked this week", exact: true });
+  const featured = page.getByRole("heading", { name: "Featured Properties", exact: true });
   const explore = page.getByRole("heading", { name: "Explore Properties", exact: true });
   await featured.scrollIntoViewIfNeeded();
   expect((await featured.boundingBox())!.y).toBeLessThan((await explore.boundingBox())!.y);
 
-  // Discover Properties by Location sits above New projects worth watching.
-  const location = page.getByRole("heading", { name: "Discover Properties by Location", exact: true });
-  const projects = page.getByRole("heading", { name: "New projects worth watching", exact: true });
+  // Popular Searches replaces the inline location map above new projects.
+  const location = page.getByRole("heading", { name: "Popular Searches", exact: true });
+  const projects = page.getByRole("heading", { name: "New Housing Projects", exact: true });
   await location.scrollIntoViewIfNeeded();
   expect((await location.boundingBox())!.y).toBeLessThan((await projects.boundingBox())!.y);
 
@@ -135,9 +136,8 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
   await expect(groups.nth(1)).toHaveAttribute("aria-hidden", "true");
   await expect(groups.nth(1).locator("a").first()).toHaveAttribute("tabindex", "-1");
 
-  // The belt may be driven by the stylesheet animation or, when that is not
-  // available, by the JavaScript fallback — either way it must be a single
-  // horizontal row that keeps moving.
+  // Native scrolling supports the automatic loop and user-controlled movement
+  // without CSS transforms fighting touch, trackpad or arrow scrolling.
   const layout = await belt.evaluate((element) => {
     const style = getComputedStyle(element);
     const cards = [...element.querySelectorAll(".dealer-belt-group a")].slice(0, 3).map((card) => card.getBoundingClientRect());
@@ -153,11 +153,11 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
   // Motion is continuous: it only ever advances, and it never restarts at zero.
   const offsets: number[] = [];
   for (let sample = 0; sample < 4; sample++) {
-    offsets.push(await belt.evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41));
+    offsets.push(await viewport.evaluate((element) => element.scrollLeft));
     await page.waitForTimeout(900);
   }
   for (let index = 1; index < offsets.length; index++) {
-    expect(offsets[index], `belt restarted between samples: ${offsets.join(", ")}`).toBeLessThan(offsets[index - 1]!);
+    expect(offsets[index], `belt restarted between samples: ${offsets.join(", ")}`).toBeGreaterThan(offsets[index - 1]!);
   }
   await expect(page.getByRole("button", { name: /pause dealer rotation/i })).toHaveCount(0);
 
@@ -165,11 +165,9 @@ test("dealer belt runs a continuous loop that never leaves the page", async ({ p
   // the container edge (no stray offset, nothing hanging outside the grid).
   const alignment = await page.evaluate(() => {
     const marquee = document.querySelector('[data-testid="dealers-marquee"]') as HTMLElement;
-    const track = marquee.querySelector(".dealer-belt") as HTMLElement;
-    track.style.animation = "none";
+    marquee.scrollLeft = 0;
     const parentLeft = marquee.getBoundingClientRect().left;
     const firstCardLeft = (marquee.querySelector("a") as HTMLElement).getBoundingClientRect().left;
-    track.style.animation = "";
     return { parentLeft, firstCardLeft, cardWidth: (marquee.querySelector("a") as HTMLElement).getBoundingClientRect().width };
   });
   expect(Math.abs(alignment.firstCardLeft - alignment.parentLeft)).toBeLessThanOrEqual(1);

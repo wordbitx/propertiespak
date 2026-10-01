@@ -1,6 +1,6 @@
 import type { Inquiry } from "@/db/schema";
 
-export const INQUIRY_TYPES = ["property", "visit", "contact", "list", "valuation", "newsletter", "advisory"] as const;
+export const INQUIRY_TYPES = ["property", "visit", "contact", "list", "valuation", "newsletter", "advisory", "advertise"] as const;
 export const INQUIRY_STATUSES = ["new", "contacted", "closed"] as const;
 export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
 
@@ -12,6 +12,7 @@ export const INQUIRY_LABELS: Record<string, string> = {
   valuation: "Valuation request",
   newsletter: "Newsletter signup",
   advisory: "Advisory enquiry",
+  advertise: "Advertising request",
 };
 
 export type InboxItem = Omit<Inquiry, "createdAt" | "reviewedAt"> & {

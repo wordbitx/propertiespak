@@ -100,6 +100,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         lng: submission.lng,
         price: submission.price,
         priceUnit: submission.priceUnit,
+        paymentType: submission.paymentType,
+        videoUrl: submission.videoUrl,
         negotiable: submission.negotiable,
         bedrooms: submission.bedrooms,
         bathrooms: submission.bathrooms,

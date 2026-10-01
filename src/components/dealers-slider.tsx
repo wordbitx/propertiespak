@@ -1,204 +1,111 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import Link from "next/link";
+import { useRef } from "react";
 import { IconArrowRight } from "@/components/icons";
 import { BlueTick } from "@/components/verified-badge";
-import { useDealerBelt } from "@/components/use-dealer-belt";
+import { siteImages } from "@/lib/site-images";
+import { useDealerRail } from "@/components/use-dealer-rail";
 import type { DealerProfile } from "@/lib/queries";
 
-function initialsFor(name: string) {
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "PP";
-}
-
-/**
- * One card leaves the left edge every 3.5 seconds. The duration is counted over
- * the cards actually on the belt (including the repeats that pad a short list),
- * so the belt travels at the same calm speed regardless of how many profiles
- * exist.
- */
+// Temporary architectural thumbnails, not invented photos of the named people.
+// A real uploaded company logo/avatar always takes priority.
+const AGENCY_IMAGES = [siteImages.commercialTower.webp[0].src, siteImages.commercialLobby.webp[0].src, siteImages.aboutVilla.webp[0].src, siteImages.smarterLiving.webp[0].src];
 const SECONDS_PER_CARD = 3.5;
-const MIN_DURATION_SECONDS = 36;
-/** Cards rendered per belt pass — a short list is repeated so the belt stays seamless. */
 const MIN_GROUP_CARDS = 12;
 
-/**
- * Dealer showcase.
- *
- * The belt is a true continuous loop: the row is duplicated once and the track
- * is translated by exactly −50%, so the last visible card slides off as the
- * first one comes back in. It never stops, never jumps back to the start and it
- * is clipped inside the page container — with a soft fade at each edge instead
- * of a scrollbar.
- *
- * Layout and motion never depend on the stylesheet alone: the critical
- * horizontal-flex layout is also applied inline and, if the CSS animation is
- * unavailable (for example a stale cached stylesheet in the visitor's browser),
- * the same loop is driven from JavaScript. Either way the row stays horizontal
- * and keeps moving — it never falls back to a stacked list.
- *
- * Visitors who prefer reduced motion get a still, manually scrollable row and
- * no duplicated content.
- */
 export function DealersSlider({ dealers }: { dealers: DealerProfile[] }) {
   const repeats = Math.max(1, Math.ceil(MIN_GROUP_CARDS / Math.max(1, dealers.length)));
   const belt = Array.from({ length: repeats }, () => dealers).flat();
-  const duration = Math.max(MIN_DURATION_SECONDS, Math.round(belt.length * SECONDS_PER_CARD));
-  // Hovering (or focusing) any card pauses the belt; moving away resumes it.
-  const { beltRef, held, hold, release } = useDealerBelt(duration);
+  const duration = Math.max(36, Math.round(belt.length * SECONDS_PER_CARD));
+  const { viewportRef, beltRef, held, hold, release, interrupt, move } = useDealerRail(duration);
+  const drag = useRef<{ pointer: number; x: number; left: number; moved: boolean } | null>(null);
+  const dragged = useRef(false);
 
-  const verifiedCount = dealers.filter((dealer) => dealer.isVerified).length;
-  const listingCount = dealers.reduce((total, dealer) => total + (dealer.listings ?? 0), 0);
-
-  const eyebrow = (
-    <p className="eyebrow text-forest-700">
-      <span className="h-px w-6 bg-current" /> Verified dealer network
-    </p>
-  );
-
-  if (dealers.length === 0) {
+  function renderBelt(hidden: boolean) {
     return (
-      <section className="overflow-hidden bg-mist py-16" aria-label="Dealers on Properties Pak">
-        <div className="ui-container">
-          {eyebrow}
-          <h2 className="display-2 mt-3.5 max-w-3xl text-navy-900">The dealers behind every listing</h2>
-          <p className="lede mt-4 max-w-3xl">
-            No dealer profiles yet. Create an account and complete your professional profile to stand here with a verified
-            badge.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/list-property" className="btn btn-primary">
-              List a property <IconArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/login?mode=register" className="btn btn-outline">
-              Create a dealer account
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  function renderCard(dealer: DealerProfile, clone: boolean) {
-    const href = dealer.slug ? `/dealers/${dealer.slug}` : "/dealers";
-    const areas = dealer.areas
-      ? dealer.areas.split(",").map((area) => area.trim()).filter(Boolean).slice(0, 2).join(" · ")
-      : dealer.cityName || "Pakistan";
-    return (
-      <Link
-        href={href}
-        // Clones exist only to make the belt seamless — never focusable, never announced.
-        tabIndex={clone ? -1 : undefined}
-        aria-hidden={clone ? "true" : undefined}
-        className="group flex h-[272px] w-[176px] flex-col items-center rounded-panel border border-soft bg-white px-4 py-5 text-center shadow-soft transition-all hover:-translate-y-1 hover:border-navy-100 hover:shadow-card sm:w-[200px]"
-      >
-        <span className="grid h-[92px] w-[92px] shrink-0 place-items-center overflow-hidden rounded-full border border-soft bg-mist font-sans text-[1.5rem] font-bold text-navy-900">
-          {dealer.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={dealer.avatarUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
-          ) : dealer.companyLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={dealer.companyLogo} alt="" className="h-full w-full object-contain p-3" loading="lazy" />
-          ) : (
-            initialsFor(dealer.name)
-          )}
-        </span>
-
-        {/* Blue tick sits next to the name, same as the dealer cards and profiles. */}
-        <span className="mt-3.5 flex w-full min-w-0 items-center justify-center gap-1.5">
-          <span className="truncate font-sans text-[0.9375rem] font-semibold text-navy-900 group-hover:text-forest-700">
-            {dealer.name}
-          </span>
-          {dealer.isVerified && <BlueTick className="h-4 w-4 shrink-0" />}
-        </span>
-        <span className="mt-1 w-full truncate text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-forest-700">
-          {dealer.agency || dealer.designation || "Property consultant"}
-        </span>
-        <span className="mt-1.5 line-clamp-2 min-h-10 text-[0.75rem] leading-5 text-ink-muted">{areas}</span>
-        <span className="mt-auto inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-navy-800">
-          <span className="h-1.5 w-1.5 rounded-full bg-forest-500" aria-hidden="true" />
-          {dealer.listings > 0 ? `${dealer.listings} ${dealer.listings === 1 ? "listing" : "listings"}` : "Profile"}
-          <IconArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-        </span>
-      </Link>
-    );
-  }
-
-  function renderBelt(cards: DealerProfile[], hidden: boolean) {
-    return (
-      <ul
-        className="dealer-belt-group"
-        style={{ display: "flex" }}
-        aria-hidden={hidden ? "true" : undefined}
-        aria-label={hidden ? undefined : "Dealer profiles"}
-      >
-        {cards.map((dealer, index) => (
-          <li key={`${hidden ? "clone" : "card"}-${dealer.id}-${index}`} className="shrink-0">
-            {renderCard(dealer, hidden)}
-          </li>
-        ))}
+      <ul className="dealer-belt-group" style={{ display: "flex" }} aria-hidden={hidden ? "true" : undefined} aria-label={hidden ? undefined : "Dealer profiles"}>
+        {belt.map((dealer, index) => {
+          const clone = hidden || index >= dealers.length;
+          return (
+            <li key={`${hidden ? "clone" : "card"}-${dealer.id}-${index}`} className="shrink-0">
+              <Link href={dealer.slug ? `/dealers/${dealer.slug}` : "/dealers"} tabIndex={clone ? -1 : undefined} aria-hidden={clone ? "true" : undefined}
+                className="dealer-showcase-card group">
+                <span className="dealer-showcase-avatar">
+                  <ResilientImage src={dealer.companyLogo || dealer.avatarUrl || AGENCY_IMAGES[index % AGENCY_IMAGES.length]}
+                    fallbackSrc={AGENCY_IMAGES[index % AGENCY_IMAGES.length]}
+                    alt={dealer.companyLogo || dealer.avatarUrl ? "" : "Temporary agency image"}
+                    title={dealer.companyLogo || dealer.avatarUrl ? undefined : "Temporary image — replace from your profile"}
+                    data-agency-placeholder={!dealer.companyLogo && !dealer.avatarUrl ? "true" : undefined}
+                    width={128} height={128} loading="lazy" draggable={false}
+                    className={dealer.companyLogo ? "h-full w-full object-contain p-1.5" : "h-full w-full object-cover"} />
+                </span>
+                <span className="dealer-showcase-info">
+                  <span className="dealer-showcase-name"><span>{dealer.agency || dealer.name}</span>{dealer.isVerified && <BlueTick className="h-3.5 w-3.5 shrink-0" />}</span>
+                  <span className="dealer-showcase-person">{dealer.agency ? dealer.name : dealer.designation || "Property consultant"}</span>
+                  <span className="dealer-showcase-city">{dealer.cityName || "Pakistan"}</span>
+                  <span className="dealer-showcase-listings">{dealer.listings > 0 ? `${dealer.listings} ${dealer.listings === 1 ? "listing" : "listings"}` : "View profile"}<IconArrowRight className="h-3 w-3" /></span>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     );
   }
 
   return (
-    <section className="overflow-hidden bg-mist py-16" aria-label="Dealers on Properties Pak">
-      <div className="ui-container">
-        <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0 max-w-3xl">
-            {eyebrow}
-            <h2 className="display-2 mt-4 text-navy-900">Dealers you can verify before you deal</h2>
-            <p className="lede mt-4">
-              Every account below completed a professional profile — agency details, service areas and credentials on the
-              record. Look for the blue tick before you commit.
-            </p>
-            <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.8125rem] text-ink-muted">
-              <span className="inline-flex items-center gap-1.5 font-semibold text-navy-900">
-                <BlueTick className="h-4 w-4" /> {verifiedCount} verified {verifiedCount === 1 ? "account" : "accounts"}
-              </span>
-              <span aria-hidden="true" className="text-soft">
-                •
-              </span>
-              <span>{dealers.length} dealer profiles</span>
-              <span aria-hidden="true" className="text-soft">
-                •
-              </span>
-              <span>{listingCount} live listings</span>
-            </p>
-          </div>
-
-          <Link
-            href="/dealers"
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 font-sans text-[0.875rem] font-semibold text-forest-700 hover:text-forest-600"
-          >
-            All dealers <IconArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Clipped inside the page container — the belt fades out at both edges instead of scrolling the page. */}
-      <div className="ui-container mt-10">
-        <div
-          className="dealer-belt-viewport"
-          data-testid="dealers-marquee"
-          style={{ overflow: "hidden" }}
-          onMouseEnter={hold}
-          onMouseLeave={release}
-        >
-          <div
-            ref={beltRef}
-            className="dealer-belt"
-            data-held={held ? "true" : undefined}
-            // Layout is inline on purpose: the belt stays a single horizontal row
-            // even if the stylesheet that carries the belt rules is unavailable.
-            style={{ display: "flex", width: "max-content", animationDuration: `${duration}s` }}
-            onFocusCapture={hold}
-            onBlurCapture={release}
-          >
-            {renderBelt(belt, false)}
-            {renderBelt(belt, true)}
+    <section id="home-dealers" className="home-dealers bg-mist" aria-label="Dealers on Properties Pak">
+      <div className="ui-container" onFocusCapture={() => hold("focus")} onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) release("focus");
+      }}>
+        <div className="home-section-topline">
+          <h2>{"Dealers & Agencies"}</h2>
+          <div className="dealer-heading-actions">
+            <Link href="/dealers">View all<IconArrowRight className="h-4 w-4" /></Link>
+            {dealers.length > 0 && <div className="dealer-rail-controls">
+              <button type="button" aria-label="Previous dealers and agencies" onClick={() => move(-1)}><IconArrowRight className="h-4 w-4 rotate-180" /></button>
+              <button type="button" aria-label="Next dealers and agencies" onClick={() => move(1)}><IconArrowRight className="h-4 w-4" /></button>
+            </div>}
           </div>
         </div>
+        {dealers.length ? (
+          <div ref={viewportRef} className="dealer-belt-viewport dealer-native-viewport" data-testid="dealers-marquee"
+            role="region" aria-label="Dealers and agencies" tabIndex={0}
+            onMouseEnter={() => hold("pointer")} onMouseLeave={() => release("pointer")}
+            onWheel={interrupt}
+            onDragStart={(event) => event.preventDefault()}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1); }
+            }}
+            onPointerDown={(event) => {
+              interrupt(); hold("gesture"); dragged.current = false;
+              if (event.pointerType === "mouse") drag.current = { pointer: event.pointerId, x: event.clientX, left: event.currentTarget.scrollLeft, moved: false };
+            }}
+            onPointerMove={(event) => {
+              const current = drag.current;
+              if (!current || current.pointer !== event.pointerId) return;
+              const delta = event.clientX - current.x;
+              if (!current.moved && Math.abs(delta) < 6) return;
+              current.moved = true; dragged.current = true;
+              event.currentTarget.dataset.dragging = "true";
+              if (!event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.setPointerCapture(event.pointerId);
+              event.currentTarget.scrollLeft = current.left - delta;
+            }}
+            onPointerUp={(event) => {
+              drag.current = null; delete event.currentTarget.dataset.dragging;
+              interrupt(); release("gesture");
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onPointerCancel={(event) => { drag.current = null; delete event.currentTarget.dataset.dragging; release("gesture"); interrupt(); }}
+            onClickCapture={(event) => { if (dragged.current) { event.preventDefault(); event.stopPropagation(); dragged.current = false; } }}>
+            <div ref={beltRef} className="dealer-belt" data-held={held ? "true" : undefined} style={{ display: "flex", width: "max-content" }}>
+              {renderBelt(false)}{renderBelt(true)}
+            </div>
+          </div>
+        ) : <p className="mt-3 text-sm text-ink-muted">No agency profiles yet. <Link href="/login?mode=register" className="font-semibold text-forest-700">Create a dealer account</Link>.</p>}
       </div>
     </section>
   );

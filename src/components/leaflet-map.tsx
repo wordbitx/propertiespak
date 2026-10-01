@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type L from "leaflet";
+import { mapMarkerLayout, type LayoutPin } from "@/lib/map-marker-layout";
 import type { SocietyMapDef } from "@/lib/society-maps";
 
 export type LeafletPin = {
@@ -25,11 +26,14 @@ type Props = {
   pins?: LeafletPin[];
   /** Fit a distinct nearby dataset once; selection never triggers another fit. */
   fitToPins?: boolean;
+  /** Lightweight, viewport-cropped clusters for the large header map. */
+  clusterPins?: boolean;
   /** Open the popup of whichever pin the parent marks active (list hover/click sync). */
   autoOpenActive?: boolean;
   /** Fit the viewport to these [[south,west],[north,east]] bounds once ready (society fit). */
   fitBounds?: [[number, number], [number, number]] | null;
   showLocate?: boolean;
+  allowFullscreen?: boolean;
   society?: SocietyMapDef | null;
   /** Called when the user taps/clicks the map (picker mode). */
   onPick?: (lat: number, lng: number) => void;
@@ -64,7 +68,7 @@ function pinSvg(color: string) {
 
 /** 1×1 transparent pixel — failed tiles vanish instead of showing broken art. */
 const TRANSPARENT_TILE =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+  "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>');
 
 /** Tile x/y for a lat/lng at a given zoom (slippy-map scheme). */
 function tileXYFor(lat: number, lng: number, z: number) {
@@ -167,9 +171,11 @@ export function LeafletMap({
   zoom = 14,
   pins = [],
   fitToPins = false,
+  clusterPins = false,
   autoOpenActive = false,
   fitBounds = null,
   showLocate = true,
+  allowFullscreen = true,
   society = null,
   onPick,
   onLocate,
@@ -186,6 +192,7 @@ export function LeafletMap({
   const mapRef = useRef<L.Map | null>(null);
   const leafletRef = useRef<typeof L | null>(null);
   const pinLayerRef = useRef<L.LayerGroup | null>(null);
+  const pinMarkersRef = useRef(new Map<string | number, { marker: L.Marker; pin: LayoutPin; html: string; popup: string }>());
   const pickerRef = useRef<L.Marker | null>(null);
   const gpsRef = useRef<{ marker: L.CircleMarker; circle: L.Circle } | null>(null);
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
@@ -209,7 +216,8 @@ export function LeafletMap({
   const [layoutMsg, setLayoutMsg] = useState("");
   const [locating, setLocating] = useState(false);
   const [locateMsg, setLocateMsg] = useState("");
-  const [baseName, setBaseName] = useState("Google Maps Satellite View");
+  const [baseName, setBaseName] = useState(clusterPins ? "Google Maps" : "Google Maps Satellite View");
+  const [baseTileMsg, setBaseTileMsg] = useState("");
   const autoLocated = useRef(false);
   const lastFit = useRef("");
 
@@ -230,131 +238,124 @@ export function LeafletMap({
   /* ---------- create map ---------- */
   useEffect(() => {
     let cancelled = false;
+    const pinRecords = pinMarkersRef.current;
     let cleanupInteractions = () => {};
     (async () => {
       const Lmod = (await import("leaflet")).default;
       if (cancelled || !containerRef.current || mapRef.current) return;
       leafletRef.current = Lmod;
 
-      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 4, updateWhenIdle: false, updateWhenZooming: false } as L.TileLayerOptions;
-      const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
-      const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, subdomains: ["mt0", "mt1", "mt2", "mt3"] });
+      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 2, updateWhenIdle: Lmod.Browser.mobile, updateWhenZooming: false } as L.TileLayerOptions;
+      const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, attribution: "Imagery © Google", subdomains: ["mt0", "mt1", "mt2", "mt3"] });
+      const osm = Lmod.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { ...attr, maxZoom: 19, attribution: "© OpenStreetMap contributors" });
+      const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, attribution: "Imagery © Google", subdomains: ["mt0", "mt1", "mt2", "mt3"] });
 
       const map = Lmod.map(containerRef.current, {
         center: [center.lat, center.lng],
         zoom,
         minZoom: 5,
         maxZoom: 20,
-        layers: [gsat],
+        layers: [clusterPins ? gmap : gsat],
         zoomControl: true,
         // In picker mode the map tap moves the pin, so the pin's popup must stay open.
         closePopupOnClick: !onPick,
-        scrollWheelZoom: false, // Handled smoothly via custom requestAnimationFrame wheel listener
+        scrollWheelZoom: true,
+        wheelDebounceTime: 80,
+        wheelPxPerZoomLevel: 100,
         zoomSnap: 0,            // Full fractional continuous zoom without discrete jumping
         zoomDelta: 1,
         touchZoom: true,
-        doubleClickZoom: false, // Handled with smooth setZoomAround
+        doubleClickZoom: true,
+        bounceAtZoomLimits: false,
         inertia: true,
         inertiaDeceleration: 3000,
         inertiaMaxSpeed: 2500,
         zoomAnimation: true,
-        fadeAnimation: true,
+        fadeAnimation: false,
         markerZoomAnimation: true,
         attributionControl: true,
       });
       map.attributionControl.setPrefix("");
-      map.attributionControl.addAttribution("Imagery © Google · Society layouts © ioi Technologies / DHA Plus");
+      map.attributionControl.addAttribution("Society layouts © ioi Technologies / DHA Plus");
       Lmod.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
 
-      /* ---------- smooth continuous wheel zoom ---------- */
+      // Leaflet's native touch/wheel animation transforms the existing tiles.
+      // Calling setZoomAround every animation frame rebuilt the viewport and
+      // made two-finger zoom stutter, especially with many listing labels.
       const mapElem = containerRef.current;
-      let targetZoom = map.getZoom();
-      let animId: number | null = null;
-      let mousePoint: L.Point | null = null;
-      let isZooming = false;
-
-      const onWheel = (e: WheelEvent) => {
-        if ((e.target as Element)?.closest?.(".leaflet-control")) return;
-        e.preventDefault();
-        const rect = mapElem.getBoundingClientRect();
-        mousePoint = Lmod.point(e.clientX - rect.left, e.clientY - rect.top);
-
-        const delta = -e.deltaY * (e.deltaMode === 1 ? 24 : e.deltaMode === 2 ? 350 : 1);
-        const factor = e.ctrlKey ? 0.008 : 0.0028;
-        const zoomStep = delta * factor;
-
-        targetZoom = Math.min(20, Math.max(5, (isZooming ? targetZoom : map.getZoom()) + zoomStep));
-
-        if (!isZooming) {
-          isZooming = true;
-          const render = () => {
-            const curZ = map.getZoom();
-            const diff = targetZoom - curZ;
-            if (Math.abs(diff) > 0.005) {
-              const nextZ = curZ + diff * 0.3;
-              if (mousePoint) {
-                map.setZoomAround(mousePoint, nextZ, { animate: false });
-              }
-              animId = requestAnimationFrame(render);
-            } else {
-              if (mousePoint) {
-                map.setZoomAround(mousePoint, targetZoom, { animate: false });
-              }
-              isZooming = false;
-              animId = null;
-            }
-          };
-          animId = requestAnimationFrame(render);
-        }
+      mapElem.dataset.mapOverview = String(clusterPins);
+      const updateZoom = () => { mapElem.dataset.mapZoom = String(map.getZoom()); const center = map.getCenter(); mapElem.dataset.mapCenter = `${center.lat.toFixed(6)},${center.lng.toFixed(6)}`; };
+      const startGesture = () => {
+        mapElem.dataset.mapInteracting = "true";
+        // Hover popups must never pan the viewport against a mouse/touch drag.
+        if (!onPickRef.current) map.closePopup();
       };
-
-      const onDblClick = (e: MouseEvent) => {
-        e.preventDefault();
-        const rect = mapElem.getBoundingClientRect();
-        const pt = Lmod.point(e.clientX - rect.left, e.clientY - rect.top);
-        map.setZoomAround(pt, Math.min(20, Math.round(map.getZoom()) + 1), { animate: true });
-      };
-
-      mapElem.addEventListener("wheel", onWheel, { passive: false });
-      mapElem.addEventListener("dblclick", onDblClick);
+      const endGesture = () => { delete mapElem.dataset.mapInteracting; };
+      map.on("dragstart zoomstart", startGesture);
+      map.on("moveend zoomend", endGesture);
+      map.on("zoomend moveend", updateZoom);
+      updateZoom();
+      let resizeFrame = 0;
+      const resize = new ResizeObserver(() => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+      });
+      resize.observe(mapElem);
       cleanupInteractions = () => {
-        if (animId !== null) cancelAnimationFrame(animId);
-        isZooming = false;
-        mapElem.removeEventListener("wheel", onWheel);
-        mapElem.removeEventListener("dblclick", onDblClick);
+        cancelAnimationFrame(resizeFrame);
+        resize.disconnect();
+        map.off("zoomend moveend", updateZoom);
+        map.off("dragstart zoomstart", startGesture);
+        map.off("moveend zoomend", endGesture);
       };
 
       const overlayGroup = Lmod.layerGroup().addTo(map);
       overlayGroupRef.current = overlayGroup;
 
       const control = Lmod.control.layers(
-        { "Google Maps Satellite View": gsat, "Google Maps": gmap },
+        { "Google Maps Satellite View": gsat, "Google Maps": gmap, "OpenStreetMap": osm },
         {},
         { collapsed: true, position: "topleft" },
       ).addTo(map);
       controlRef.current = control;
-      map.on("baselayerchange", (e) => setBaseName((e as L.LayersControlEvent).name));
+      map.on("baselayerchange", (e) => { setBaseName((e as L.LayersControlEvent).name); setBaseTileMsg(""); });
+      map.on("popupopen", (event) => {
+        // Popup HTML belongs to Leaflet, not React's hydration tree.
+        const photo = (event as L.PopupEvent).popup.getElement()?.querySelector<HTMLImageElement>(".ewx-popup-thumb");
+        if (!photo) return;
+        const recover = () => { photo.onerror = null; photo.src = "/images/property-placeholder.svg"; };
+        photo.onerror = recover;
+        if (photo.complete && photo.naturalWidth === 0) recover();
+      });
 
       pinLayerRef.current = Lmod.layerGroup().addTo(map);
 
       map.on("click", (e: L.LeafletMouseEvent) => onPickRef.current?.(e.latlng.lat, e.latlng.lng));
 
-      // One-shot guard: if the active base layer starts returning blocked
-      // tiles (403 block pages), fall back to the other Google layer once
-      // instead of leaving a wall of error tiles on screen.
+      // Switch providers, not just Google layer styles, when imagery is blocked.
       let baseFailures = 0;
-      const onBaseTileError = () => {
+      const onBaseTileError = (event: L.LeafletEvent) => {
+        if (!map.hasLayer(event.target)) return;
         baseFailures += 1;
-        if (baseFailures < 8 || baseFallbackRef.current) return;
-        baseFallbackRef.current = true;
-        const toSatellite = map.hasLayer(gmap);
-        map.removeLayer(toSatellite ? gmap : gsat);
-        (toSatellite ? gsat : gmap).addTo(map);
-        setBaseName(toSatellite ? "Google Maps Satellite View" : "Google Maps");
-        setLayoutMsg("Imagery provider blocked — switched the base map. Sorry about that.");
+        if (baseFailures < 8) return;
+        if (!baseFallbackRef.current) {
+          baseFallbackRef.current = true;
+          map.removeLayer(gsat); map.removeLayer(gmap);
+          osm.addTo(map);
+          setBaseName("OpenStreetMap");
+          setBaseTileMsg("Switched to OpenStreetMap because imagery was unavailable.");
+          baseFailures = 0;
+        } else {
+          setBaseTileMsg("Map tiles are unavailable. Pins and property details still work.");
+        }
       };
-      gsat.on("tileerror", onBaseTileError);
-      gmap.on("tileerror", onBaseTileError);
+      for (const base of [gsat, gmap, osm]) {
+        base.on("tileerror", onBaseTileError);
+        base.on("tileload", (event: L.LeafletEvent) => {
+          if ((event as L.TileEvent).tile.getAttribute("src") === TRANSPARENT_TILE) return;
+          if (map.hasLayer(base)) { baseFailures = 0; setBaseTileMsg(""); }
+        });
+      }
 
       mapRef.current = map;
       setReady(true);
@@ -366,6 +367,7 @@ export function LeafletMap({
       mapRef.current?.remove();
       mapRef.current = null;
       pinLayerRef.current = null;
+      pinRecords.clear();
       pickerRef.current = null;
       lastFit.current = "";
     };
@@ -380,7 +382,7 @@ export function LeafletMap({
     if (Math.abs(cur.lat - center.lat) > 1e-7 || Math.abs(cur.lng - center.lng) > 1e-7 || Math.abs(map.getZoom() - zoom) > 0.01) {
       map.flyTo([center.lat, center.lng], zoom, { duration: 0.6 });
     }
-  }, [center.lat, center.lng, zoom, ready]);
+  }, [center.lat, center.lng, zoom, ready, fitBounds]);
 
   /* ---------- society fit (dhaplus-style whole-society view) ---------- */
   useEffect(() => {
@@ -467,6 +469,7 @@ export function LeafletMap({
     const { x, y } = tileXYFor((southLat + northLat) / 2, (westLng + eastLng) / 2, 14);
     const probeUrl = society.layers[0].tiles.replace("{z}", "14").replace("{x}", String(x)).replace("{y}", String(y));
     probeTileFiltering(probeUrl).then((filterable) => {
+      if (cancelled) return;
       layoutProbeRef.current.set(society.slug, filterable);
       if (filterable) {
         buildLayers(true);
@@ -478,53 +481,83 @@ export function LeafletMap({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [society, layoutDead, ready]);
 
   /* ---------- listing pins ---------- */
   useEffect(() => {
-    const Lmod = leafletRef.current, layer = pinLayerRef.current;
-    if (!Lmod || !layer || !ready) return;
-    layer.clearLayers();
-    let activeMarker: L.Marker | null = null;
-    let activeId: string | number | null = null;
-    for (const pin of pins) {
-      const icon = Lmod.divIcon({
-        className: "ewx-pin",
-        html: `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price"${!pin.active && pin.color ? ` style="border-left:3px solid ${pin.color}"` : ""}>${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`,
-        iconSize: [30, 41],
-        iconAnchor: [15, 41],
-        popupAnchor: [0, -38],
-      });
-      const m = Lmod.marker([pin.lat, pin.lng], { icon, title: pin.title, riseOnHover: true }).addTo(layer);
-      m.bindPopup(pinPopupHtml(pin), { closeButton: true, autoPan: true, maxWidth: 288, minWidth: 252 });
-      m.on("click", () => onPinSelectRef.current?.(pin.id));
-      // Hovering a pin reveals its card; leaving hides it again — unless the
-      // pin is the one selected from the side list / a click, which stays open.
-      m.on("mouseenter", () => m.openPopup());
-      m.on("mouseout", () => {
-        if (!pin.active && m.isPopupOpen()) m.closePopup();
-      });
-      if (pin.active) {
-        activeMarker = m;
-        activeId = pin.id;
-      }
-    }
-    // Single-pin maps always label their pin. Multi-pin maps open the selected
-    // pin's card only when the selection CHANGES (side-list hover, tap) — the
-    // initial paint stays clean.
-    if (lastActiveRef.current === undefined) lastActiveRef.current = activeId;
-    if (activeMarker && (pins.length === 1 || (autoOpenActive && activeId !== null && activeId !== lastActiveRef.current))) {
-      activeMarker.openPopup();
-    }
-    lastActiveRef.current = activeId;
+    const Lmod = leafletRef.current, layer = pinLayerRef.current, map = mapRef.current;
+    if (!Lmod || !layer || !map || !ready) return;
     const dataKey = pins.map((pin) => `${pin.id}:${pin.lat}:${pin.lng}`).join("|");
-    if (fitToPins && pins.length && lastFit.current !== dataKey && mapRef.current) {
+    if (fitToPins && pins.length && lastFit.current !== dataKey) {
       lastFit.current = dataKey;
-      const bounds = Lmod.latLngBounds(pins.map((pin) => [pin.lat, pin.lng] as [number, number]));
-      mapRef.current.fitBounds(bounds.pad(0.15), { padding: [40, 40], maxZoom: 15, animate: false });
+      map.fitBounds(Lmod.latLngBounds(pins.map((pin) => [pin.lat, pin.lng] as [number, number])).pad(0.15), { padding: [40, 40], maxZoom: 15, animate: false });
     }
-  }, [pins, ready, fitToPins, autoOpenActive]);
+    function renderPins() {
+      if (!Lmod || !layer || !map) return;
+      const bounds = map.getBounds().pad(0.25);
+      const visible = clusterPins ? mapMarkerLayout(pins, map.getZoom(), {
+        south: bounds.getSouth(), north: bounds.getNorth(), west: bounds.getWest(), east: bounds.getEast(),
+      }) : pins;
+      const records = pinMarkersRef.current;
+      const incoming = new Set(visible.map((pin) => pin.id));
+      for (const [id, record] of records) {
+        if (!incoming.has(id)) { layer.removeLayer(record.marker); records.delete(id); }
+      }
+      let activeMarker: L.Marker | null = null;
+      let activeId: string | number | null = null;
+      for (const pin of visible as LayoutPin[]) {
+        const clustered = !!pin.members;
+        const html = clustered ? `<span class="ewx-cluster-count">${pin.members!.length}</span>` : `<div class="ewx-pin-wrap${pin.active ? " is-active" : ""}">${pin.price ? `<div class="ewx-pin-price"${!pin.active && pin.color ? ` style="border-left:3px solid ${pin.color}"` : ""}>${escapeText(pin.price)}</div>` : ""}${pinSvg(pin.active ? "#10a456" : (pin.color ?? "#06274a"))}</div>`;
+        const popup = clustered ? "" : pinPopupHtml(pin);
+        const icon = () => Lmod.divIcon({ className: clustered ? "ewx-cluster" : "ewx-pin", html,
+          iconSize: clustered ? [44, 44] : [30, 41], iconAnchor: clustered ? [22, 22] : [15, 41], popupAnchor: [0, -38] });
+        let record = records.get(pin.id);
+        if (!record) {
+          const marker = Lmod.marker([pin.lat, pin.lng], { icon: icon(), title: pin.title, riseOnHover: !clusterPins }).addTo(layer);
+          record = { marker, pin, html, popup };
+          records.set(pin.id, record);
+          const live = record;
+          if (!clustered) marker.bindPopup(popup, { closeButton: true, autoPan: !clusterPins, maxWidth: 288, minWidth: 252 });
+          marker.on("click", () => {
+            if (live.pin.members) {
+              const grouped = Lmod.latLngBounds(live.pin.members.map((item) => [item.lat, item.lng] as [number, number]));
+              if (map.getZoom() >= 18) {
+                // Society-level pins can legitimately share one coordinate;
+                // don't keep zooming forever or invent separate plot positions.
+                const links = live.pin.members.filter((item) => item.href?.startsWith("/property/")).slice(0, 5)
+                  .map((item) => `<li><a href="${escapeText(item.href!)}">${escapeText(item.title)}</a></li>`).join("");
+                Lmod.popup({ autoPan: false, maxWidth: 290 }).setLatLng([live.pin.lat, live.pin.lng])
+                  .setContent(`<div class="ewx-popup"><b>${live.pin.members.length} properties in this area</b><ul class="ewx-cluster-list">${links}</ul><span class="ewx-muted">Use the property list to browse all matching listings.</span></div>`).openOn(map);
+                return;
+              }
+              map.fitBounds(grouped.pad(0.2), { padding: [44, 44], maxZoom: Math.min(19, map.getZoom() + 3), animate: true });
+            } else onPinSelectRef.current?.(live.pin.id);
+          });
+          // Click-only labels: pointer movement during a pan cannot trigger auto-pan.
+        } else {
+          if (record.pin.active && !pin.active) record.marker.closePopup();
+          if (record.html !== html) {
+            const focused = record.marker.getElement()?.contains(document.activeElement);
+            record.marker.setIcon(icon());
+            if (focused) record.marker.getElement()?.focus({ preventScroll: true });
+          }
+          if (record.popup !== popup && !clustered) record.marker.setPopupContent(popup);
+          if (record.pin.lat !== pin.lat || record.pin.lng !== pin.lng) record.marker.setLatLng([pin.lat, pin.lng]);
+          record.pin = pin; record.html = html; record.popup = popup;
+        }
+        if (pin.active) { activeMarker = record.marker; activeId = pin.id; }
+      }
+      if (lastActiveRef.current === undefined) lastActiveRef.current = activeId;
+      if (activeMarker && (pins.length === 1 || (autoOpenActive && activeId !== null && activeId !== lastActiveRef.current))) activeMarker.openPopup();
+      lastActiveRef.current = activeId;
+      // Diagnostics describe actual rendered markers, not the number of matching listings.
+      if (containerRef.current) containerRef.current.dataset.mapRenderedMarkers = String(visible.length);
+    }
+    renderPins();
+    // No React state, network request, clustering or DOM rebuild per animation frame.
+    if (clusterPins) map.on("moveend", renderPins);
+    return () => { if (clusterPins) map.off("moveend", renderPins); };
+  }, [pins, ready, fitToPins, autoOpenActive, clusterPins]);
 
   /* ---------- draggable picker marker ---------- */
   useEffect(() => {
@@ -568,7 +601,7 @@ export function LeafletMap({
     });
     for (const orphan of orphans) map.removeLayer(orphan);
     if (!pickerRef.current.isPopupOpen()) pickerRef.current.openPopup();
-  }, [pickerPosition?.lat, pickerPosition?.lng, ready]);
+  }, [pickerPosition, pickerLabel, pickerSubtitle, ready]);
 
   /* ---------- keep the pin popup text in step with the resolved area name ---------- */
   useEffect(() => {
@@ -586,6 +619,7 @@ export function LeafletMap({
     setLocating(true); setLocateMsg("");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (mapRef.current !== map) return;
         const { latitude: lat, longitude: lng, accuracy } = pos.coords;
         gpsRef.current?.marker.remove(); gpsRef.current?.circle.remove();
         const circle = Lmod.circle([lat, lng], { radius: accuracy, color: "#1f4fd8", weight: 1, fillColor: "#1f4fd8", fillOpacity: 0.12 }).addTo(map);
@@ -597,6 +631,7 @@ export function LeafletMap({
         onLocateRef.current?.(lat, lng, accuracy);
       },
       (err) => {
+        if (mapRef.current !== map) return;
         setLocating(false);
         if (silent) return;
         setLocateMsg(
@@ -614,7 +649,6 @@ export function LeafletMap({
     autoLocated.current = true;
     const t = window.setTimeout(() => locate(true), 500);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLocate, ready]);
 
   /* ---------- fullscreen + resize ---------- */
@@ -665,9 +699,9 @@ export function LeafletMap({
           {showLocate && <button type="button" onClick={() => locate(false)} disabled={locating} aria-label="Use my current location" title="My location" className={`${ctl} disabled:opacity-60`}>
             <svg viewBox="0 0 24 24" className={`h-5 w-5 ${locating ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>
           </button>}
-          <button type="button" onClick={() => setFullscreen((v) => !v)} aria-label={fullscreen ? "Exit full screen" : "Full screen map"} title="Full screen" className={ctl}>
+          {allowFullscreen && <button type="button" onClick={() => setFullscreen((v) => !v)} aria-label={fullscreen ? "Exit full screen" : "Full screen map"} title="Full screen" className={ctl}>
             <svg viewBox="0 0 24 24" className="h-[1.1rem] w-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{fullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}</svg>
-          </button>
+          </button>}
         </div>
 
         {locateMsg && (
@@ -676,9 +710,9 @@ export function LeafletMap({
           </div>
         )}
 
-        {layoutMsg && (
+        {(baseTileMsg || layoutMsg) && (
           <div className="absolute inset-x-3 bottom-20 z-[500] rounded-md border border-[#cfd8e3] bg-white/95 px-3 py-2 text-[0.75rem] text-navy-900 shadow-soft sm:left-auto sm:right-3 sm:max-w-xs" role="status">
-            <div className="flex items-start justify-between gap-2"><span>{layoutMsg}</span><button type="button" onClick={() => setLayoutMsg("")} aria-label="Dismiss" className="shrink-0 text-ink-muted">✕</button></div>
+            <div className="flex items-start justify-between gap-2"><span>{baseTileMsg || layoutMsg}</span><button type="button" onClick={() => { setBaseTileMsg(""); setLayoutMsg(""); }} aria-label="Dismiss" className="shrink-0 text-ink-muted">✕</button></div>
           </div>
         )}
 

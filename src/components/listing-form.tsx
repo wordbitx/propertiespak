@@ -21,7 +21,7 @@ const CITIES = [
 
 const CATEGORIES = [
   { value: "house", label: "House", types: ["House", "Villa"] },
-  { value: "apartment", label: "Apartment / Flat", types: ["Apartment", "Penthouse", "Upper Portion"] },
+  { value: "apartment", label: "Apartment / Flat", types: ["Apartment", "Penthouse", "Upper Portion", "Lower Portion", "Room"] },
   { value: "plot", label: "Plot / File", types: ["Plot"] },
   { value: "office", label: "Office", types: ["Office"] },
   { value: "shop", label: "Shop / Retail", types: ["Shop"] },
@@ -72,6 +72,8 @@ export function ListingForm() {
   const [lat, setLat] = useState(CITY_CENTERS.lahore.lat);
   const [lng, setLng] = useState(CITY_CENTERS.lahore.lng);
   const [price, setPrice] = useState("");
+  const [paymentType, setPaymentType] = useState("cash");
+  const [videoUrl, setVideoUrl] = useState("");
   const [negotiable, setNegotiable] = useState(true);
   const [bedrooms, setBedrooms] = useState("5");
   const [bathrooms, setBathrooms] = useState("4");
@@ -130,6 +132,8 @@ export function ListingForm() {
           lat,
           lng,
           price: Number(price),
+          paymentType,
+          videoUrl,
           negotiable,
           bedrooms: Number(bedrooms),
           bathrooms: Number(bathrooms),
@@ -464,6 +468,12 @@ export function ListingForm() {
               placeholder={purpose === "rent" ? "e.g. 85000" : "e.g. 32500000"}
             />
           </div>
+          <div>
+            <label className={label} htmlFor="listing-payment">Payment type</label>
+            <select id="listing-payment" value={paymentType} onChange={(event) => setPaymentType(event.target.value)} className="field mt-2">
+              <option value="cash">Cash / full payment</option><option value="installments">Installments</option>
+            </select>
+          </div>
           <div className="flex items-end pb-1">
             <label className="flex cursor-pointer items-center gap-2.5 text-[0.875rem] font-medium text-navy-900">
               <input
@@ -551,6 +561,11 @@ export function ListingForm() {
             <label className={label} htmlFor="listing-amenities">Amenities (comma separated)</label>
             <input id="listing-amenities" value={amenities} onChange={(e) => setAmenities(e.target.value)} className="field mt-2" placeholder="e.g. Gated society, 24/7 security, Mosque nearby" />
           </div>
+        </div>
+        <div className="mt-4">
+          <label className={label} htmlFor="listing-video">Property video link (optional)</label>
+          <input id="listing-video" type="url" maxLength={2000} value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)} className="field mt-2" placeholder="https://youtube.com/watch?v=…" />
+          <p className="mt-1.5 text-xs text-ink-muted">Add a public tour of this property. The link is reviewed with your listing.</p>
         </div>
         <div className="mt-5">
           <p className={label}>Property photos *</p>

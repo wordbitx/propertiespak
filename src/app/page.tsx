@@ -1,39 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Hero } from "@/components/hero";
-import { PropertyCard } from "@/components/property-card";
-import { Reveal } from "@/components/reveal";
 import { Section, SectionHeading } from "@/components/section";
 import { Calculators } from "@/components/calculators";
+import { IconArrowRight, IconCalculator } from "@/components/icons";
 import {
   CategoryGrid,
   CityDiscovery,
   CommercialSection,
   FeaturedProperties,
   InsightsPreview,
-  MapSection,
   MarketHub,
   NewProjectsSection,
 } from "@/components/sections-discovery";
 
 import { CtaSection, InvestmentSection, TestimonialsSection, WhyEstateWx } from "@/components/sections-editorial";
 import { DealersSlider } from "@/components/dealers-slider";
-import { VerifiedDealersSection } from "@/components/dealers-section";
+import { PopularSearches } from "@/components/popular-searches";
 import {
   getCities,
   getCityListingCounts,
   getDealerShowcase,
-  getDealers,
-  getFeaturedProperties,
-  getMapProperties,
   getPlatformStats,
   getPosts,
+  getPopularSearches,
   getProjects,
   getTestimonials,
   searchProperties,
 } from "@/lib/queries";
 import { buildMetadata } from "@/lib/seo";
-import type { MapProperty } from "@/components/map-view";
+import { HomeExploreProperties } from "@/components/home-explore-properties";
+import { RecentProperties } from "@/components/recent-properties";
 
 export const metadata: Metadata = buildMetadata({
   title: "Properties Pak — Property for Sale & Rent in Pakistan | Pakistan Real Estate",
@@ -71,58 +68,36 @@ export default async function HomePage() {
     commercialListings,
     commercialCount,
     rentalCount,
-    mapRows,
     posts,
     testimonials,
-    verifiedDealers,
-    allDealers,
     showcaseDealers,
+    popularSearches,
   ] = await Promise.all([
     getPlatformStats(),
-    getFeaturedProperties(8),
+    searchProperties({ featured: true, verified: true, pageSize: 8 }),
     searchProperties({ sort: "newest", pageSize: 8 }),
     getCities(),
     getCityListingCounts(),
     getProjects(4),
-    searchProperties({ category: "commercial", pageSize: 4, sort: "popular" }),
+    searchProperties({ category: "commercial", pageSize: 8 }),
     searchProperties({ category: "commercial", pageSize: 1 }),
     searchProperties({ purpose: "rent", pageSize: 1 }),
-    getMapProperties({}, 100),
     getPosts(3),
     getTestimonials(),
-    getDealers({ verifiedOnly: true, limit: 4 }),
-    getDealers({ limit: 60 }),
     getDealerShowcase(48),
+    getPopularSearches(),
   ]);
 
-  const mapProperties: MapProperty[] = mapRows.map((property) => ({
-    id: property.id,
-    slug: property.slug,
-    title: property.title,
-    cityName: property.cityName,
-    locationArea: property.locationArea,
-    price: property.price,
-    priceUnit: property.priceUnit,
-    lat: property.lat,
-    lng: property.lng,
-    coverImage: property.coverImage,
-    propertyType: property.propertyType,
-    bedrooms: property.bedrooms,
-    bathrooms: property.bathrooms,
-    areaValue: property.areaValue,
-    areaUnit: property.areaUnit,
-    citySlug: property.citySlug,
-  }));
-
   return (
-    <>
+    <div className="home-page">
       <Hero />
 
       {/* Dealer belt sits under the hero; the category tiles sit just above the commercial section. */}
       <DealersSlider dealers={showcaseDealers} />
 
       {/* Featured inventory leads the marketplace: the strongest listings first, then full discovery. */}
-      <FeaturedProperties properties={featured} />
+      <FeaturedProperties properties={featured.items} total={featured.total} />
+      <RecentProperties />
 
       {/* Property discovery */}
       <Section tone="mist" id="explore">
@@ -140,14 +115,7 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-          {/* Four across on desktop (two full rows of 4), matching the featured grid. */}
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {discovery.items.map((property, index) => (
-              <Reveal key={property.id} delay={index * 50}>
-                <PropertyCard property={property} priority={index < 4} />
-              </Reveal>
-            ))}
-          </div>
+          <HomeExploreProperties properties={discovery.items} total={discovery.total} />
           <div className="mt-10 flex justify-center">
             <Link href="/properties" className="btn btn-primary">
               View all {stats.listings} properties
@@ -156,28 +124,24 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* "Spaces Built for Business" leads into the location map directly below it. */}
-      <CommercialSection properties={commercialListings.items} />
-      {/* "Discover Properties by Location" sits directly below the commercial section. */}
-      <MapSection properties={mapProperties} center={{ lat: 31.47, lng: 74.38 }} cities={cities.slice(0, 8)} zoom={12} />
+      {/* Manually scroll every commercial listing, not just the first server page. */}
+      <CommercialSection properties={commercialListings.items} total={commercialListings.total} />
+      {/* Map access lives exclusively in the header, on desktop and mobile. */}
+      <PopularSearches groups={popularSearches} />
       {/* "Every property category, in one place" closes the discovery run before new projects. */}
       <CategoryGrid />
       <NewProjectsSection projects={projects} />
       <CityDiscovery cities={cities} counts={cityCounts} />
-      <VerifiedDealersSection dealers={verifiedDealers} totalDealers={allDealers.length} verifiedCount={allDealers.filter((dealer) => dealer.isVerified).length} />
 
       {/* Smart calculators */}
-      <Section tone="light" id="tools">
+      <Section tone="light" id="tools" className="home-decision-tools">
         <div className="ui-container">
-          <SectionHeading
-            eyebrow="Smart tools"
-            title="Make Smarter Property Decisions"
-            description="Understand the numbers before you make the move — instalments, yield, growth scenarios and affordability in one place."
-            action={{ label: "Open tools hub", href: "/tools" }}
-          />
-          <div className="mt-10">
-            <Calculators defaultPrice={featured[0]?.price ?? 25000000} />
+          <div className="decision-tools-heading">
+            <span className="decision-tools-icon"><IconCalculator className="h-6 w-6" /></span>
+            <div><p className="decision-tools-kicker">Plan before you decide</p><h2>Make Smarter Property Decisions</h2><p className="decision-tools-description">Work out your budget, monthly payments and potential returns.</p></div>
+            <Link href="/tools" className="decision-tools-link">All property tools<IconArrowRight className="h-4 w-4" /></Link>
           </div>
+          <Calculators variant="home" defaultPrice={25000000} />
         </div>
       </Section>
 
@@ -217,6 +181,6 @@ export default async function HomePage() {
         ]}
       />
       <CtaSection />
-    </>
+    </div>
   );
 }

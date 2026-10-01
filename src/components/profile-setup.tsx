@@ -1,6 +1,9 @@
 "use client";
 
+import { ResilientImage } from "@/components/resilient-image";
+
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { IconArrowRight, IconCheck, IconClose, IconShield, IconSpark } from "@/components/icons";
 
@@ -125,11 +128,12 @@ export function ProfileSetupDialog({
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !saving) close();
     };
+    const previousOverflow = document.body.style.overflow;
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [open, saving]);
 
@@ -233,7 +237,8 @@ export function ProfileSetupDialog({
         {variant === "ghost" && <IconArrowRight className="h-4 w-4" />}
       </button>
 
-      {open && (
+      {/* Keep the overlay outside dashboard containers so it cannot be hidden or clipped. */}
+      {open && createPortal(
         <div
           className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-navy-950/70 p-4 py-8 backdrop-blur-sm sm:p-6"
           role="dialog"
@@ -275,8 +280,7 @@ export function ProfileSetupDialog({
                   <div className="flex items-center gap-3 sm:flex-col sm:items-start">
                     <span className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border border-soft bg-mist font-sans text-[1.1rem] font-bold text-navy-900">
                       {fields.avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={fields.avatarUrl} alt="" className="h-full w-full object-cover" />
+                                    <ResilientImage src={fields.avatarUrl} alt="" className="h-full w-full object-cover" />
                       ) : (
                         (fields.name.trim()[0] ?? "P").toUpperCase()
                       )}
@@ -442,8 +446,7 @@ export function ProfileSetupDialog({
                     <div className="mt-1 flex items-center gap-3">
                       <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg border border-soft bg-mist">
                         {fields.companyLogo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={fields.companyLogo} alt="" className="h-full w-full object-contain" />
+                                        <ResilientImage src={fields.companyLogo} alt="" className="h-full w-full object-contain" />
                         ) : (
                           <span className="text-[0.625rem] font-semibold uppercase tracking-wide text-ink-muted">Logo</span>
                         )}
@@ -557,7 +560,8 @@ export function ProfileSetupDialog({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

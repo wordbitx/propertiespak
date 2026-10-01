@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { IconArrowRight, IconCheck, IconMail } from "@/components/icons";
 import { SITE } from "@/lib/constants";
 
-type Variant = "property" | "visit" | "contact" | "list" | "valuation";
+type Variant = "property" | "visit" | "contact" | "list" | "valuation" | "advertise";
 const PURPOSES = ["Buy", "Rent", "Sell", "Invest"];
 const PROPERTY_KINDS = ["House", "Apartment", "Plot", "Office", "Shop", "Commercial Building", "Farmhouse", "Warehouse"];
 
@@ -48,7 +48,7 @@ export function LeadForm({
     return (
       <div role="status" className="min-w-0 rounded-xl border border-forest-600/25 bg-forest-50 p-5">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-forest-600 text-white"><IconCheck className="h-5 w-5" /></span>
-        <h3 className="mt-4 font-sans text-[1.05rem] font-semibold text-navy-900">{variant === "visit" ? "Visit request sent to admin" : "Enquiry sent to admin"}</h3>
+        <h3 className="mt-4 font-sans text-[1.05rem] font-semibold text-navy-900">{variant === "visit" ? "Visit request sent to admin" : variant === "advertise" ? "Advertising request sent" : "Enquiry sent to admin"}</h3>
         <p className="mt-2 break-words text-[0.875rem] leading-7 text-ink-muted">
           Thank you, {form.name}. Your details{propertyTitle ? ` and enquiry for ${propertyTitle}` : ""} are saved in our admin inbox.
           {variant === "visit" ? ` The team will contact you about your requested date (${form.preferredDate}) before confirming the visit.` : " The team can now review your request and contact you using the details you provided."}
@@ -69,7 +69,7 @@ export function LeadForm({
         <div className="min-w-0"><label className={label} htmlFor={id("name")}>Full name *</label><input id={id("name")} name="name" required autoComplete="name" maxLength={120} value={form.name} onChange={(event) => set("name", event.target.value)} className="field mt-2" placeholder="e.g. Ahmed Khan" /></div>
         <div className="min-w-0"><label className={label} htmlFor={id("phone")}>Phone / WhatsApp *</label><input id={id("phone")} name="phone" required type="tel" autoComplete="tel" maxLength={50} value={form.phone} onChange={(event) => set("phone", event.target.value)} className="field mt-2" placeholder="+92 3xx xxxxxxx" /></div>
         <div className="min-w-0"><label className={label} htmlFor={id("email")}>Email *</label><input id={id("email")} name="email" required type="email" autoComplete="email" maxLength={254} value={form.email} onChange={(event) => set("email", event.target.value)} className="field mt-2" placeholder="you@email.com" /></div>
-        {(variant === "contact" || isListing) && <div className="min-w-0"><label className={label} htmlFor={id("city")}>City</label><input id={id("city")} name="city" maxLength={100} value={form.city} onChange={(event) => set("city", event.target.value)} className="field mt-2" placeholder="Lahore, Islamabad, Karachi…" /></div>}
+        {(variant === "contact" || variant === "advertise" || isListing) && <div className="min-w-0"><label className={label} htmlFor={id("city")}>City</label><input id={id("city")} name="city" maxLength={100} value={form.city} onChange={(event) => set("city", event.target.value)} className="field mt-2" placeholder="Lahore, Islamabad, Karachi…" /></div>}
         {variant === "visit" && <div className="min-w-0"><label className={label} htmlFor={id("date")}>Preferred visit date *</label><input id={id("date")} name="preferredDate" type="date" required min={new Date().toISOString().slice(0, 10)} value={form.preferredDate} onChange={(event) => set("preferredDate", event.target.value)} className="field mt-2" /></div>}
         {variant === "property" && <div className="min-w-0"><label className={label} htmlFor={id("budget")}>Budget (optional)</label><input id={id("budget")} name="budget" maxLength={120} value={form.budget} onChange={(event) => set("budget", event.target.value)} className="field mt-2" placeholder="PKR 4 – 6 Crore" /></div>}
         {isListing && <>
@@ -80,11 +80,11 @@ export function LeadForm({
         </>}
       </div>
       <div className="mt-4 min-w-0">
-        <label className={label} htmlFor={id("message")}>{isListing ? "Property details" : variant === "visit" ? "Visit notes (optional)" : "Message"}</label>
-        <textarea id={id("message")} name="message" maxLength={4000} rows={compact ? 3 : 4} value={form.message} onChange={(event) => set("message", event.target.value)} className="field mt-2 resize-y" placeholder={variant === "visit" ? "Preferred time or anything the team should know…" : "Tell us what you would like to know about this property…"} />
+        <label className={label} htmlFor={id("message")}>{isListing ? "Property details" : variant === "visit" ? "Visit notes (optional)" : variant === "advertise" ? "Advertising requirements" : "Message"}</label>
+        <textarea id={id("message")} name="message" maxLength={4000} rows={compact ? 3 : 4} value={form.message} onChange={(event) => set("message", event.target.value)} className="field mt-2 resize-y" placeholder={variant === "advertise" ? "Your agency or project, target city, preferred placement and budget…" : variant === "visit" ? "Preferred time or anything the team should know…" : "Tell us what you would like to know about this property…"} />
       </div>
       {state === "error" && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-[0.8125rem] text-red-700">{error}</p>}
-      <button type="submit" disabled={state === "loading"} className="btn btn-green mt-5 w-full disabled:opacity-70">{state === "loading" ? "Sending…" : variant === "visit" ? "Request visit" : "Send enquiry"}<IconArrowRight className="h-4 w-4" /></button>
+      <button type="submit" disabled={state === "loading"} className="btn btn-green mt-5 w-full disabled:opacity-70">{state === "loading" ? "Sending…" : variant === "visit" ? "Request visit" : variant === "advertise" ? "Request advertising details" : "Send enquiry"}<IconArrowRight className="h-4 w-4" /></button>
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-muted">Your request goes to the Properties Pak admin team. By submitting, you agree to be contacted about it. We never sell your data.</p>
     </form>
   );

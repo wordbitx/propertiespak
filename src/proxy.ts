@@ -15,6 +15,7 @@ const STATIC_TOP_LEVEL = new Set([
   "blog",
   "about",
   "contact",
+  "advertise",
   "favorites",
   "list-property",
   "tools",
