@@ -706,6 +706,17 @@ export async function setUserVerification(userId: number, verified: boolean) {
   return updated[0];
 }
 
+/** Admin: update the name and agency shown on public dealer profiles. */
+export async function updateAdminUserIdentity(userId: number, input: { name?: string; agency?: string }) {
+  await ensureSeeded();
+  const updated = await db
+    .update(users)
+    .set(input)
+    .where(eq(users.id, userId))
+    .returning({ id: users.id, name: users.name, agency: users.agency, slug: users.slug });
+  return updated[0];
+}
+
 /** Distinct towns present in the live inventory, for the cascading filters. */
 async function getListingAreasByCityUncached() {
   await ensureSeeded();

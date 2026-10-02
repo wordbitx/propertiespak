@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { clearVerificationRequest, setUserVerification } from "@/lib/queries";
+import { clearVerificationRequest, setUserVerification, updateAdminUserIdentity } from "@/lib/queries";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { invalidateCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Admin verification toggle. `{ verified: true }` switches the blue tick on for
- * the account site-wide (profile, listings, cards); `{ verified: false }`
- * removes it. This is the only place verification state can change.
+ * Admin-only account controls: verification and the public name / agency shown
+ * on dealer profiles and directory cards.
  */
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdminAuthenticated())) {
@@ -22,7 +21,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   try {
-    const body = (await request.json()) as { verified?: boolean; action?: string };
+    const body = (await request.json()) as {
+      verified?: boolean;
+      action?: string;
+      name?: unknown;
+      agency?: unknown;
+    };
 
     // Reviewing a request (approved or rejected) clears it from the queue.
     if (body.action === "clear-request") {
@@ -31,6 +35,34 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
       }
       return NextResponse.json({ ok: true });
+    }
+
+    const hasName = Object.prototype.hasOwnProperty.call(body, "name");
+    const hasAgency = Object.prototype.hasOwnProperty.call(body, "agency");
+    if (hasName || hasAgency) {
+      if ((hasName && typeof body.name !== "string") || (hasAgency && typeof body.agency !== "string")) {
+        return NextResponse.json({ ok: false, error: "Name and agency must be text values." }, { status: 400 });
+      }
+
+      const name = hasName ? (body.name as string).trim() : undefined;
+      const agency = hasAgency ? (body.agency as string).trim() : undefined;
+      if (name !== undefined && (name.length < 2 || name.length > 120)) {
+        return NextResponse.json({ ok: false, error: "Name must be between 2 and 120 characters." }, { status: 400 });
+      }
+      if (agency !== undefined && agency.length > 160) {
+        return NextResponse.json({ ok: false, error: "Agency name must be 160 characters or fewer." }, { status: 400 });
+      }
+
+      const changes = {
+        ...(name !== undefined ? { name } : {}),
+        ...(agency !== undefined ? { agency } : {}),
+      };
+      const updatedIdentity = await updateAdminUserIdentity(userId, changes);
+      if (!updatedIdentity) {
+        return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
+      }
+      invalidateCatalog();
+      return NextResponse.json({ ok: true, user: updatedIdentity });
     }
 
     const verified =
@@ -52,7 +84,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     invalidateCatalog();
     return NextResponse.json({ ok: true, user: updated });
   } catch (error) {
-    console.error("admin verification failed", error);
-    return NextResponse.json({ ok: false, error: "Could not update verification." }, { status: 500 });
+    console.error("admin account update failed", error);
+    return NextResponse.json({ ok: false, error: "Could not update the account." }, { status: 500 });
   }
 }

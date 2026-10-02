@@ -57,6 +57,11 @@ test("header actions remain tappable without overflow from 320px to desktop", as
         return !!top && element.contains(top);
       }), `button covered at ${width}`).toBe(true);
     }
+    if (width < 1280) {
+      const menu = visibleTestId(page, "header-menu");
+      await expect(menu).toHaveText("");
+      await expect(menu).toHaveAccessibleName("Open menu");
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), `home overflow at ${width}px`).toBeLessThanOrEqual(1);
     if (width === 320 || width === 390) await page.screenshot({ path: testInfo.outputPath(`after-hero-${width}.png`) });
     await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
