@@ -16,9 +16,8 @@ function subscribe(listener: () => void) {
 /** Show four rows of desktop discovery cards and a paginated, single-row swipe rail on phones. */
 export function HomeExploreProperties({ properties, total }: { properties: PropertyWithDealer[]; total: number }) {
   const mobile = useSyncExternalStore(subscribe, () => window.matchMedia(PHONE).matches, () => false);
-  // On phones this becomes a swipe rail that drifts the opposite way to Featured
-  // Properties, and on a slower cadence, so the two home rails read as
-  // independent rather than driven by one timer.
+  // On phones this becomes a swipe rail that starts with the newest property,
+  // then advances one card at a time with a generous pause between listings.
   return mobile ? (
     <PropertyRail
       initialProperties={properties}
@@ -26,12 +25,13 @@ export function HomeExploreProperties({ properties, total }: { properties: Prope
       query="sort=newest"
       label="Explore properties"
       pageSize={16}
-      propertyTypeBelowPrice
       autoPlay
-      autoPlayDirection="backward"
+      autoPlayDirection="forward"
+      autoPlayInterval={5200}
+      imageRatio="tall"
     />
   ) :
     <div className="home-explore-grid mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {properties.map((property, index) => <Reveal key={property.id} delay={index * 50}><PropertyCard property={property} priority={index < 4} propertyTypeBelowPrice /></Reveal>)}
+      {properties.map((property, index) => <Reveal key={property.id} delay={index * 35}><PropertyCard property={property} priority={index < 4} compact imageRatio="tall" /></Reveal>)}
     </div>;
 }

@@ -37,7 +37,7 @@ test("desktop and mobile hero copy adapts cleanly, with a larger mobile search h
   await expect(hero.locator(".hero-headline-mobile")).toBeHidden();
 });
 
-test("Featured Properties cards share one rhythm: stacked price, equal heights, no dead gap under the call to action", async ({ page }) => {
+test("Featured Properties cards align price and type, with equal heights and no dead gap under the call to action", async ({ page }) => {
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -45,9 +45,10 @@ test("Featured Properties cards share one rhythm: stacked price, equal heights, 
     await expect(cards.first()).toBeVisible();
     await expect(cards).toHaveCount(8);
 
-    // The price and the type chip are stacked on every card, so a long price
-    // such as "PKR 2.8 Lakh / month" cannot add a line the short ones lack.
-    await expect(cards.locator('[data-property-type-stack="true"]')).toHaveCount(8);
+    // The property type sits on the opposite end of the price row.
+    await expect(cards.locator('[data-property-type-layout="split"]')).toHaveCount(8);
+    expect(await cards.first().evaluate((card) => getComputedStyle(card).borderTopColor)).toBe("rgb(209, 221, 231)");
+    expect(await cards.first().locator(":scope > div:last-child").evaluate((body) => getComputedStyle(body).backgroundImage)).toContain("linear-gradient");
 
     const report = await cards.evaluateAll((articles) => articles.map((article) => {
       const block = article.querySelector<HTMLElement>(".property-card-price-block");
@@ -55,8 +56,7 @@ test("Featured Properties cards share one rhythm: stacked price, equal heights, 
       const type = block?.querySelector("span")?.getBoundingClientRect();
       const cta = Array.from(article.querySelectorAll("a")).find((link) => link.textContent?.trim().startsWith("View Details"))?.getBoundingClientRect();
       return {
-        stacked: !!block && getComputedStyle(block).flexDirection === "column",
-        typeUnderPrice: !!price && !!type && type.top >= price.bottom - 1,
+        split: !!block && getComputedStyle(block).flexDirection === "row" && !!price && !!type && type.left > price.left && type.right <= block.getBoundingClientRect().right + 1,
         height: Math.round(article.getBoundingClientRect().height),
         // Distance from the bottom of the call to action to the bottom of the
         // card. It has to be the same on every card and near zero.
@@ -65,7 +65,7 @@ test("Featured Properties cards share one rhythm: stacked price, equal heights, 
       };
     }));
 
-    expect(report.every((card) => card.stacked && card.typeUnderPrice), `${width}px stacking`).toBe(true);
+    expect(report.every((card) => card.split), `${width}px price/type alignment`).toBe(true);
     // Every card in the rail is exactly as tall as its tallest sibling.
     expect(new Set(report.map((card) => card.height)).size, `${width}px equal heights`).toBe(1);
     // ...and the call to action lands on that shared bottom edge everywhere,
@@ -75,7 +75,7 @@ test("Featured Properties cards share one rhythm: stacked price, equal heights, 
   }
 });
 
-test("Explore Properties cards consistently stack type below price on desktop and mobile", async ({ page }) => {
+test("Explore images are taller than Commercial compact cards and both keep type beside price", async ({ page }) => {
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -84,14 +84,25 @@ test("Explore Properties cards consistently stack type below price on desktop an
       : page.locator("#explore:visible .home-explore-grid article");
     await expect(cards.first()).toBeVisible();
     await expect(cards).toHaveCount(16);
-    await expect(cards.locator('[data-property-type-stack="true"]')).toHaveCount(16);
+    await expect(cards.locator('[data-property-type-layout="split"]')).toHaveCount(16);
+    const image = await cards.first().locator(".zoom-frame").boundingBox();
+    expect(image!.width / image!.height).toBeCloseTo(4 / 3, 1);
     expect(await cards.evaluateAll((articles) => articles.every((article) => {
       const block = article.querySelector<HTMLElement>(".property-card-price-block");
       const price = block?.querySelector("p")?.getBoundingClientRect();
       const type = block?.querySelector("span")?.getBoundingClientRect();
-      return !!block && getComputedStyle(block).flexDirection === "column" && !!price && !!type && type.top >= price.bottom - 1;
+      const specs = article.querySelector<HTMLElement>(".property-card-specs");
+      return !!block && getComputedStyle(block).flexDirection === "row" && !!price && !!type && type.left > price.left && !!specs && getComputedStyle(specs).flexWrap === "nowrap";
     }))).toBe(true);
   }
+
+  const commercial = page.locator("#commercial:visible .property-rail-item article");
+  await expect(commercial.first()).toBeVisible();
+  const commercialCount = await commercial.count();
+  expect(commercialCount).toBeGreaterThan(0);
+  await expect(commercial.locator('[data-property-type-layout="split"]')).toHaveCount(commercialCount);
+  const commercialImage = await commercial.first().locator(".zoom-frame").boundingBox();
+  expect(commercialImage!.width / commercialImage!.height).toBeCloseTo(16 / 9, 1);
 });
 
 test("dealers keep automatic motion while arrows, hover, keyboard and drag give manual control", async ({ page }) => {
@@ -204,13 +215,14 @@ test("Explore more tools and guides follow Dealers in a manual horizontal rail",
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 });
 
-test("footer branding keeps the transparent mark and the AI assistant stays a compact corner shortcut", async ({ page }) => {
+test("footer branding stays intact while mobile uses a floating WhatsApp contact instead of the AI assistant", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#wordbitx")).toHaveCount(0);
   const assistant = page.getByRole("button", { name: "Open the Properties Pak AI assistant", exact: true });
+  const whatsapp = page.getByRole("link", { name: "Chat with Properties Pak on WhatsApp", exact: true });
   await expect(assistant).toHaveAttribute("aria-expanded", "false");
   const footer = page.getByRole("contentinfo", { name: "Properties Pak footer" });
-  for (const width of [390, 1440]) {
+  for (const width of [390, 767, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await footer.scrollIntoViewIfNeeded();
     const footerLogo = footer.locator(".brand-lockup-mark").first();
@@ -225,16 +237,40 @@ test("footer branding keeps the transparent mark and the AI assistant stays a co
     }));
     expect(colors.x).not.toBe(colors.name);
     expect(await brand.textContent()).toBe("X");
-    const box = await assistant.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
-    expect(box!.height).toBeLessThanOrEqual(56);
-    const assistantLabel = assistant.locator(".ai-launcher-label");
-    await expect(assistantLabel).toHaveText("AI Assistant");
-    if (width < 1024) await expect(assistantLabel).toBeHidden();
-    else await expect(assistantLabel).toBeVisible();
+
+    if (width < 768) {
+      await expect(assistant).toBeHidden();
+      await expect(whatsapp).toBeVisible();
+      await expect(whatsapp).toHaveAttribute("href", /^https:\/\/wa\.me\/923251888841\?text=/);
+      const box = await whatsapp.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+    } else {
+      await expect(assistant).toBeVisible();
+      await expect(whatsapp).toBeHidden();
+      const box = await assistant.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+      expect(box!.height).toBeLessThanOrEqual(56);
+      const assistantLabel = assistant.locator(".ai-launcher-label");
+      await expect(assistantLabel).toHaveText("AI Assistant");
+      if (width < 1024) await expect(assistantLabel).toBeHidden();
+      else await expect(assistantLabel).toBeVisible();
+    }
   }
+});
+
+test("mobile floating WhatsApp stands down on property details with their own contact bar", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('#explore [data-testid="property-rail"]')).toBeVisible();
+  const propertyPath = await page.locator("#explore article a[href^='/property/']").first().getAttribute("href");
+  expect(propertyPath).toBeTruthy();
+  await page.goto(propertyPath!, { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("floating-whatsapp")).toHaveCount(0);
+  await expect(page.locator("div.fixed.inset-x-0.bottom-0").getByRole("link", { name: "WhatsApp", exact: true })).toBeVisible();
 });
 
 test("the AI assistant answers property questions from live inventory", async ({ page }) => {

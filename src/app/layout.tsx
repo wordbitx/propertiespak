@@ -9,6 +9,7 @@ import { FavoritesProvider } from "@/components/favorites-provider";
 import { CompareProvider } from "@/components/compare-provider";
 import { CompareBar } from "@/components/compare-bar";
 import { AiAssistant } from "@/components/ai-assistant";
+import { FloatingWhatsApp } from "@/components/floating-whatsapp";
 import { JsonLd } from "@/components/json-ld";
 import { getSessionUserId } from "@/lib/auth";
 import { SITE } from "@/lib/constants";
@@ -174,6 +175,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <SiteFooter />
               <CompareBar />
               <AiAssistant />
+              <FloatingWhatsApp />
             </CompareProvider>
           </FavoritesProvider>
         </LanguageProvider>

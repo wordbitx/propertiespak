@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   IconArrowRight,
   IconCalculator,
-  IconChart,
   IconCheck,
   IconCompass,
   IconLayers,
@@ -113,115 +112,6 @@ export function WhyEstateWx({ listings, cities }: { listings: number; cities: nu
                   </li>
                 ))}
               </ul>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-export function InvestmentSection({
-  snapshot,
-}: {
-  snapshot: { projects: number; commercial: number; cities: number; rentals: number };
-}) {
-  const points = [
-    { title: "High-potential locations", copy: "Areas where infrastructure delivery and demand are moving together." },
-    { title: "New developments", copy: "Launch pricing, payment plans and handover timelines side by side." },
-    { title: "Commercial opportunities", copy: "Income-producing office, retail and warehouse assets." },
-    { title: "Rental opportunities", copy: "Units and areas with strong tenant-demand signals." },
-  ];
-
-  return (
-    <Section tone="dark" className="relative isolate overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-70"
-        style={{
-          backgroundImage:
-            "radial-gradient(760px 420px at 8% 0%, rgba(16,164,86,0.22), transparent 60%), radial-gradient(700px 420px at 92% 100%, rgba(19,80,127,0.55), transparent 62%)",
-        }}
-      />
-      <div className="ui-container relative z-10">
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <Reveal>
-            <p className="eyebrow text-forest-400">
-              <span className="h-[1px] w-6 bg-current opacity-70" />
-              Investor desk
-            </p>
-            <h2 className="display-2 mt-4 text-white">Invest With More Confidence.</h2>
-            <p className="lede mt-4 text-white/70">
-              Property decisions get better when the numbers are visible. Use Properties Pak to compare locations, understand
-              entry and rental economics, and judge a development on evidence rather than optimism.
-            </p>
-
-            <ul className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-              {points.map((point) => (
-                <li key={point.title} className="flex gap-3.5">
-                  <span className="mt-0.5 shrink-0 text-forest-400">
-                    <IconChart className="h-[1.3rem] w-[1.3rem]" />
-                  </span>
-                  <span>
-                    <span className="block font-sans text-[0.95rem] font-semibold text-white">{point.title}</span>
-                    <span className="mt-1 block text-[0.8125rem] leading-relaxed text-white/60">{point.copy}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/property-investment-in-pakistan" className="btn btn-green">
-                Read the Investment Guide
-                <IconArrowRight className="h-[1.05rem] w-[1.05rem]" />
-              </Link>
-              <Link href="/tools" className="btn btn-ghost-light">
-                Open all 8 tools
-              </Link>
-            </div>
-
-            <p className="mt-6 text-[0.75rem] leading-relaxed text-white/45">
-              Tools provide estimates for planning only. They are not investment advice and do not guarantee returns.
-            </p>
-          </Reveal>
-
-          <Reveal delay={120}>
-            <div className="rounded-panel border border-white/12 bg-white/[0.04] p-6 backdrop-blur-sm lg:p-7">
-              <p className="eyebrow text-forest-400">Platform snapshot</p>
-              <dl className="mt-5 divide-y divide-white/10">
-                {[
-                  { label: "New developments tracked", value: snapshot.projects, href: "/projects" },
-                  { label: "Commercial listings", value: snapshot.commercial, href: "/commercial" },
-                  { label: "Rental listings", value: snapshot.rentals, href: "/properties/for-rent" },
-                  { label: "Cities covered", value: snapshot.cities, href: "/properties" },
-                ].map((row) => (
-                  <div key={row.label} className="flex items-center justify-between gap-4 py-4">
-                    <dt className="text-[0.875rem] text-white/65">{row.label}</dt>
-                    <dd className="flex items-center gap-3">
-                      <span className="font-sans text-[1.35rem] font-bold leading-none text-white">{row.value}</span>
-                      <Link
-                        href={row.href}
-                        aria-label={`View ${row.label}`}
-                        className="grid h-8 w-8 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-forest-500 hover:text-white"
-                      >
-                        <IconArrowRight className="h-4 w-4" />
-                      </Link>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <div className="mt-5 rounded-xl bg-forest-600/15 p-4">
-                <p className="text-[0.8125rem] leading-relaxed text-white/80">
-                  Want a specific area analysed? Our advisory desk prepares short area notes on request — including
-                  pricing bands, tenant profiles and supply pipeline.
-                </p>
-                <Link
-                  href="/contact?topic=advisory"
-                  className="mt-3 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-forest-400 hover:text-forest-500"
-                >
-                  Request an area note <IconArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
             </div>
           </Reveal>
         </div>

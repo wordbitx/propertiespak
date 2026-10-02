@@ -86,30 +86,46 @@ GOOGLE_CLIENT_SECRET=GOCSPX-your-secret-here
 # GOOGLE_REDIRECT_URI=https://propertiespak.com/api/auth/google/callback
 ```
 
-On Vercel, add the same keys under **Project → Settings → Environment
-Variables** for the Production environment (and Preview, if you registered a
-preview redirect URI).
+### Vercel deployment (required for the button to appear)
+
+GitHub merges do **not** copy local environment variables or OAuth secrets to
+Vercel. Add these under **Vercel → Project → Settings → Environment Variables**:
+
+| Key | Production value |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` | The OAuth web client ID from Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | The matching OAuth client secret |
+| `GOOGLE_REDIRECT_URI` | `https://propertiespak.com/api/auth/google/callback` |
+
+Select **Production** for the canonical live site. Add the variables to
+**Preview** separately only if you have also registered the exact preview
+callback URL in Google Cloud Console. Save the variables, then create a fresh
+Vercel deployment (or use **Redeploy**) so the running server receives them.
 
 Rules that the app enforces:
 
-- The "Continue with Google" button only appears when **both**
-  `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set. Until then the login
-  page looks exactly as it did before.
-- `GOOGLE_CLIENT_SECRET` is only ever read on the server. It is never sent to
-  the browser.
+- The "Continue with Google" / "Sign up with Google" button appears on the
+  login, account-creation and signed-out list-property screens only when both
+  `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are present and non-empty at
+  runtime. If the button is missing on Vercel, check the two environment
+  variables and confirm that a new deployment was made.
+- `GOOGLE_CLIENT_SECRET` is read only on the server. It is never sent to the
+  browser and must never be committed to Git, pasted into source code, or added
+  as a `NEXT_PUBLIC_…` variable.
+- If a client secret is accidentally exposed in chat, an issue, a terminal log,
+  or a Git commit, revoke/rotate it in Google Cloud Console and replace the
+  Vercel value with the new secret.
 
 ### About `GOOGLE_REDIRECT_URI`
 
 If it is unset, the app builds the callback URL from the incoming request host,
-so `localhost:3000`, a Vercel preview deployment, and production all work
-without extra configuration — as long as each host's URI is registered in
-Google Cloud Console.
+so local development and preview deployments can each use their own origin —
+as long as each callback URL is registered in Google Cloud Console.
 
-If you set it, that one fixed URI is always used, which is useful when you want
-production to be the only accepted destination. The downside is that signing in
-from a preview deployment will then fail with `redirect_uri_mismatch`, because
-the request arrives at the preview host but Google is told to return to
-production.
+For the canonical live site, set the production-scoped Vercel value to
+`https://propertiespak.com/api/auth/google/callback`. Leave it unset for Preview
+unless that preview's exact callback has been registered. A fixed production
+callback used by a Preview deployment will fail with `redirect_uri_mismatch`.
 
 ---
 
