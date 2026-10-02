@@ -217,6 +217,31 @@ test("mobile hero search preserves filters and location suggestions", async ({ p
   expect(url.searchParams.get("beds")).toBe("2");
 });
 
+test("the header menu button is labelled at every width where it is the only navigation", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  // The hamburger is the sole navigation control from the narrowest phone up to
+  // 1279px — the desktop nav only appears at 1280px — so it has to keep its
+  // "Menu" label the whole way, otherwise it is a bare unexplained icon.
+  for (const width of [320, 390, 640, 700, 900, 1100, 1279]) {
+    await page.setViewportSize({ width, height: 900 });
+    const button = visibleTestId(page, "header-menu");
+    await expect(button, `button visible at ${width}px`).toBeVisible();
+    const caption = button.locator(".header-action-caption");
+    await expect(caption, `label visible at ${width}px`).toBeVisible();
+    await expect(caption, `label text at ${width}px`).toHaveText("Menu");
+    // And the label must actually sit underneath the icon, not beside it.
+    const icon = await button.locator("svg").boundingBox();
+    const label = await caption.boundingBox();
+    expect(label!.y, `label below icon at ${width}px`).toBeGreaterThanOrEqual(icon!.y + icon!.height - 1);
+  }
+
+  // At 1280px the full nav takes over and the button disappears, so an
+  // unlabelled icon can never be stranded.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(visibleTestId(page, "header-menu")).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Primary", exact: true })).toBeVisible();
+});
+
 test("desktop property menu and key pages are responsive", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/", { waitUntil: "domcontentloaded" });

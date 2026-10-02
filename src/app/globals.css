@@ -866,6 +866,13 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .property-search-form { padding: 20px; }
   .company-contact-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
+/* Between 640px and 1280px the hamburger is the only navigation control left in
+   the header — the desktop nav is still hidden — so it has to keep its label or
+   it becomes a bare, unexplained icon. At 1280px the full nav takes over and the
+   button disappears, so the caption goes with it. */
+@media (min-width: 640px) and (max-width: 1279.98px) {
+  .header-menu-action .header-action-caption { display: block; }
+}
 @media (min-width: 768px) {
   .header-inner { padding-inline: 32px; }
   .header-account { display: inline-flex; }
