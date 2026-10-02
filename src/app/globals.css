@@ -760,7 +760,15 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .header-desktop-nav .nav-link { font-size: .8125rem; font-weight: 600; }
   .header-actions { display: flex; align-items: center; flex-shrink: 0; gap: 4px; }
   .header-action { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; gap: 3px; min-width: 44px; min-height: 48px; border-radius: 9px; color: inherit; transition: background-color .16s ease; }
-  .header-action-caption { font-size: 9px; font-weight: 600; line-height: 1; letter-spacing: .025em; }
+  /* The icon captions have to survive being read at arm's length on a phone,
+     and in white over a bright hero photograph. 9px was too small to register
+     at all, so they are larger and heavier, with a soft dark halo while the
+     header sits transparently over the hero. */
+  .header-action-caption { font-size: 10.5px; font-weight: 700; line-height: 1.15; letter-spacing: .01em; }
+  .site-header--overlay .header-action-caption { text-shadow: 0 1px 2px rgba(3, 18, 30, .7); }
+  /* ...and none of it once the header is solid, where the text is dark on white. */
+  .site-header--solid .header-action-caption,
+  html[data-header-solid] .site-header .header-action-caption { text-shadow: none; }
   .header-saved-count { position: absolute; right: 1px; top: 0; display: grid; place-items: center; min-width: 16px; height: 16px; padding-inline: 3px; border-radius: 10px; background: var(--color-forest-700); color: #fff; font-size: 9px; font-weight: 700; line-height: 1; }
   .header-search-action, .header-account, .header-list-property { display: none; }
   .site-header--overlay .header-action:hover, .site-header--overlay .header-account:hover { background: rgba(255,255,255,.1); }

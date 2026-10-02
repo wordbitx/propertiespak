@@ -229,6 +229,11 @@ test("the header menu button is labelled at every width where it is the only nav
     const caption = button.locator(".header-action-caption");
     await expect(caption, `label visible at ${width}px`).toBeVisible();
     await expect(caption, `label text at ${width}px`).toHaveText("Menu");
+    // Legible, not a 9px whisper that vanishes over the hero photograph.
+    const size = await caption.evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+    expect(size, `label size at ${width}px`).toBeGreaterThanOrEqual(10);
+    const weight = await caption.evaluate((element) => getComputedStyle(element).fontWeight);
+    expect(Number(weight), `label weight at ${width}px`).toBeGreaterThanOrEqual(700);
     // And the label must actually sit underneath the icon, not beside it.
     const icon = await button.locator("svg").boundingBox();
     const label = await caption.boundingBox();
