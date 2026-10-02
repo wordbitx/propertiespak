@@ -969,9 +969,23 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .property-rail-toolbar p { font-size: .75rem; color: var(--color-ink-muted); }
 .property-rail-toolbar p span { display: none; }
 .property-rail-controls { display: flex; gap: 6px; }
-.property-rail-controls button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--color-soft); border-radius: 8px; background: white; color: var(--color-navy-900); }
-.property-rail-controls button:hover:not(:disabled) { border-color: var(--color-forest-600); color: var(--color-forest-700); }
+.property-rail-controls button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--color-soft); border-radius: 8px; background: white; color: var(--color-navy-900); transition: border-color .18s ease, color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+/* A restrained hover: the button lifts a hair, gains a soft shadow and a faint
+   green wash, and the arrow nudges a pixel in the direction it points. Enough
+   to confirm the target, quiet enough to stay professional. */
+.property-rail-controls button:hover:not(:disabled) { border-color: var(--color-forest-600); color: var(--color-forest-700); background: #f3faf5; box-shadow: 0 4px 12px -6px rgba(6, 28, 51, .3); transform: translateY(-1px); }
+.property-rail-controls button:active:not(:disabled) { transform: translateY(0); box-shadow: none; background: #eaf5ee; }
+.property-rail-controls button:focus-visible { outline: 2px solid var(--color-forest-600); outline-offset: 2px; }
 .property-rail-controls button:disabled { opacity: .35; cursor: not-allowed; }
+.property-rail-controls button svg { transition: transform .18s ease; }
+/* The arrow nudges a pixel in the direction it points. Both buttons share one
+   rule because the previous button's icon is pre-rotated by Tailwind's
+   rotate-180, which sets the standalone "rotate" property — and that composes
+   on top of "transform" rather than being replaced by it. So the same positive
+   X is flipped into "a little further left" for the previous arrow, while the
+   next arrow simply moves right. Re-applying the rotation inside a transform
+   would double it and point the previous arrow back to the right. */
+.property-rail-controls button:hover:not(:disabled) svg { transform: translateX(1.5px); }
 .property-rail-viewport { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scroll-snap-type: x proximity; scroll-padding-inline: 1px; scrollbar-width: thin; scrollbar-color: #b8c7d3 #eef2f5; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .property-rail-track { display: flex; gap: 14px; width: max-content; align-items: stretch; }
 .property-rail-item { flex: 0 0 auto; width: 264px; scroll-snap-align: start; }
@@ -1542,7 +1556,13 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .property-search-advanced { min-height: 34px; }
 @keyframes property-new-flag { from { transform: translateY(0); opacity: .78; } to { transform: translateY(-2px); opacity: 1; } }
 @keyframes header-sell-flag-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-@media (prefers-reduced-motion: reduce) { .header-list-property-flag { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .header-list-property-flag { animation: none; }
+  .property-rail-controls button,
+  .property-rail-controls button svg { transition: none; }
+  .property-rail-controls button:hover:not(:disabled),
+  .property-rail-controls button:hover:not(:disabled) svg { transform: none; }
+}
 
 /* Tools, guides and resources from this site, in a calm manually scrollable horizontal rail. */
 .home-page > section.home-explore-more { padding-block: 24px 28px; background: #fff; border-bottom: 1px solid #eef1f3; }

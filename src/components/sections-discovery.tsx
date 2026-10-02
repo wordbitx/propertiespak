@@ -265,6 +265,9 @@ export function FeaturedProperties({ properties, total }: { properties: Property
     <Section tone="light" id="featured">
       <div className="ui-container">
         <SectionHeading title="Featured Properties" action={{ label: "View all", href: "/properties?featured=1&verified=1" }} />
+        {/* Idle, this rail drifts forward at its own cadence. The Explore rail
+            below runs backwards on a different one, so the two home rails never
+            move in lockstep. */}
         <PropertyRail initialProperties={properties} initialTotal={total} query="featured=1&verified=1" label="Featured properties" autoPlay />
       </div>
     </Section>

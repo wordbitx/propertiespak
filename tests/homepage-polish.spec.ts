@@ -37,6 +37,44 @@ test("desktop and mobile hero copy adapts cleanly, with a larger mobile search h
   await expect(hero.locator(".hero-headline-mobile")).toBeHidden();
 });
 
+test("Featured Properties cards share one rhythm: stacked price, equal heights, no dead gap under the call to action", async ({ page }) => {
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const cards = page.locator("#featured:visible .property-rail-item article");
+    await expect(cards.first()).toBeVisible();
+    await expect(cards).toHaveCount(8);
+
+    // The price and the type chip are stacked on every card, so a long price
+    // such as "PKR 2.8 Lakh / month" cannot add a line the short ones lack.
+    await expect(cards.locator('[data-property-type-stack="true"]')).toHaveCount(8);
+
+    const report = await cards.evaluateAll((articles) => articles.map((article) => {
+      const block = article.querySelector<HTMLElement>(".property-card-price-block");
+      const price = block?.querySelector("p")?.getBoundingClientRect();
+      const type = block?.querySelector("span")?.getBoundingClientRect();
+      const cta = Array.from(article.querySelectorAll("a")).find((link) => link.textContent?.trim().startsWith("View Details"))?.getBoundingClientRect();
+      return {
+        stacked: !!block && getComputedStyle(block).flexDirection === "column",
+        typeUnderPrice: !!price && !!type && type.top >= price.bottom - 1,
+        height: Math.round(article.getBoundingClientRect().height),
+        // Distance from the bottom of the call to action to the bottom of the
+        // card. It has to be the same on every card and near zero.
+        gapUnderCta: Math.round(article.getBoundingClientRect().bottom - (cta?.bottom ?? 0)),
+        ctaHeight: Math.round(cta?.height ?? 0),
+      };
+    }));
+
+    expect(report.every((card) => card.stacked && card.typeUnderPrice), `${width}px stacking`).toBe(true);
+    // Every card in the rail is exactly as tall as its tallest sibling.
+    expect(new Set(report.map((card) => card.height)).size, `${width}px equal heights`).toBe(1);
+    // ...and the call to action lands on that shared bottom edge everywhere,
+    // leaving no empty band underneath it.
+    expect(new Set(report.map((card) => card.gapUnderCta)).size, `${width}px cta gap`).toBe(1);
+    expect(Math.max(...report.map((card) => card.gapUnderCta)), `${width}px cta gap value`).toBeLessThanOrEqual(20);
+  }
+});
+
 test("Explore Properties cards consistently stack type below price on desktop and mobile", async ({ page }) => {
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });

@@ -34,6 +34,7 @@ export function PropertyCard({
   const badge = purposeBadge(property);
   const score = computePropertyScore(property);
   const pps = pricePerSqft(property);
+  const stackType = compact || propertyTypeBelowPrice;
 
   return (
     <article
@@ -78,11 +79,15 @@ export function PropertyCard({
       </div>
 
       <div className={`flex min-w-0 flex-1 flex-col ${compact ? "p-3.5" : "p-5"}`}>
-        <div className={`property-card-price-block flex min-w-0 ${propertyTypeBelowPrice ? "flex-col items-start gap-1.5" : "flex-wrap items-start justify-between gap-3"}`} data-property-type-stack={propertyTypeBelowPrice ? "true" : undefined}>
+        {/* Compact cards always stack the price above the type chip. Sitting
+            them side by side works for "PKR 5.6 Crore" but wraps for
+            "PKR 2.8 Lakh / month", and that one extra line is what made some
+            cards a line taller than their neighbours. */}
+        <div className={`property-card-price-block flex min-w-0 ${stackType ? "flex-col items-start gap-1.5" : "flex-wrap items-start justify-between gap-3"}`} data-property-type-stack={stackType ? "true" : undefined}>
           <p className={`font-sans font-bold leading-tight tracking-[-0.03em] text-navy-900 ${compact ? "text-[1.0625rem]" : "text-[1.28rem]"}`}>
             {formatPrice(property.price, property.priceUnit)}
           </p>
-          <span className={`max-w-full rounded-md bg-mist px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted ${propertyTypeBelowPrice ? "" : "mt-0.5"}`}>
+          <span className={`max-w-full rounded-md bg-mist px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-muted ${stackType ? "" : "mt-0.5"}`}>
             {property.propertyType}
           </span>
         </div>
@@ -106,7 +111,10 @@ export function PropertyCard({
           </span>
         </p>
 
-        <div className={compact ? "mt-2 pt-2" : "mt-auto pt-4"}>
+        {/* mt-auto in both modes: the rail stretches every card to the tallest
+            one, so the specs and the call to action have to be pinned to the
+            bottom edge or short listings leave a dead gap underneath them. */}
+        <div className={`${compact ? "mt-auto pt-2" : "mt-auto pt-4"}`}>
           <div className="hairline" />
           <div className={`flex flex-wrap items-center gap-y-2 font-medium text-ink ${compact ? "mt-3 gap-x-3 text-[0.75rem]" : "mt-3.5 gap-x-4 text-[0.8125rem]"}`}>
             {property.bedrooms > 0 && (

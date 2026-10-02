@@ -9,10 +9,24 @@ import type { PropertyWithDealer } from "@/lib/queries";
 type RailProperty = Property | PropertyWithDealer;
 const PAGE_SIZE = 8;
 
+/**
+ * How often the rail advances itself, in milliseconds. Two home rails autoplay
+ * at once, so they are deliberately given different cadences (and opposite
+ * directions) — identical timings read as one machine driving both, and the
+ * pair looks mechanical rather than alive.
+ */
+export const RAIL_AUTO_PLAY_MS = 2800;
+export const RAIL_AUTO_PLAY_MS_REVERSE = 3200;
+
 /** Native horizontal scrolling with optional, user-friendly paused auto-advancement. */
-export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false, size = "compact" }: {
+export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, autoPlayDirection = "forward", autoPlayInterval, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false, size = "compact" }: {
   initialProperties: RailProperty[]; initialTotal: number; query?: string; label: string;
-  autoPlay?: boolean; pageSize?: number; propertyTypeBelowPrice?: boolean; size?: "compact" | "roomy";
+  autoPlay?: boolean;
+  /** Which way the idle rail drifts. "backward" enters from the right edge. */
+  autoPlayDirection?: "forward" | "backward";
+  /** Override the cadence; defaults differ by direction so the two never match. */
+  autoPlayInterval?: number;
+  pageSize?: number; propertyTypeBelowPrice?: boolean; size?: "compact" | "roomy";
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLLIElement | null>(null);
@@ -92,10 +106,31 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
     return () => observer.disconnect();
   }, [items.length, total, error, loadMore, query]);
 
+  /**
+   * A rail that drifts backwards has to open at the far end, otherwise its very
+   * first move has nowhere to go. Applied once more listings arrive — the
+   * scroll width is not final until the cards have been laid out — and then
+   * never again, so the visitor's own scroll position is left alone.
+   */
+  const reversePrimedRef = useRef(false);
+  useEffect(() => {
+    if (autoPlayDirection !== "backward" || reversePrimedRef.current) return;
+    const rail = viewportRef.current;
+    if (!rail) return;
+    const frame = requestAnimationFrame(() => {
+      const max = rail.scrollWidth - rail.clientWidth;
+      if (max <= 2) return; // Nothing to scroll yet; a later run will retry.
+      rail.scrollLeft = max;
+      reversePrimedRef.current = true;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [autoPlayDirection, items.length]);
+
   useEffect(() => {
     if (!autoPlay || !query || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const viewport = viewportRef.current;
     if (!viewport) return;
+    const backward = autoPlayDirection === "backward";
     let visible = false;
     const visibility = new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
@@ -107,23 +142,36 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
       if (!rail || !visible || document.hidden || hovered || focused || interactionPaused || error || busyRef.current) return;
       const maxScroll = rail.scrollWidth - rail.clientWidth;
       if (maxScroll <= 2) return;
-      const atEnd = rail.scrollLeft >= maxScroll - 2;
-      if (atEnd) {
+      const track = rail.querySelector<HTMLElement>(".property-rail-track");
+      const card = rail.querySelector<HTMLElement>(".property-rail-item");
+      const gap = track ? parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 14 : 14;
+      const step = (card?.getBoundingClientRect().width ?? 280) + gap;
+
+      if (backward) {
+        // At the left edge there is nothing further to reveal, so wrap to the
+        // right edge and carry on. Loading more is left to the sentinel, which
+        // fires whenever the end of the list comes into view anyway.
+        if (rail.scrollLeft <= 2) {
+          rail.scrollTo({ left: maxScroll, behavior: "smooth" });
+          return;
+        }
+        rail.scrollBy({ left: -step, behavior: "smooth" });
+        return;
+      }
+
+      if (rail.scrollLeft >= maxScroll - 2) {
         if (items.length < total) void loadMore();
         else rail.scrollTo({ left: 0, behavior: "smooth" });
         return;
       }
-      const track = rail.querySelector<HTMLElement>(".property-rail-track");
-      const card = rail.querySelector<HTMLElement>(".property-rail-item");
-      const gap = track ? parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 14 : 14;
-      rail.scrollBy({ left: (card?.getBoundingClientRect().width ?? 280) + gap, behavior: "smooth" });
-    }, 4200);
+      rail.scrollBy({ left: step, behavior: "smooth" });
+    }, autoPlayInterval ?? (autoPlayDirection === "backward" ? RAIL_AUTO_PLAY_MS_REVERSE : RAIL_AUTO_PLAY_MS));
 
     return () => {
       window.clearInterval(timer);
       visibility.disconnect();
     };
-  }, [autoPlay, query, items.length, total, loadMore, hovered, focused, interactionPaused, error]);
+  }, [autoPlay, autoPlayDirection, autoPlayInterval, query, items.length, total, loadMore, hovered, focused, interactionPaused, error]);
 
   async function advance(direction: -1 | 1) {
     const viewport = viewportRef.current;
@@ -138,7 +186,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
   }
 
   return (
-    <div className={`property-rail${size === "roomy" ? " property-rail--roomy" : ""}`} data-testid="property-rail" data-rail-label={label} data-auto-play={autoPlay ? "true" : undefined}
+    <div className={`property-rail${size === "roomy" ? " property-rail--roomy" : ""}`} data-testid="property-rail" data-rail-label={label} data-auto-play={autoPlay ? "true" : undefined} data-auto-play-direction={autoPlay ? autoPlayDirection : undefined}
       onMouseEnter={() => { if (autoPlay) setHovered(true); }}
       onMouseLeave={() => { if (autoPlay) setHovered(false); }}
       onFocusCapture={() => { if (autoPlay) setFocused(true); }}
