@@ -1292,7 +1292,7 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 @keyframes ai-launcher-ping { 0% { transform: scale(1); opacity: .65; } 70%, 100% { transform: scale(1.5); opacity: 0; } }
 
 /* The panel itself. */
-.ai-panel { display: flex; flex-direction: column; width: min(352px, calc(100vw - 32px)); max-height: min(540px, calc(100dvh - 132px)); overflow: hidden; border: 1px solid #dfe7ec; border-radius: 20px; background: #fff; box-shadow: 0 32px 70px -28px rgba(6,28,51,.45), 0 0 0 1px rgba(6,28,51,.04); transform-origin: bottom right; animation: ai-panel-in .22s cubic-bezier(.2,.8,.3,1); }
+.ai-panel { display: flex; flex-direction: column; width: min(352px, calc(100vw - 32px)); max-height: min(560px, calc(100dvh - 108px)); overflow: hidden; border: 1px solid #dfe7ec; border-radius: 20px; background: #fff; box-shadow: 0 32px 70px -28px rgba(6,28,51,.45), 0 0 0 1px rgba(6,28,51,.04); transform-origin: bottom right; animation: ai-panel-in .22s cubic-bezier(.2,.8,.3,1); }
 @keyframes ai-panel-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
 .ai-panel-head { display: flex; align-items: center; gap: 11px; padding: 13px 13px 13px 14px; background: linear-gradient(120deg, #061c33 0%, #0b3e46 60%, #106b52 100%); color: #fff; }
 .ai-panel-avatar { display: grid; width: 36px; height: 36px; place-items: center; flex-shrink: 0; border-radius: 11px; background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); color: #6ee7b7; }
@@ -1357,7 +1357,8 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .ai-assistant[data-sticky-bar="true"] { display: none; }
 }
 @media (min-width: 1024px) {
-  .ai-assistant { right: 24px; bottom: 96px; }
+  /* Sits on the bottom edge like a standard shortcut — not lifted into the page. */
+  .ai-assistant { right: 24px; bottom: 24px; }
   .ai-launcher-label { display: inline; }
 }
 @media (prefers-reduced-motion: reduce) {

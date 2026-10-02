@@ -35,7 +35,7 @@ export function CompareBar() {
   if (!ready || ids.length === 0 || pathname === "/compare") return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 hidden px-4 pb-4 lg:block">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 hidden px-4 pb-4 lg:block lg:pl-4 lg:pr-[11.5rem]">
       <div className="pointer-events-auto mx-auto flex max-w-5xl items-center gap-4 rounded-panel border border-white/12 bg-navy-950/96 p-3 pr-4 shadow-lift backdrop-blur">
         <span className="flex items-center gap-2 pl-2 font-sans text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-forest-400">
           <IconLayers className="h-4 w-4" />
