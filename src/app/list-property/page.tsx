@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IconArrowRight, IconCheck, IconShield, IconPin, IconLayers } from "@/components/icons";
+import { IconArrowRight, IconCheck, IconGoogle, IconLayers, IconPin, IconShield } from "@/components/icons";
 import { ListingForm } from "@/components/listing-form";
 import { PageHero } from "@/components/page-hero";
 import { Section, SectionHeading } from "@/components/section";
 import { buildMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/constants";
+import { getSessionUserId } from "@/lib/auth";
+import { isGoogleSignInConfigured } from "@/lib/google-oauth";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Your Property in Pakistan — Free Listing Review",
@@ -42,7 +44,11 @@ const STEPS = [
   },
 ];
 
-export default function ListPropertyPage() {
+export default async function ListPropertyPage() {
+  // Whether the visitor already has a session decides if the account block
+  // offers a password at all, and if Google sign-in is configured decides
+  // whether that shortcut is offered. Both are server-only facts.
+  const [userId, googleEnabled] = await Promise.all([getSessionUserId(), isGoogleSignInConfigured()]);
   return (
     <>
       <PageHero
@@ -100,9 +106,39 @@ export default function ListPropertyPage() {
             </div>
           </div>
 
+          {/*
+            Sign-in shortcut, offered before the form rather than inside it.
+            The listing form is long, and signing in with Google is a full-page
+            redirect — putting it here means there is nothing to lose, and the
+            visitor comes back already authenticated so the listing attaches to
+            their account without a password ever being set.
+          */}
+          {!userId && googleEnabled && (
+            <div className="mx-auto mb-8 w-full max-w-5xl">
+              <div className="flex flex-col items-start gap-4 rounded-panel border border-forest-500/30 bg-forest-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div>
+                  <h2 className="font-sans text-[1rem] font-bold text-navy-900">
+                    Sign in first and your listing tracks itself
+                  </h2>
+                  <p className="mt-1 max-w-xl text-[0.875rem] leading-relaxed text-ink-muted">
+                    Continue with Google and this submission lands straight in your dashboard — no password to
+                    remember, and your enquiries and public dealer profile stay under one account.
+                  </p>
+                </div>
+                <Link
+                  href="/api/auth/google?returnTo=/list-property"
+                  className="btn btn-outline w-full shrink-0 justify-center gap-2.5 bg-white sm:w-auto"
+                >
+                  <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
+                  Continue with Google
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Large, Prominent, Full-Width Listing Form */}
           <div id="submit" className="mx-auto w-full max-w-5xl">
-            <ListingForm />
+            <ListingForm signedIn={Boolean(userId)} />
           </div>
 
           {/* Guidance Below Form */}

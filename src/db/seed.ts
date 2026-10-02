@@ -210,6 +210,10 @@ const SCHEMA_SQL = `
       created_at timestamptz NOT NULL DEFAULT now()
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS slug text NOT NULL DEFAULT '';
+    /* Google sign-in needs no password, so the column becomes nullable. */
+    ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+    /* Google's subject id (the sub claim) once an account signs in with Google. */
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id text;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'member';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS city_slug text NOT NULL DEFAULT '';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS city_name text NOT NULL DEFAULT '';
@@ -230,6 +234,8 @@ const SCHEMA_SQL = `
     ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_at timestamptz;
     CREATE INDEX IF NOT EXISTS users_slug_idx ON users (slug);
+    /* One Google account can only ever map to one Properties Pak account. */
+    CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_idx ON users (google_id) WHERE google_id IS NOT NULL AND google_id <> '';
     CREATE TABLE IF NOT EXISTS favorites (
       id serial PRIMARY KEY,
       user_id integer NOT NULL,

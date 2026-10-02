@@ -187,7 +187,17 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().default(""),
-  passwordHash: text("password_hash").notNull(),
+  /**
+   * Null for accounts that only ever signed in with Google. Password accounts
+   * keep `salt:hash` here (see `src/lib/password.ts`); Google-only accounts
+   * have no password to store.
+   */
+  passwordHash: text("password_hash"),
+  /**
+   * Google's stable subject id (`sub` claim) once the account has signed in
+   * with Google. Null for password accounts and never shared with Google.
+   */
+  googleId: text("google_id"),
   /** Public profile slug; empty until the account publishes a listing. */
   slug: text("slug").notNull().default(""),
   /** member | dealer | agency — dealers are members who list property. */

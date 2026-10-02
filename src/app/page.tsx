@@ -87,7 +87,7 @@ export default async function HomePage() {
     <div className="home-page">
       <Hero />
 
-      {/* Dealer profiles and Zameen-inspired tools follow the hero in one compact run. */}
+      {/* Dealer profiles and the site's own tools and guides follow the hero in one compact run. */}
       <DealersSlider dealers={showcaseDealers} />
       <ExploreMoreSection />
 
