@@ -250,7 +250,18 @@ export function LeafletMap({
       if (cancelled || !containerRef.current || mapRef.current) return;
       leafletRef.current = Lmod;
 
-      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 2, updateWhenIdle: Lmod.Browser.mobile, updateWhenZooming: false } as L.TileLayerOptions;
+      // `updateWhenIdle` decides whether tiles load *during* a pan or only once
+      // it ends. Leaflet's mobile default is `true`, which keeps the map pane
+      // itself moving perfectly smoothly but stops new tiles from arriving
+      // until the finger lifts — the pane then slides out past the `keepBuffer`
+      // tiles and the map looks like it is sticking. `Browser.mobile` is true on
+      // every phone *and* on any desktop window narrower than 700px, so this
+      // was biting exactly the cases where a finger is used. `false` refreshes
+      // the grid on a 200ms throttle while panning, which is what the desktop
+      // path already did and why mouse dragging felt fine.
+      // `updateWhenZooming` stays `false`: updating the grid mid-zoom-animation
+      // is what made two-finger pinch stutter with many listing labels.
+      const attr = { attribution: "", maxZoom: 20, minZoom: 5, errorTileUrl: TRANSPARENT_TILE, keepBuffer: 2, updateWhenIdle: false, updateWhenZooming: false } as L.TileLayerOptions;
       const gmap = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en", { ...attr, attribution: "Imagery © Google", subdomains: ["mt0", "mt1", "mt2", "mt3"] });
       const osm = Lmod.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { ...attr, maxZoom: 19, attribution: "© OpenStreetMap contributors" });
       const gsat = Lmod.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}&hl=en", { ...attr, attribution: "Imagery © Google", subdomains: ["mt0", "mt1", "mt2", "mt3"] });
@@ -282,6 +293,11 @@ export function LeafletMap({
         fadeAnimation: false,
         markerZoomAnimation: true,
         attributionControl: true,
+        // Leaflet's own keyboard handler pans by a fixed 80px and drops every
+        // keypress that arrives while that pan is still animating, which makes
+        // a held arrow key stutter instead of gliding. Replaced below with a
+        // requestAnimationFrame loop.
+        keyboard: false,
       });
       map.attributionControl.setPrefix("");
       map.attributionControl.addAttribution("Society layouts © ioi Technologies / DHA Plus");
@@ -659,6 +675,135 @@ export function LeafletMap({
     return () => window.clearTimeout(t);
   }, [autoLocate, ready]);
 
+  /* ---------- smooth keyboard panning ---------- */
+  /**
+   * Leaflet's keyboard handler pans by a fixed 80px and, crucially, ignores
+   * every keypress that arrives while that pan animation is still running
+   * (`if (!map._panAnim || !map._panAnim._inProgress)`). Holding an arrow key
+   * therefore produces pan — dead time — pan instead of continuous motion,
+   * which is the stutter this replaces.
+   *
+   * A requestAnimationFrame loop moves the pane by a fixed number of pixels per
+   * second for as long as a key is held, so the speed is steady rather than
+   * stepped, and releasing the key stops it dead rather than coasting.
+   *
+   * The pane is moved with `_rawPanBy`, which repositions it directly without
+   * touching `_panAnim` and without firing `moveend`. That last part matters:
+   * `moveend` rebuilds every visible pin (see `renderPins` above), so firing it
+   * once per frame would be far worse than the bug. `move` is fired per frame
+   * so the scale bar and the throttled tile updater stay live, and a single
+   * `moveend` is fired when the key is released.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    const elem = containerRef.current;
+    if (!map || !elem || !ready) return;
+
+    /** Pixels per second. A 400px map crosses in about 0.7s — deliberate, not twitchy. */
+    const SPEED = 560;
+    /** Shift makes it three times faster, matching Leaflet's own convention. */
+    const SHIFT_MULTIPLIER = 3;
+
+    // Sign convention copied from Leaflet's `_panKeys`: the pane is moved by the
+    // *negation* of these, so a positive y means the map content moves up.
+    const VECTORS: Record<string, [number, number]> = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    };
+
+    const held = new Set<string>();
+    let active: string | null = null;
+    let frame = 0;
+    let previous = 0;
+    let fast = false;
+
+    const finish = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      active = null;
+      held.clear();
+      // One `moveend` for the whole gesture, so pins re-cluster and the stored
+      // centre catch up exactly once rather than sixty times.
+      map.fire("moveend");
+    };
+
+    const tick = (now: number) => {
+      const vector = active ? VECTORS[active] : null;
+      if (!vector) return;
+      const seconds = previous ? (now - previous) / 1000 : 0;
+      previous = now;
+      // Clamp so a backgrounded tab cannot resume with one enormous jump.
+      const step = SPEED * (fast ? SHIFT_MULTIPLIER : 1) * Math.min(seconds, 0.1);
+      const panBy = (map as unknown as { _rawPanBy: (offset: unknown) => void })._rawPanBy;
+      const point = (leafletRef.current as unknown as { point: (x: number, y: number) => unknown }).point;
+      panBy.call(map, point(vector[0] * step, vector[1] * step));
+      map.fire("move");
+      frame = requestAnimationFrame(tick);
+    };
+
+    const start = (key: string) => {
+      // End anything already in flight — a `flyTo` writes the same pane position
+      // every frame and would otherwise fight this loop. `_stop` cancels the
+      // flyTo frame and the pan animation without the `viewreset` that the public
+      // `map.stop()` also triggers when `zoomSnap` is 0.
+      (map as unknown as { _stop: () => void })._stop.call(map);
+      active = key;
+      previous = 0;
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const vector = VECTORS[event.key];
+      if (vector) {
+        event.preventDefault();
+        event.stopPropagation();
+        held.add(event.key);
+        fast = event.shiftKey;
+        // Retarget rather than queue: pressing a second arrow while the first is
+        // held should turn, not wait.
+        start(event.key);
+        return;
+      }
+      // Preserve the zoom and dismiss shortcuts Leaflet's handler used to own.
+      if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        map.zoomIn(1);
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        map.zoomOut(1);
+      } else if (event.key === "Escape") {
+        map.closePopup();
+      }
+    };
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (!VECTORS[event.key]) return;
+      held.delete(event.key);
+      if (event.key !== active) return;
+      // Keep gliding if another arrow is still held; otherwise stop.
+      const remaining = [...held].pop();
+      if (remaining) start(remaining);
+      else finish();
+    };
+
+    // Losing focus mid-hold (tab away, click elsewhere) must not leave the loop
+    // running with nothing driving it.
+    const onBlur = () => { if (active) finish(); };
+
+    elem.addEventListener("keydown", onKeyDown);
+    elem.addEventListener("keyup", onKeyUp);
+    elem.addEventListener("blur", onBlur, true);
+    return () => {
+      elem.removeEventListener("keydown", onKeyDown);
+      elem.removeEventListener("keyup", onKeyUp);
+      elem.removeEventListener("blur", onBlur, true);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [ready]);
+
   /* ---------- fullscreen + resize ---------- */
   useEffect(() => {
     const map = mapRef.current;
@@ -700,7 +845,20 @@ export function LeafletMap({
       )}
 
       <div className={`relative ${open || fullscreen ? "" : "hidden"} ${fullscreen ? "flex-1" : ""}`}>
-        <div ref={containerRef} className={`w-full ${fullscreen ? "h-full" : heightClass} ${onPick ? "cursor-crosshair" : ""}`} />
+        {/*
+          `tabIndex` makes the map focusable, which is what lets the arrow keys
+          reach it. Leaflet's own keyboard handler set this itself; it is
+          disabled, so the container is marked up directly. A focusable map also
+          means the keys are only captured while the visitor is actually on the
+          map, never while they are typing somewhere else on the page.
+        */}
+        <div
+          ref={containerRef}
+          tabIndex={0}
+          role="application"
+          aria-label="Property map. Use the arrow keys to pan and plus or minus to zoom."
+          className={`w-full outline-none ${fullscreen ? "h-full" : heightClass} ${onPick ? "cursor-crosshair" : ""}`}
+        />
 
         {/* Right-side custom controls */}
         <div className="absolute right-3 top-3 z-[500] flex flex-col items-end gap-2">
