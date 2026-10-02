@@ -12,6 +12,8 @@ test("generous local hero, header-only map, relocated popular searches and respo
   await expect(page.getByRole("heading", { name: "Discover Properties by Location", exact: true })).toHaveCount(0);
   expect(await page.locator("#commercial").evaluate((element) => element.nextElementSibling?.id)).toBe("popular-searches");
   await expect(page.locator("#recent-properties")).toHaveCount(0);
+  await expect(page.locator("#explore .chip")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Invest With More Confidence.", exact: true })).toHaveCount(0);
   for (const width of [320, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
@@ -38,7 +40,7 @@ test("generous local hero, header-only map, relocated popular searches and respo
   expect(failures).toEqual([]);
 });
 
-test("mobile Explore is one manual row with four desktop rows and paginates further listings", async ({ page }) => {
+test("mobile Explore is one swipeable row with four compact desktop rows and paginates further listings", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const rail = page.locator('#explore [data-testid="property-rail"]');
@@ -65,15 +67,22 @@ test("viewed properties persist in ordered, deduplicated history; Clear Recent o
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const recent = page.locator("#recent-properties");
   await expect(recent.locator("article")).toHaveCount(2);
+  await expect(recent.getByRole("heading", { name: "Recent Activity", exact: true })).toBeVisible();
   const titles = await recent.locator("article h3").allTextContents();
   expect(titles).toEqual([listings.items[0].title, listings.items[1].title]);
   expect(await recent.evaluate((element) => element.previousElementSibling?.id)).toBe("featured");
-  expect(await recent.locator(".property-rail-track").evaluate((element) => getComputedStyle(element).flexWrap)).toBe("nowrap");
-  const desktopCardWidth = await recent.locator(".property-rail-item").first().evaluate((element) => element.getBoundingClientRect().width);
+  expect(await recent.locator(".recent-activity-track").evaluate((element) => getComputedStyle(element).flexWrap)).toBe("nowrap");
+  const desktopCardWidth = await recent.locator(".recent-activity-item").first().evaluate((element) => element.getBoundingClientRect().width);
   expect(desktopCardWidth).toBeLessThanOrEqual(250);
   await page.setViewportSize({ width: 390, height: 844 });
-  const mobileCardWidth = await recent.locator(".property-rail-item").first().evaluate((element) => element.getBoundingClientRect().width);
+  const mobileCardWidth = await recent.locator(".recent-activity-item").first().evaluate((element) => element.getBoundingClientRect().width);
   expect(mobileCardWidth).toBeLessThanOrEqual(230);
+  await expect(recent.locator("img")).toHaveCount(0);
+  expect(await recent.locator(".recent-activity-card").first().evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(90);
+  const activityViewport = recent.getByRole("region", { name: "Recent property activity", exact: true });
+  expect(await activityViewport.evaluate((element) => element.scrollWidth)).toBeGreaterThan(await activityViewport.evaluate((element) => element.clientWidth));
+  await recent.getByRole("button", { name: "Next recent activity", exact: true }).click();
+  await expect.poll(() => activityViewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   await recent.getByRole("button", { name: "Clear Recent", exact: true }).click();
   await expect(recent).toHaveCount(0);
   expect(await page.evaluate((key) => localStorage.getItem(key), RECENT)).toBeNull();

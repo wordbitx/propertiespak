@@ -10,23 +10,21 @@ type RailProperty = Property | PropertyWithDealer;
 const PAGE_SIZE = 8;
 
 /**
- * How often the rail advances itself, in milliseconds. Two home rails autoplay
- * at once, so they are deliberately given different cadences (and opposite
- * directions) — identical timings read as one machine driving both, and the
- * pair looks mechanical rather than alive.
+ * The rail moves by one card per tick, then stays still long enough to read it.
+ * The slower reverse cadence is kept separate for any rail that opts into it.
  */
-export const RAIL_AUTO_PLAY_MS = 2800;
-export const RAIL_AUTO_PLAY_MS_REVERSE = 3200;
+export const RAIL_AUTO_PLAY_MS = 4800;
+export const RAIL_AUTO_PLAY_MS_REVERSE = 5200;
 
 /** Native horizontal scrolling with optional, user-friendly paused auto-advancement. */
-export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, autoPlayDirection = "forward", autoPlayInterval, pageSize = PAGE_SIZE, propertyTypeBelowPrice = false, size = "compact" }: {
+export function PropertyRail({ initialProperties, initialTotal, query, label, autoPlay = false, autoPlayDirection = "forward", autoPlayInterval, pageSize = PAGE_SIZE, size = "compact", imageRatio = "wide" }: {
   initialProperties: RailProperty[]; initialTotal: number; query?: string; label: string;
   autoPlay?: boolean;
   /** Which way the idle rail drifts. "backward" enters from the right edge. */
   autoPlayDirection?: "forward" | "backward";
   /** Override the cadence; defaults differ by direction so the two never match. */
   autoPlayInterval?: number;
-  pageSize?: number; propertyTypeBelowPrice?: boolean; size?: "compact" | "roomy";
+  pageSize?: number; size?: "compact" | "roomy"; imageRatio?: "wide" | "tall";
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLLIElement | null>(null);
@@ -204,7 +202,7 @@ export function PropertyRail({ initialProperties, initialTotal, query, label, au
       </div>
       <div ref={viewportRef} className="property-rail-viewport" role="region" aria-label={label} tabIndex={0} onScroll={measure}>
         <ul className="property-rail-track">
-          {items.map((property) => <li key={property.id} className="property-rail-item" data-property-featured={property.featured ? "true" : "false"} data-property-verified={property.verified ? "true" : "false"}><PropertyCard property={property} compact={size === "compact"} propertyTypeBelowPrice={propertyTypeBelowPrice} /></li>)}
+          {items.map((property) => <li key={property.id} className="property-rail-item" data-property-featured={property.featured ? "true" : "false"} data-property-verified={property.verified ? "true" : "false"}><PropertyCard property={property} compact={size === "compact"} imageRatio={imageRatio} /></li>)}
           <li ref={endRef} aria-hidden="true" className="property-rail-end" />
         </ul>
       </div>

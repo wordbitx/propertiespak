@@ -45,11 +45,11 @@ function base64Url(buffer: Buffer): string {
 }
 
 function clientId(): string {
-  return process.env.GOOGLE_CLIENT_ID ?? "";
+  return process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 }
 
 function clientSecret(): string {
-  return process.env.GOOGLE_CLIENT_SECRET ?? "";
+  return process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
 }
 
 /** True once both credentials are configured, so the UI can hide the button. */

@@ -265,9 +265,8 @@ export function FeaturedProperties({ properties, total }: { properties: Property
     <Section tone="light" id="featured">
       <div className="ui-container">
         <SectionHeading title="Featured Properties" action={{ label: "View all", href: "/properties?featured=1&verified=1" }} />
-        {/* Idle, this rail drifts forward at its own cadence. The Explore rail
-            below runs backwards on a different one, so the two home rails never
-            move in lockstep. */}
+        {/* Advance one listing at a time with a comfortable pause so visitors
+            can read each card and still take over with a swipe or arrow. */}
         <PropertyRail initialProperties={properties} initialTotal={total} query="featured=1&verified=1" label="Featured properties" autoPlay />
       </div>
     </Section>

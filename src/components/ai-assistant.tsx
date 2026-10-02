@@ -29,10 +29,9 @@ let counter = 0;
 const nextId = () => `turn-${++counter}`;
 
 /**
- * A small, premium AI assistant that answers property questions from this
- * website's own inventory and tools. It replaces the floating WhatsApp
- * shortcut: the same corner, the same one-tap reach, but it can actually search
- * listings instead of only opening a chat.
+ * A compact AI assistant that answers property questions from this website's
+ * own inventory and tools. It stays available on desktop while a dedicated
+ * WhatsApp contact action is used on phone-sized screens.
  */
 export function AiAssistant() {
   const pathname = usePathname();

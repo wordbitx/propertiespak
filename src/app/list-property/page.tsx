@@ -125,13 +125,14 @@ export default async function ListPropertyPage() {
                     remember, and your enquiries and public dealer profile stay under one account.
                   </p>
                 </div>
-                <Link
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- OAuth must leave the App Router for a full-document redirect. */}
+                <a
                   href="/api/auth/google?returnTo=/list-property"
                   className="btn btn-outline w-full shrink-0 justify-center gap-2.5 bg-white sm:w-auto"
                 >
                   <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
                   Continue with Google
-                </Link>
+                </a>
               </div>
             </div>
           )}

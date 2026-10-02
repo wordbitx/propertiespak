@@ -12,7 +12,7 @@ import {
   NewProjectsSection,
 } from "@/components/sections-discovery";
 
-import { CtaSection, InvestmentSection, WhyEstateWx } from "@/components/sections-editorial";
+import { CtaSection, WhyEstateWx } from "@/components/sections-editorial";
 import { DealersSlider } from "@/components/dealers-slider";
 import { PopularSearches } from "@/components/popular-searches";
 import {
@@ -46,14 +46,6 @@ export const metadata: Metadata = buildMetadata({
   ],
 });
 
-const QUICK_CHIPS = [
-  { label: "Featured listings", href: "/properties?featured=1" },
-  { label: "Houses for sale", href: "/properties/for-sale?type=House" },
-  { label: "Apartments for rent", href: "/properties/for-rent?type=Apartment" },
-  { label: "Commercial space", href: "/properties/commercial" },
-  { label: "Plots & files", href: "/properties?category=plot" },
-];
-
 export default async function HomePage() {
   const [
     stats,
@@ -63,8 +55,6 @@ export default async function HomePage() {
     cityCounts,
     projects,
     commercialListings,
-    commercialCount,
-    rentalCount,
     posts,
     showcaseDealers,
     popularSearches,
@@ -76,8 +66,6 @@ export default async function HomePage() {
     getCityListingCounts(),
     getProjects(8),
     searchProperties({ category: "commercial", pageSize: 8 }),
-    searchProperties({ category: "commercial", pageSize: 1 }),
-    searchProperties({ purpose: "rent", pageSize: 1 }),
     getPosts(3),
     getDealerShowcase(48),
     getPopularSearches(),
@@ -99,18 +87,9 @@ export default async function HomePage() {
       <Section tone="mist" id="explore">
         <div className="ui-container">
           <SectionHeading
-            eyebrow="Property discovery"
             title="Explore Properties"
-            description="Find spaces that match the way you live, work and invest."
             action={{ label: "Advanced search", href: "/properties" }}
           />
-          <div className="mt-6 flex flex-wrap gap-2">
-            {QUICK_CHIPS.map((chip) => (
-              <Link key={chip.href} href={chip.href} className="chip">
-                {chip.label}
-              </Link>
-            ))}
-          </div>
           <HomeExploreProperties properties={discovery.items} total={discovery.total} />
           <div className="mt-10 flex justify-center">
             <Link href="/properties" className="btn btn-primary">
@@ -130,15 +109,6 @@ export default async function HomePage() {
       <CityDiscovery cities={cities} counts={cityCounts} />
 
       <WhyEstateWx listings={stats.listings} cities={stats.cities} />
-
-      <InvestmentSection
-        snapshot={{
-          projects: stats.projects,
-          commercial: commercialCount.total,
-          cities: stats.cities,
-          rentals: rentalCount.total,
-        }}
-      />
 
       <InsightsPreview posts={posts} />
       <CtaSection />

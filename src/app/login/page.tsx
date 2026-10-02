@@ -96,15 +96,11 @@ export default async function LoginPage({ searchParams }: PageProps) {
                     </span>
                     <span className="h-px flex-1 bg-soft" />
                   </div>
-                  {/* A Link, not a form post: the handshake is a full-page
-                      redirect to Google and back. */}
-                  <Link
-                    href="/api/auth/google?returnTo=/account"
-                    className="btn btn-outline w-full justify-center gap-2.5"
-                  >
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- OAuth must leave the App Router for a full-document redirect. */}
+                  <a href="/api/auth/google?returnTo=/account" className="btn btn-outline w-full justify-center gap-2.5">
                     <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
                     Continue with Google
-                  </Link>
+                  </a>
                   <p className="mt-3 text-center text-[0.75rem] text-ink-muted">
                     New here? We&apos;ll create your {SITE.name} account from your Google profile.
                   </p>
@@ -129,15 +125,11 @@ export default async function LoginPage({ searchParams }: PageProps) {
 
               {googleEnabled && (
                 <>
-                  {/* A Link, not a form post: the handshake is a full-page
-                      redirect to Google and back. */}
-                  <Link
-                    href="/api/auth/google?returnTo=/account"
-                    className="btn btn-outline mt-5 w-full justify-center gap-2.5"
-                  >
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- OAuth must leave the App Router for a full-document redirect. */}
+                  <a href="/api/auth/google?returnTo=/account" className="btn btn-outline mt-5 w-full justify-center gap-2.5">
                     <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
                     Sign up with Google
-                  </Link>
+                  </a>
                   <div className="my-5 flex items-center gap-3" aria-hidden="true">
                     <span className="h-px flex-1 bg-soft" />
                     <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">

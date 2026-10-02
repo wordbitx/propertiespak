@@ -997,9 +997,8 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .property-rail-viewport { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scroll-snap-type: x proximity; scroll-padding-inline: 1px; scrollbar-width: thin; scrollbar-color: #b8c7d3 #eef2f5; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .property-rail-track { display: flex; gap: 14px; width: max-content; align-items: stretch; }
 .property-rail-item { flex: 0 0 auto; width: 264px; scroll-snap-align: start; }
-/* Recently viewed listings are deliberately smaller than the full-size rails. */
+/* Larger rails may opt into a roomier card width. */
 .property-rail--roomy .property-rail-item { width: 320px; }
-#recent-properties .property-rail-item { width: 224px; }
 .property-rail-end { flex: 0 0 1px; width: 1px; }
 .property-rail-status { font-size: .75rem; line-height: 1.6; color: var(--color-ink-muted); }
 .property-rail-status:not(:empty) { margin-top: 8px; }
@@ -1219,7 +1218,6 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
   .property-search-buttons { grid-column: 1 / -1; justify-content: flex-end; }
   .property-rail-item { width: 280px; }
   .property-rail--roomy .property-rail-item { width: 360px; }
-  #recent-properties .property-rail-item { width: 248px; }
 }
 @media (min-width: 1024px) {
   :root { --site-header-height: calc(100px + env(safe-area-inset-top, 0px)); }
@@ -1659,4 +1657,64 @@ html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 @media (prefers-reduced-motion: reduce) {
   .property-search-new-badge { animation: none; }
   .explore-more-card { transition: none; }
+}
+
+/* Recent Activity is a lightweight name rail, not another full image-card section. */
+.recent-activity-strip { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.recent-activity-viewport { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 1px 9px; scroll-snap-type: x mandatory; scroll-padding-inline: 1px; scrollbar-width: thin; scrollbar-color: #bdcad5 transparent; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.recent-activity-viewport:focus-visible { outline: 2px solid #9aafc2; outline-offset: 2px; border-radius: 10px; }
+.recent-activity-track { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 9px; width: max-content; margin: 0; padding: 0; list-style: none; }
+.recent-activity-item { flex: 0 0 218px; scroll-snap-align: start; }
+.recent-activity-item article { height: 100%; }
+.recent-activity-card { display: flex; min-height: 76px; height: 100%; flex-direction: column; justify-content: center; gap: 5px; padding: 10px 13px; overflow: hidden; border: 1px solid #d9e3eb; border-radius: 10px; background: #fff; text-decoration: none; transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
+.recent-activity-card:hover { border-color: #9db2c4; background: #f9fbfd; box-shadow: 0 5px 14px -11px rgba(6,28,51,.4); }
+.recent-activity-card:focus-visible { outline: 2px solid #829bb1; outline-offset: 2px; }
+.recent-activity-card h3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-family: var(--font-sans); font-size: .8125rem; font-weight: 650; line-height: 1.35; color: var(--color-navy-900); }
+.recent-activity-card > span { overflow: hidden; color: var(--color-ink-muted); font-size: .6875rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.recent-activity-controls { display: flex; justify-content: flex-end; gap: 5px; padding-top: 2px; }
+.recent-activity-controls button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #d7e1e9; border-radius: 7px; background: #fff; color: var(--color-navy-900); transition: border-color .18s ease, background-color .18s ease, color .18s ease; }
+.recent-activity-controls button:hover { border-color: #9db2c4; background: #f5f8fa; color: #244865; }
+.recent-activity-controls button:focus-visible { outline: 2px solid #829bb1; outline-offset: 2px; }
+
+/* Featured inventory has a cool, lightly shaded surface so it reads differently from Explore's white cards. */
+.home-page #featured .property-rail-item article { border-color: #d1dde7; background-color: #f7f9fc; }
+.home-page #featured .property-rail-item article > div:last-child { background-image: linear-gradient(180deg, #fff 0%, #f3f7fa 100%); }
+.home-page #featured .property-rail-item article .property-card-price-block > span { background-color: #e8eff5; color: #425d73; }
+.home-page #featured .property-rail-item article:hover,
+.home-page #featured .property-rail-item article:focus-within { border-color: #9aafc2; background-color: #f2f6fa; box-shadow: 0 12px 26px -19px rgba(6,28,51,.38); }
+
+/* Keep discovery cards compact so the long homepage has more visual rhythm. */
+.home-page #explore .home-explore-grid { align-items: stretch; }
+.home-page #explore .home-explore-grid > div { min-width: 0; }
+@media (max-width: 767px) {
+  .home-page #explore .property-rail-item { width: 238px; }
+  .home-page #explore .property-rail-track { gap: 12px; }
+  .recent-activity-item { flex-basis: 194px; }
+  .recent-activity-card { min-height: 70px; padding: 9px 11px; }
+}
+@media (max-width: 374px) {
+  .home-page #explore .property-rail-item { width: 224px; }
+  .recent-activity-item { flex-basis: 184px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recent-activity-card,
+  .recent-activity-controls button { transition: none; }
+  .recent-activity-viewport { scroll-behavior: auto; }
+}
+
+/* Let Explore Properties lead directly into its listings without extra filter-chip clutter. */
+.home-page #explore .section-heading .display-2 { font-size: clamp(1.15rem, 1.6vw, 1.4rem); font-weight: 600; }
+
+/* A mobile WhatsApp shortcut replaces the desktop AI launcher at the screen edge. */
+.floating-whatsapp { position: fixed; z-index: 70; right: max(16px, calc(env(safe-area-inset-right, 0px) + 16px)); bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px)); display: none; min-height: 52px; align-items: center; justify-content: center; gap: 9px; padding: 0 16px; border: 1px solid rgba(255,255,255,.36); border-radius: 999px; background: #128c4a; color: #fff; box-shadow: 0 10px 26px -12px rgba(8,75,42,.75); font-size: .8125rem; font-weight: 700; text-decoration: none; transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.floating-whatsapp svg { width: 21px; height: 21px; flex: 0 0 auto; }
+.floating-whatsapp:hover { transform: translateY(-2px); background: #0e713c; box-shadow: 0 13px 28px -12px rgba(8,75,42,.82); }
+.floating-whatsapp:focus-visible { outline: 3px solid #9ae6b4; outline-offset: 3px; }
+@media (max-width: 767px) {
+  .ai-assistant { display: none; }
+  .floating-whatsapp { display: inline-flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-whatsapp,
+  .floating-whatsapp:hover { transition: none; transform: none; }
 }
