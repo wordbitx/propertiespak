@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { IconArrowRight, IconCheck, IconHeart, IconLayers, IconShield } from "@/components/icons";
+import {
+  IconArrowRight,
+  IconCheck,
+  IconGoogle,
+  IconHeart,
+  IconLayers,
+  IconShield,
+} from "@/components/icons";
 import { loginAction, registerAction } from "@/app/actions/auth";
 import { PageHero } from "@/components/page-hero";
 import { Section } from "@/components/section";
 import { getSessionUserId } from "@/lib/auth";
+import { isGoogleSignInConfigured } from "@/lib/google-oauth";
 import { SITE } from "@/lib/constants";
 import { buildMetadata } from "@/lib/seo";
 
@@ -22,6 +30,8 @@ type PageProps = { searchParams: Promise<{ error?: string; mode?: string }> };
 export default async function LoginPage({ searchParams }: PageProps) {
   const [{ error, mode }, userId] = await Promise.all([searchParams, getSessionUserId()]);
   if (userId) redirect("/account");
+
+  const googleEnabled = isGoogleSignInConfigured();
 
   const inputClass = "field mt-2";
   const labelClass = "text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-ink-muted";
@@ -76,8 +86,33 @@ export default async function LoginPage({ searchParams }: PageProps) {
               <button type="submit" className="btn btn-primary mt-6 w-full">
                 Sign in <IconArrowRight className="h-4 w-4" />
               </button>
+
+              {googleEnabled && (
+                <>
+                  <div className="my-5 flex items-center gap-3" aria-hidden="true">
+                    <span className="h-px flex-1 bg-soft" />
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+                      or
+                    </span>
+                    <span className="h-px flex-1 bg-soft" />
+                  </div>
+                  {/* A Link, not a form post: the handshake is a full-page
+                      redirect to Google and back. */}
+                  <Link
+                    href="/api/auth/google?returnTo=/account"
+                    className="btn btn-outline w-full justify-center gap-2.5"
+                  >
+                    <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
+                    Continue with Google
+                  </Link>
+                  <p className="mt-3 text-center text-[0.75rem] text-ink-muted">
+                    New here? We&apos;ll create your {SITE.name} account from your Google profile.
+                  </p>
+                </>
+              )}
+
               <p className="mt-4 text-[0.75rem] leading-relaxed text-ink-muted">
-                Accounts are stored securely on {SITE.name} with hashed passwords. Accounts are operated by {SITE.company}.
+                Passwords are stored hashed, never in plain text. Accounts are operated by {SITE.company}.
               </p>
             </form>
 

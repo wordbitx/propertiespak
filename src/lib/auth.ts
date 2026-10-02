@@ -89,9 +89,98 @@ export async function loginUser(emailInput: string, password: string): Promise<A
   const email = emailInput.trim().toLowerCase();
   const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
   const user = rows[0];
-  if (!user || !verifyPassword(password, user.passwordHash)) {
+  if (!user) {
+    return { ok: false, error: "Incorrect email or password." };
+  }
+  if (!user.passwordHash) {
+    // The account exists but has no password, so it was created with Google.
+    return {
+      ok: false,
+      error: "This account uses Google sign-in. Please continue with Google instead.",
+    };
+  }
+  if (!verifyPassword(password, user.passwordHash)) {
     return { ok: false, error: "Incorrect email or password." };
   }
   await createSession(user.id);
   return { ok: true, userId: user.id };
+}
+
+/**
+ * Finds the account behind a Google identity and signs it in.
+ *
+ * `users.email` is unique, so "find or create" has to decide what to do when
+ * the mailbox is already taken:
+ *
+ *  - No account at all → create one. No password is stored, which is why
+ *    `password_hash` is nullable.
+ *  - An account already linked to this Google id → simply sign it in. This is
+ *    the returning visitor path.
+ *  - An account with this email but no Google link → link it, so the person's
+ *    shortlist stays in one place instead of splitting across two accounts.
+ *    Linking is only allowed when Google reports `email_verified`, because
+ *    that is Google — not the person at the keyboard — confirming they own the
+ *    mailbox. An unverified Google email is refused and the person is sent to
+ *    the password form, which is the only other proof of ownership we accept.
+ */
+export async function signInWithGoogle(profile: {
+  sub: string;
+  email: string;
+  emailVerified: boolean;
+  name: string;
+  picture?: string;
+}): Promise<AuthResult> {
+  await ensureSeeded();
+  const email = profile.email.trim().toLowerCase();
+
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const existing = rows[0];
+
+  if (existing) {
+    if (existing.googleId && existing.googleId !== profile.sub) {
+      // A different Google account already owns this Properties Pak account.
+      return {
+        ok: false,
+        error: "This email is already linked to a different Google account. Please use that one to sign in.",
+      };
+    }
+    if (existing.passwordHash && !profile.emailVerified) {
+      return {
+        ok: false,
+        error: "Please sign in with your password first to link Google to this account.",
+      };
+    }
+
+    await db
+      .update(users)
+      .set({
+        googleId: profile.sub,
+        // Fill in anything the account never had, without overwriting what the
+        // owner may have already edited by hand.
+        name: existing.name || profile.name,
+        avatarUrl: existing.avatarUrl || profile.picture || "",
+      })
+      .where(eq(users.id, existing.id));
+    await createSession(existing.id);
+    return { ok: true, userId: existing.id };
+  }
+
+  const inserted = await db
+    .insert(users)
+    .values({
+      name: profile.name,
+      email,
+      // No password: this account can only be opened with Google.
+      passwordHash: null,
+      googleId: profile.sub,
+      slug: buildProfileSlug(profile.name),
+      role: "member",
+      avatarUrl: profile.picture ?? "",
+    })
+    .returning({ id: users.id });
+
+  const userId = inserted[0]?.id;
+  if (!userId) return { ok: false, error: "Could not sign you in with Google. Please try again." };
+  await createSession(userId);
+  return { ok: true, userId };
 }
