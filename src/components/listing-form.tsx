@@ -46,12 +46,17 @@ function SectionTitle({ step, title, copy }: { step: string; title: string; copy
   );
 }
 
-export function ListingForm() {
+/**
+ * `signedIn` comes from the server so a visitor who already authenticated —
+ * including with Google — is recognised before they type anything, rather than
+ * only after a submission comes back.
+ */
+export function ListingForm({ signedIn: initiallySignedIn = false }: { signedIn?: boolean }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const [referenceId, setReferenceId] = useState<number | null>(null);
   const [accountCreated, setAccountCreated] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useState(initiallySignedIn);
   const [emailTaken, setEmailTaken] = useState(false);
 
   const [name, setName] = useState("");
@@ -277,46 +282,69 @@ export function ListingForm() {
         </div>
 
         <div className="mt-5 rounded-xl border border-soft bg-mist p-4">
-          <label className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              checked={createAccount}
-              onChange={(e) => setCreateAccount(e.target.checked)}
-              className="mt-1 h-4 w-4 shrink-0 accent-forest-600"
-            />
-            <span>
-              <span className="font-sans text-[0.875rem] font-semibold text-navy-900">
-                Create my Properties Pak account (recommended)
-              </span>
-              <span className="mt-1 block text-[0.8125rem] leading-relaxed text-ink-muted">
-                Your listing, enquiries and a public dealer profile stay under one account. Once our team verifies the
-                account, the blue tick appears on your profile and on every property you publish.
-              </span>
-            </span>
-          </label>
-          {createAccount && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {initiallySignedIn ? (
+            <div className="flex items-start gap-3">
+              <IconCheck className="mt-0.5 h-5 w-5 shrink-0 text-forest-600" />
               <div>
-                <label className={label} htmlFor="listing-password">Account password *</label>
-                <input
-                  id="listing-password"
-                  type="password"
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="field mt-2"
-                  placeholder="At least 6 characters"
-                  autoComplete="new-password"
-                />
+                <span className="font-sans text-[0.875rem] font-semibold text-navy-900">
+                  You are signed in — this listing goes to your account
+                </span>
+                <span className="mt-1 block text-[0.8125rem] leading-relaxed text-ink-muted">
+                  It will be waiting in your dashboard under <strong>Your listings</strong> as soon as our team approves
+                  it. A verified account gets the blue tick on your dealer profile and on every property you publish.{" "}
+                  <Link href="/account" className="font-semibold text-forest-700 hover:underline">
+                    Open your dashboard
+                  </Link>
+                  .
+                </span>
               </div>
-              <p className="self-end text-[0.75rem] leading-relaxed text-ink-muted">
-                Already registered? Leave the password blank and{" "}
-                <Link href="/login" className="font-semibold text-forest-700 hover:underline">
-                  sign in
-                </Link>{" "}
-                instead — the listing is attached to your existing account.
-              </p>
             </div>
+          ) : (
+            <>
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={createAccount}
+                  onChange={(e) => setCreateAccount(e.target.checked)}
+                  className="mt-1 h-4 w-4 shrink-0 accent-forest-600"
+                />
+                <span>
+                  <span className="font-sans text-[0.875rem] font-semibold text-navy-900">
+                    Create my Properties Pak account (recommended)
+                  </span>
+                  <span className="mt-1 block text-[0.8125rem] leading-relaxed text-ink-muted">
+                    Your listing, enquiries and a public dealer profile stay under one account. Once our team verifies
+                    the account, the blue tick appears on your profile and on every property you publish.
+                  </span>
+                </span>
+              </label>
+              {createAccount && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={label} htmlFor="listing-password">
+                      Account password *
+                    </label>
+                    <input
+                      id="listing-password"
+                      type="password"
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="field mt-2"
+                      placeholder="At least 6 characters"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <p className="self-end text-[0.75rem] leading-relaxed text-ink-muted">
+                    Already registered? Leave the password blank and{" "}
+                    <Link href="/login" className="font-semibold text-forest-700 hover:underline">
+                      sign in
+                    </Link>{" "}
+                    instead — the listing is attached to your existing account.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

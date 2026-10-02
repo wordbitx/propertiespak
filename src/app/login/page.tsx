@@ -126,6 +126,27 @@ export default async function LoginPage({ searchParams }: PageProps) {
               <p className="mt-2 text-[0.875rem] text-ink-muted">
                 Free to join. Build a shortlist, save searches and get matched listings for your budget.
               </p>
+
+              {googleEnabled && (
+                <>
+                  {/* A Link, not a form post: the handshake is a full-page
+                      redirect to Google and back. */}
+                  <Link
+                    href="/api/auth/google?returnTo=/account"
+                    className="btn btn-outline mt-5 w-full justify-center gap-2.5"
+                  >
+                    <IconGoogle className="h-[1.125rem] w-[1.125rem]" />
+                    Sign up with Google
+                  </Link>
+                  <div className="my-5 flex items-center gap-3" aria-hidden="true">
+                    <span className="h-px flex-1 bg-soft" />
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+                      or use your details
+                    </span>
+                    <span className="h-px flex-1 bg-soft" />
+                  </div>
+                </>
+              )}
               <div className="mt-6 space-y-4">
                 <div>
                   <label className={labelClass} htmlFor="register-name">

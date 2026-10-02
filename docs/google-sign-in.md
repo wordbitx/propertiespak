@@ -58,6 +58,11 @@ environment variables, and what happens in the database.
    http://localhost:3000/api/auth/google/callback
    ```
 
+   That is the only redirect URI the app ever uses — every entry point
+   (`/login` sign-in, `/login` register, `/list-property`) goes through the same
+   callback, which then forwards the visitor to the right page using a
+   site-relative path stored in a cookie.
+
    For a Vercel preview deployment you would add its own URI too, but note that
    preview URLs change on every deploy — see the note on
    `GOOGLE_REDIRECT_URI` below.
@@ -231,4 +236,22 @@ cannot be exercised from inside the sandbox at all. The code is verified with
 | `src/db/schema.ts` | `passwordHash` nullable, `googleId` added. |
 | `src/db/seed.ts` | The idempotent `ALTER TABLE` statements. |
 | `src/components/icons.tsx` | `IconGoogle`. |
-| `src/app/login/page.tsx` | The "Continue with Google" button. |
+| `src/app/login/page.tsx` | The button on both the sign-in and the create-an-account forms. |
+| `src/app/list-property/page.tsx` | A sign-in shortcut above the listing form, for signed-out visitors. |
+| `src/components/listing-form.tsx` | Recognises an already-signed-in visitor and swaps the password block for a confirmation. |
+
+### The three entry points
+
+| Where | Label | Returns to |
+| --- | --- | --- |
+| `/login` — sign in | Continue with Google | `/account` |
+| `/login` — create an account | Sign up with Google | `/account` |
+| `/list-property` | Continue with Google | `/list-property` |
+
+On `/list-property` the shortcut sits **above** the form rather than inside it.
+The listing form is long, and signing in with Google is a full-page redirect —
+placing it before any typing means there is nothing to lose, and the visitor
+returns already authenticated so the listing attaches to their account without
+a password ever being set. Once signed in, the account block at the bottom of
+the form drops the checkbox and the password field and simply confirms that the
+listing will go to their account.
