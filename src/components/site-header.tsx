@@ -191,7 +191,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
               <span className="header-list-property-flag" aria-hidden="true">SELL</span>
               {t("List Property")}
             </Link>
-            <button type="button" data-testid="header-menu" onClick={(event) => openPanel("menu", event.currentTarget)} aria-label={t("Open menu")} aria-haspopup="dialog" aria-expanded={panel === "menu"} className="header-action header-menu-action"><IconMenu className="h-5 w-5" /><span className="header-action-caption">{t("Menu")}</span></button>
+            <button type="button" data-testid="header-menu" onClick={(event) => openPanel("menu", event.currentTarget)} aria-label={t("Open menu")} aria-haspopup="dialog" aria-expanded={panel === "menu"} className="header-action header-menu-action"><IconMenu className="h-5 w-5" /></button>
           </div>
         </div>
       </header>

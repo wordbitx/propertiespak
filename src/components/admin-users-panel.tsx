@@ -19,9 +19,9 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 /**
- * Admin control for the blue tick. Every registered account is listed with its
- * listing count; the toggle is the single switch that turns verification on or
- * off across the public site.
+ * Admin controls for dealer verification and public identity. Every account is
+ * listed with its listing footprint; admins can verify or unverify it and edit
+ * the name and agency shown on public profiles.
  */
 export function AdminUsersPanel() {
   const router = useRouter();
@@ -33,6 +33,8 @@ export function AdminUsersPanel() {
   const [acting, setActing] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [identityDraft, setIdentityDraft] = useState({ name: "", agency: "" });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -110,6 +112,42 @@ export function AdminUsersPanel() {
         return;
       }
       setNotice(`Verification request for ${user.name} marked as reviewed.`);
+      await load();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setActing(null);
+    }
+  }
+
+  async function saveIdentity(user: DealerProfile) {
+    const name = identityDraft.name.trim();
+    const agency = identityDraft.agency.trim();
+    if (name.length < 2) {
+      setError("Public name must be at least 2 characters.");
+      return;
+    }
+    if (name.length > 120 || agency.length > 160) {
+      setError("Name or agency is too long. Please shorten it and try again.");
+      return;
+    }
+
+    setActing(user.id);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, agency }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) {
+        setError(payload.error ?? "Could not update the dealer name and agency.");
+        return;
+      }
+      setEditingId(null);
+      setNotice(`Public name and agency updated for ${name}.`);
       await load();
     } catch {
       setError("Network error. Please try again.");
@@ -257,6 +295,25 @@ export function AdminUsersPanel() {
                   </div>
                   <button
                     type="button"
+                    aria-expanded={editingId === user.id}
+                    aria-controls={editingId === user.id ? `admin-user-edit-${user.id}` : undefined}
+                    disabled={acting === user.id}
+                    onClick={() => {
+                      if (editingId === user.id) {
+                        setEditingId(null);
+                      } else {
+                        setEditingId(user.id);
+                        setIdentityDraft({ name: user.name, agency: user.agency });
+                        setError("");
+                        setNotice("");
+                      }
+                    }}
+                    className="btn btn-outline"
+                  >
+                    {editingId === user.id ? "Close editor" : "Edit name / agency"}
+                  </button>
+                  <button
+                    type="button"
                     disabled={acting === user.id}
                     onClick={() => setVerification(user, !user.isVerified)}
                     className={user.isVerified ? "btn btn-outline" : "btn btn-primary"}
@@ -273,6 +330,56 @@ export function AdminUsersPanel() {
                   </button>
                 </div>
               </div>
+
+              {editingId === user.id && (
+                <form
+                  id={`admin-user-edit-${user.id}`}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void saveIdentity(user);
+                  }}
+                  className="mt-4 rounded-xl border border-forest-600/25 bg-forest-50 p-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-ink-muted" htmlFor={`admin-user-name-${user.id}`}>
+                        Public name
+                      </label>
+                      <input
+                        id={`admin-user-name-${user.id}`}
+                        value={identityDraft.name}
+                        onChange={(event) => setIdentityDraft((current) => ({ ...current, name: event.target.value }))}
+                        maxLength={120}
+                        minLength={2}
+                        required
+                        className="field mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-ink-muted" htmlFor={`admin-user-agency-${user.id}`}>
+                        Agency / company name
+                      </label>
+                      <input
+                        id={`admin-user-agency-${user.id}`}
+                        value={identityDraft.agency}
+                        onChange={(event) => setIdentityDraft((current) => ({ ...current, agency: event.target.value }))}
+                        maxLength={160}
+                        className="field mt-1.5"
+                        placeholder="Leave blank for an individual dealer"
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[0.75rem] text-ink-muted">Changes appear on the public dealer profile and agency directory.</p>
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button type="button" disabled={acting === user.id} onClick={() => setEditingId(null)} className="btn btn-outline">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={acting === user.id} className="btn btn-primary">
+                      {acting === user.id ? "Saving…" : "Save changes"}
+                    </button>
+                  </div>
+                </form>
+              )}
 
               <div className="mt-4 grid gap-x-6 gap-y-3 border-t border-soft pt-4 text-[0.75rem] sm:grid-cols-2 xl:grid-cols-3">
                 <div>

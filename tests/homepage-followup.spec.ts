@@ -69,6 +69,11 @@ test("viewed properties persist in ordered, deduplicated history; Clear Recent o
   expect(titles).toEqual([listings.items[0].title, listings.items[1].title]);
   expect(await recent.evaluate((element) => element.previousElementSibling?.id)).toBe("featured");
   expect(await recent.locator(".property-rail-track").evaluate((element) => getComputedStyle(element).flexWrap)).toBe("nowrap");
+  const desktopCardWidth = await recent.locator(".property-rail-item").first().evaluate((element) => element.getBoundingClientRect().width);
+  expect(desktopCardWidth).toBeLessThanOrEqual(250);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileCardWidth = await recent.locator(".property-rail-item").first().evaluate((element) => element.getBoundingClientRect().width);
+  expect(mobileCardWidth).toBeLessThanOrEqual(230);
   await recent.getByRole("button", { name: "Clear Recent", exact: true }).click();
   await expect(recent).toHaveCount(0);
   expect(await page.evaluate((key) => localStorage.getItem(key), RECENT)).toBeNull();

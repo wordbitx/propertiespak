@@ -39,7 +39,7 @@ export function RecentProperties() {
         </div>
         {loading ? <p className="recent-properties-status" role="status">Loading your recent properties…</p> : result.error ?
           <p className="recent-properties-status" role="status">Unable to load recent properties. <button type="button" onClick={() => setAttempt((current) => current + 1)}>Retry</button></p> :
-          <PropertyRail key={key} initialProperties={result.items} initialTotal={result.items.length} label="Recent properties" size="roomy" />}
+          <PropertyRail key={key} initialProperties={result.items} initialTotal={result.items.length} label="Recent properties" size="compact" />}
       </div>
     </section>
   );
